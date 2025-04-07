@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 
 interface OTPVerificationProps {
@@ -19,7 +24,7 @@ export default function OTPVerification({ mobile, onChangeMobile }: OTPVerificat
   useEffect(() => {
     if (timer === 0) {
       setCanResend(true);
-      return; // no need to set interval
+      return; 
     }
   
     const countdown = setInterval(() => {
@@ -29,15 +34,6 @@ export default function OTPVerification({ mobile, onChangeMobile }: OTPVerificat
     return () => clearInterval(countdown);
   }, [timer]);
   
-
-  const handleChange = (value: string, index: number) => {
-    if (/^[0-9]?$/.test(value)) {
-      const updated = [...otp];
-      updated[index] = value;
-      setOtp(updated);
-    }
-  };
-
   const handleResend = () => {
     if (!canResend) return;
     toast.success("OTP resent successfully!");
@@ -47,7 +43,7 @@ export default function OTPVerification({ mobile, onChangeMobile }: OTPVerificat
 
   const handleSubmitOtp = () => {
     const fullOtp = otp.join("");
-    if (fullOtp.length === 6) {
+    if (fullOtp.length === 6 && /^\d{6}$/.test(fullOtp)) {
       toast.success(`OTP Verified: ${fullOtp}`);
       navigate("/dashboard"); 
       // Api call 
@@ -82,18 +78,29 @@ export default function OTPVerification({ mobile, onChangeMobile }: OTPVerificat
         )}
       </p>
 
-      <div className="flex justify-center gap-2 max-w-xs mx-auto">
-        {otp.map((digit, i) => (
-          <Input
-            key={i}
-            type="text"
-            maxLength={1}
-            value={digit}
-            onChange={(e) => handleChange(e.target.value, i)}
-            className="text-center text-xl font-semibold w-12 h-12 rounded-lg bg-[#f3f3f3] focus:ring-2 focus:ring-primary"
-          />
-        ))}
+      <div className="flex justify-center">
+        <InputOTP
+          maxLength={6}
+          value={otp.join("")}
+          onChange={(val) => {
+            const sanitized = val.replace(/\D/g, "").slice(0, 6);
+            setOtp(sanitized.split(""));
+          }}
+        >
+          <InputOTPGroup>
+            <InputOTPSlot index={0} />
+            <InputOTPSlot index={1} />
+            <InputOTPSlot index={2} />
+          </InputOTPGroup>
+          <InputOTPSeparator />
+          <InputOTPGroup>
+            <InputOTPSlot index={3} />
+            <InputOTPSlot index={4} />
+            <InputOTPSlot index={5} />
+          </InputOTPGroup>
+        </InputOTP>
       </div>
+
 
       <div className="text-sm text-[#183966] font-medium mt-1">
         {canResend ? (

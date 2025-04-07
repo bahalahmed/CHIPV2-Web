@@ -5,12 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner"; // ✅ ShadCN toast
 import { useNavigate } from "react-router-dom";
+//import { RegisterDrawer } from "../auth/register-drawer";
 
 export default function EmailLogin() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // const [registerDrawerOpen, setRegisterDrawerOpen] = useState(false)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +26,7 @@ export default function EmailLogin() {
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleLogin}>
+    <><form className="space-y-6" onSubmit={handleLogin}>
       <div className="space-y-2">
         <label htmlFor="email" className="text-[#606060] block">Email</label>
         <Input
@@ -33,8 +35,7 @@ export default function EmailLogin() {
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-[#f3f3f3]"
-        />
+          className="bg-[#f3f3f3]" />
       </div>
 
       <div className="space-y-2">
@@ -46,8 +47,7 @@ export default function EmailLogin() {
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-[#f3f3f3] pr-10"
-          />
+            className="bg-[#f3f3f3] pr-10" />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
@@ -70,16 +70,15 @@ export default function EmailLogin() {
 
       <Button className="w-full bg-[#183966] text-white" type="submit">Login</Button>
 
-      <div className="text-center text-[#606060] text-sm">
-        Don’t have an account?{" "}
-        <button
-          type="button"
-          className="text-[#156f85] hover:underline"
-          onClick={() => navigate("/")}
-        >
+      {/* <div className="text-center text-[#606060]">
+        Don't have an account?{" "}
+        <button className="text-[#156f85] hover:underline" onClick={() => setRegisterDrawerOpen(true)}>
           Register
         </button>
-      </div>
+      </div> */}
+
     </form>
+    {/* <RegisterDrawer open={registerDrawerOpen} onOpenChange={setRegisterDrawerOpen} /> */}
+    </>
   );
 }

@@ -2,7 +2,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 interface MobileLoginProps {
@@ -12,9 +12,9 @@ interface MobileLoginProps {
   
 
 export default function MobileLogin({ onOtpSent, setMobile}: MobileLoginProps) {
-  const [mobileInput, setMobileInput] = useState(""); // Local state for mobile number
+  const [mobileInput, setMobileInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +54,7 @@ export default function MobileLogin({ onOtpSent, setMobile}: MobileLoginProps) {
           value={mobileInput}
           onChange={(e) => {
             setMobileInput(e.target.value);
-            setMobile(e.target.value); // Update the parent state via prop
+            setMobile(e.target.value); 
           }}
         />
       </div>
@@ -66,17 +66,17 @@ export default function MobileLogin({ onOtpSent, setMobile}: MobileLoginProps) {
       >
         {loading ? "Sending OTP..." : "Get OTP"}
       </Button>
-
+{/* 
       <div className="text-center text-[#606060] text-sm">
         Don’t have an account?{" "}
         <button
           type="button"
           className="text-[#156f85] hover:underline"
-          onClick={() => navigate("/register")}
+          onClick={() => navigate("/")}
         >
           Register
         </button>
-      </div>
+      </div> */}
     </form>
   );
 }
