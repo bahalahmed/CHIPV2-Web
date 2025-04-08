@@ -19,6 +19,9 @@ interface RegisterDrawerProps {
     onVerified?: () => void;
 }
 
+
+
+
 export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
     const [step, setStep] = useState(1);
 
@@ -49,10 +52,10 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
     const [designation, setDesignation] = useState("Project Director - MH");
 
 
-    const [fullName, setFullName] = useState("Kumar p");
+    const [fullName, setFullName] = useState("");
     const [gender, setGender] = useState("Male");
-    const [password, setPassword] = useState("User@123");
-    const [confirmPassword, setConfirmPassword] = useState("User@123");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const handleNext = () => {
         if (step < 4) {
@@ -223,6 +226,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
                         designation={designation}
                         fullName={fullName}
                         gender={gender}
+                        password={password}
                     />
                 )}
 

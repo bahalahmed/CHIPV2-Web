@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { OtpSection } from "@/components/auth/OtpSection";
 
 interface Step1VerificationProps {
@@ -57,7 +55,7 @@ export const Step1Verification = ({
   emailOtp,
   setEmailOtp,
 }: Step1VerificationProps) => {
-  const [sameAsMobile, setSameAsMobile] = useState(false);
+
 
   return (
     <div className="space-y-6">
