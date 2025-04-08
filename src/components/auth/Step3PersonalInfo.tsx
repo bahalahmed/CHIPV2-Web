@@ -55,8 +55,8 @@ export const Step3PersonalInfo = ({
                                     variant={gender === option ? "default" : "outline"}
                                     onClick={() => setGender(option)}
                                     className={`h-10 px-6 rounded-md text-sm font-medium ${gender === option
-                                            ? "bg-[#183966] text-white"
-                                            : "bg-white text-gray-800 border-gray-300"
+                                        ? "bg-[#183966] text-white"
+                                        : "bg-white text-gray-800 border-gray-300"
                                         }`}
                                 >
                                     {option}

@@ -22,6 +22,8 @@ interface Step2UserDetailsProps {
     setDesignation: (val: string) => void;
 }
 
+const levelOrder = ["State", "Division", "District", "Block", "Sector/PHC"];
+
 const mockOptions = {
     states: ["Rajasthan", "Delhi", "Maharashtra"],
     divisions: ["Jaipur", "Jodhpur", "Udaipur"],
@@ -54,6 +56,14 @@ export const Step2UserDetails = ({
     designation,
     setDesignation,
 }: Step2UserDetailsProps) => {
+    const geoFields = [
+        { key: "State", value: state, setter: setState, options: mockOptions.states },
+        { key: "Division", value: division, setter: setDivision, options: mockOptions.divisions },
+        { key: "District", value: district, setter: setDistrict, options: mockOptions.districts },
+        { key: "Block", value: block, setter: setBlock, options: mockOptions.blocks },
+        { key: "Sector/PHC", value: sector, setter: setSector, options: mockOptions.sectors },
+    ];
+
     return (
         <div className="space-y-6">
             <Card className="p-6 rounded-md bg-[#f8f9fc]">
@@ -79,30 +89,25 @@ export const Step2UserDetails = ({
                 <h3 className="text-lg font-medium ">Geography</h3>
                 <hr className=" border-gray-300" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                        { label: "State", value: state, setter: setState, options: mockOptions.states },
-                        { label: "Division", value: division, setter: setDivision, options: mockOptions.divisions },
-                        { label: "District", value: district, setter: setDistrict, options: mockOptions.districts },
-                        { label: "Block", value: block, setter: setBlock, options: mockOptions.blocks },
-                        { label: "Sector", value: sector, setter: setSector, options: mockOptions.sectors },
-                    ].map(({ label, value, setter, options }) => (
-                        <div key={label}>
-                            <Label className="text-sm text-gray-600 mb-2 block">{`Select ${label} Name`}</Label>
-                            <Select value={value} onValueChange={setter}>
-                            <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-[#1F2937] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#183966]">
-
-                                    <SelectValue placeholder={`Select ${label}`} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {options.map((opt) => (
-                                        <SelectItem key={opt} value={opt}>
-                                            {opt}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    ))}
+                    {geoFields
+                        .filter(({ key }) => levelOrder.indexOf(key) <= levelOrder.indexOf(selectedLevel))
+                        .map(({ key, value, setter, options }) => (
+                            <div key={key}>
+                                <Label className="text-sm text-gray-600 mb-2 block">{`Select ${key}`}</Label>
+                                <Select value={value} onValueChange={setter}>
+                                    <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-[#1F2937] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#183966]">
+                                        <SelectValue placeholder={`Select ${key}`} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {options.map((opt) => (
+                                            <SelectItem key={opt} value={opt}>
+                                                {opt}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        ))}
                 </div>
             </Card>
 
@@ -113,7 +118,7 @@ export const Step2UserDetails = ({
                     <div>
                         <Label className="text-sm text-gray-600 mb-2 block">Type of Organisation</Label>
                         <Select value={organizationType} onValueChange={setOrganizationType}>
-                        <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-[#1F2937] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#183966]">
+                            <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-[#1F2937] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#183966]">
 
                                 <SelectValue placeholder="Select Type" />
                             </SelectTrigger>
@@ -130,7 +135,7 @@ export const Step2UserDetails = ({
                     <div>
                         <Label className="text-sm text-gray-600 mb-2 block">Designation</Label>
                         <Select value={designation} onValueChange={setDesignation}>
-                        <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-[#1F2937] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#183966]">
+                            <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-[#1F2937] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#183966]">
 
                                 <SelectValue placeholder="Select Designation" />
                             </SelectTrigger>

@@ -13,14 +13,15 @@ import { Step2UserDetails } from "./Step2UserDetails";
 import { Step3PersonalInfo } from "./Step3PersonalInfo";
 import { Step4Approval } from "./Step4Approval";
 
+
+import { ApprovalDialog } from "./ApprovalDialog";
+
+
 interface RegisterDrawerProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onVerified?: () => void;
 }
-
-
-
 
 export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
     const [step, setStep] = useState(1);
@@ -42,7 +43,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
     const [whatsappVerified, setWhatsappVerified] = useState(false);
     const [emailVerified, setEmailVerified] = useState(false);
 
-    const [selectedLevel, setSelectedLevel] = useState("Sector/PHC");
+    const [selectedLevel, setSelectedLevel] = useState("state");
     const [state, setState] = useState("Rajasthan");
     const [division, setDivision] = useState("Jaipur");
     const [district, setDistrict] = useState("Jaipur");
@@ -57,6 +58,9 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
+
+
+
     const handleNext = () => {
         if (step < 4) {
             setStep(step + 1);
@@ -68,6 +72,39 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
             setStep(step - 1);
         }
     };
+    const handleApprovalSubmit = () => {
+        resetForm();
+        onOpenChange(false);
+    };
+
+    const resetForm = () => {
+        setStep(1);
+        setMobileNumber("");
+        setWhatsappNumber("");
+        setEmail("");
+        setMobileOtp(Array(6).fill(""));
+        setWhatsappOtp(Array(6).fill(""));
+        setEmailOtp(Array(6).fill(""));
+        setShowMobileOtp(false);
+        setShowWhatsappOtp(false);
+        setShowEmailOtp(false);
+        setMobileVerified(false);
+        setWhatsappVerified(false);
+        setEmailVerified(false);
+        setSelectedLevel("State");
+        setState("Rajasthan");
+        setDivision("Jaipur");
+        setDistrict("Jaipur");
+        setBlock("Bassi");
+        setSector("Malviya Nagar");
+        setOrganizationType("Director - MH");
+        setDesignation("Project Director - MH");
+        setFullName("");
+        setGender("Male");
+        setPassword("");
+        setConfirmPassword("");
+    };
+
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
@@ -236,23 +273,6 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
                     <Button variant="outline" onClick={handleBack} disabled={step === 1}>
                         Back
                     </Button>
-                    {/* <div className="flex justify-end gap-4 mt-8">
-          <Button variant="outline" onClick={handleBack} disabled={step === 1}>
-            Back
-          </Button>
-          {step < 4 ? (
-            <Button
-              className="bg-[#183966] hover:bg-[#122c4f]"
-              onClick={handleNext}
-            >
-              Next
-            </Button>
-          ) : (
-            <Button className="bg-[#183966] hover:bg-[#122c4f]">
-              Send for Approval
-            </Button>
-          )} */}
-
                     {step < 4 ? (
                         <Button
                             className="bg-[#183966] hover:bg-[#122c4f]"
@@ -265,11 +285,12 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
                             Next
                         </Button>
                     ) : (
-                        <Button className="bg-[#183966] hover:bg-[#122c4f]">
-                            Send for Approval
-                        </Button>
+                        <ApprovalDialog onSubmit={handleApprovalSubmit} />
                     )}
+
+
                 </div>
+
             </SheetContent>
         </Sheet>
     );

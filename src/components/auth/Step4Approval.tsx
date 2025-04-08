@@ -87,7 +87,7 @@ export const Step4Approval = ({
             <Card className="bg-[#f8f9fc] p-6 rounded-md">
                 <div className="flex justify-between items-center ">
                     <h3 className="text-lg font-semibold">Password</h3>
-                    
+
                     <Button
                         variant="ghost"
                         size="sm"
@@ -114,7 +114,7 @@ export const Step4Approval = ({
                         {showPassword ? password : "********"}
                     </span>
                 </div>
- 
+
             </Card>
         </div>
     );
