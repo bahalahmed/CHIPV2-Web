@@ -5,9 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/features/auth/authSlice";
 
 export default function EmailLogin() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,8 +23,31 @@ export default function EmailLogin() {
       toast.error("Please fill in both fields");
       return;
     }
-    toast.success("Logged in successfully!");
-    console.log("Email:", email, "Password:", password);
+    try {
+      // ✅ FUTURE: Replace this block with API call
+      // const res = await axios.post("/api/login", { email, password });
+      // const { user, token } = res.data;
+
+      const mockUser = {
+        id: "12345", // Mock ID added
+        name: "John Doe",
+        email,
+        role: "Admin",
+      };
+
+      const mockToken = "fake-jwt-token"; // ✅ Replace with real token from backend
+
+      // ✅ Save to Redux
+      dispatch(setUser({ user: mockUser, token: mockToken }));
+
+      // ✅ Save to LocalStorage
+      localStorage.setItem("auth", JSON.stringify({ user: mockUser, token: mockToken }));
+
+      toast.success("Logged in successfully!");
+      navigate("/dashboard");
+    } catch {
+      toast.error("Login failed. Please try again.");
+    }
   };
 
   return (
@@ -72,3 +99,5 @@ export default function EmailLogin() {
     </>
   );
 }
+
+

@@ -1,10 +1,14 @@
 // src/app/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import loginTabReducer from "@/features/auth/loginTabSlice";
+import authReducer from "@/features/auth/authSlice";
+import registerFormReducer from "@/features/registerForm/registerFormSlice";
 
 export const store = configureStore({
   reducer: {
     loginTab: loginTabReducer,
+    auth: authReducer,
+    registerForm: registerFormReducer,
   },
 });
 

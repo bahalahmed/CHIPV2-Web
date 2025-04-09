@@ -2,19 +2,22 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/features/auth/authSlice";
+
 
 interface MobileLoginProps {
-    onOtpSent: () => void;
-    setMobile: (number: string) => void;
-  }
-  
+  onOtpSent: () => void;
+  setMobile: (number: string) => void;
+}
 
-export default function MobileLogin({ onOtpSent, setMobile}: MobileLoginProps) {
+
+export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) {
   const [mobileInput, setMobileInput] = useState("");
   const [loading, setLoading] = useState(false);
-  //const navigate = useNavigate();
+
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,17 +30,38 @@ export default function MobileLogin({ onOtpSent, setMobile}: MobileLoginProps) {
     setLoading(true);
 
     try {
-      // Simulate sending OTP
-      await new Promise((r) => setTimeout(r, 1000));
-      setMobile(mobileInput);  
+      // ✅ FUTURE: Replace with actual API call
+      // const res = await axios.post("/api/send-otp", { mobile: mobileInput });
+      // const { user, token } = res.data;
+
+      const mockUser = {
+        id: "mob-67890",
+        name: "Mobile User",
+        email: "mobileuser@example.com",
+        mobile: mobileInput,
+        role: "User",
+      };
+
+      const mockToken = "mock-mobile-jwt-token";
+
+      dispatch(setUser({ user: mockUser, token: mockToken }));
+
+      localStorage.setItem("auth", JSON.stringify({ user: mockUser, token: mockToken }));
+
+      setMobile(mobileInput);
       toast.success("OTP sent successfully!");
       onOtpSent();
-    } catch  {
+
+      // ✅ OPTIONAL: navigate to dashboard or OTP screen
+      // navigate("/otp-verification");
+
+    } catch {
       toast.error("Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
@@ -58,7 +82,7 @@ export default function MobileLogin({ onOtpSent, setMobile}: MobileLoginProps) {
               setMobile(value);
             }
           }}
-          
+
         />
       </div>
 
