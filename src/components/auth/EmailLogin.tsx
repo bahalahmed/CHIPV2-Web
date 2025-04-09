@@ -3,16 +3,14 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner"; // ✅ ShadCN toast
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-//import { RegisterDrawer } from "../auth/register-drawer";
 
 export default function EmailLogin() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const [registerDrawerOpen, setRegisterDrawerOpen] = useState(false)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,15 +68,7 @@ export default function EmailLogin() {
 
       <Button className="w-full bg-[#183966] text-white" type="submit">Login</Button>
 
-      {/* <div className="text-center text-[#606060]">
-        Don't have an account?{" "}
-        <button className="text-[#156f85] hover:underline" onClick={() => setRegisterDrawerOpen(true)}>
-          Register
-        </button>
-      </div> */}
-
     </form>
-    {/* <RegisterDrawer open={registerDrawerOpen} onOpenChange={setRegisterDrawerOpen} /> */}
     </>
   );
 }

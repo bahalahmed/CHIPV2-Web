@@ -2,8 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
+import React from "react";
 
-interface Step2UserDetailsProps {
+
+interface LevelInfoProps {
     selectedLevel: string;
     setSelectedLevel: (val: string) => void;
     state: string;
@@ -22,6 +24,11 @@ interface Step2UserDetailsProps {
     setDesignation: (val: string) => void;
 }
 
+interface Step2UserDetailsProps {
+    levelInfo: LevelInfoProps;
+}
+
+
 const levelOrder = ["State", "Division", "District", "Block", "Sector/PHC"];
 
 const mockOptions = {
@@ -38,30 +45,13 @@ const mockOptions = {
     ],
 };
 
-export const Step2UserDetails = ({
-    selectedLevel,
-    setSelectedLevel,
-    state,
-    setState,
-    division,
-    setDivision,
-    district,
-    setDistrict,
-    block,
-    setBlock,
-    sector,
-    setSector,
-    organizationType,
-    setOrganizationType,
-    designation,
-    setDesignation,
-}: Step2UserDetailsProps) => {
+const Step2UserDetails = ({ levelInfo }: Step2UserDetailsProps) => {
     const geoFields = [
-        { key: "State", value: state, setter: setState, options: mockOptions.states },
-        { key: "Division", value: division, setter: setDivision, options: mockOptions.divisions },
-        { key: "District", value: district, setter: setDistrict, options: mockOptions.districts },
-        { key: "Block", value: block, setter: setBlock, options: mockOptions.blocks },
-        { key: "Sector/PHC", value: sector, setter: setSector, options: mockOptions.sectors },
+        { key: "State", value: levelInfo.state, setter: levelInfo.setState, options: mockOptions.states },
+        { key: "Division", value: levelInfo.division, setter: levelInfo.setDivision, options: mockOptions.divisions },
+        { key: "District", value: levelInfo.district, setter: levelInfo.setDistrict, options: mockOptions.districts },
+        { key: "Block", value: levelInfo.block, setter: levelInfo.setBlock, options: mockOptions.blocks },
+        { key: "Sector/PHC", value: levelInfo.sector, setter: levelInfo.setSector, options: mockOptions.sectors },
     ];
 
     return (
@@ -74,9 +64,9 @@ export const Step2UserDetails = ({
                     {["State", "Division", "District", "Block", "Sector/PHC"].map((level) => (
                         <Button
                             key={level}
-                            variant={selectedLevel === level ? "default" : "outline"}
-                            className={selectedLevel === level ? "bg-[#183966]" : ""}
-                            onClick={() => setSelectedLevel(level)}
+                            variant={levelInfo.selectedLevel === level ? "default" : "outline"}
+                            className={levelInfo.selectedLevel === level ? "bg-[#183966]" : ""}
+                            onClick={() => levelInfo.setSelectedLevel(level)}
                         >
                             {level}
                         </Button>
@@ -90,7 +80,7 @@ export const Step2UserDetails = ({
                 <hr className=" border-gray-300" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {geoFields
-                        .filter(({ key }) => levelOrder.indexOf(key) <= levelOrder.indexOf(selectedLevel))
+                        .filter(({ key }) => levelOrder.indexOf(key) <= levelOrder.indexOf(levelInfo.selectedLevel))
                         .map(({ key, value, setter, options }) => (
                             <div key={key}>
                                 <Label className="text-sm text-gray-600 mb-2 block">{`Select ${key}`}</Label>
@@ -117,7 +107,7 @@ export const Step2UserDetails = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <Label className="text-sm text-gray-600 mb-2 block">Type of Organisation</Label>
-                        <Select value={organizationType} onValueChange={setOrganizationType}>
+                        <Select value={levelInfo.organizationType} onValueChange={levelInfo.setOrganizationType}>
                             <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-[#1F2937] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#183966]">
 
                                 <SelectValue placeholder="Select Type" />
@@ -134,7 +124,7 @@ export const Step2UserDetails = ({
 
                     <div>
                         <Label className="text-sm text-gray-600 mb-2 block">Designation</Label>
-                        <Select value={designation} onValueChange={setDesignation}>
+                        <Select value={levelInfo.designation} onValueChange={levelInfo.setDesignation}>
                             <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-[#1F2937] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#183966]">
 
                                 <SelectValue placeholder="Select Designation" />
@@ -153,3 +143,5 @@ export const Step2UserDetails = ({
         </div>
     );
 };
+const Step2UserDetailsMemo = React.memo(Step2UserDetails);
+export default Step2UserDetailsMemo;

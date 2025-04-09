@@ -31,7 +31,7 @@ export default function MobileLogin({ onOtpSent, setMobile}: MobileLoginProps) {
       await new Promise((r) => setTimeout(r, 1000));
       setMobile(mobileInput);  
       toast.success("OTP sent successfully!");
-      onOtpSent(); // move to OTP verification UI
+      onOtpSent();
     } catch  {
       toast.error("Failed to send OTP. Please try again.");
     } finally {
@@ -48,14 +48,17 @@ export default function MobileLogin({ onOtpSent, setMobile}: MobileLoginProps) {
         <Input
           id="mobile"
           type="tel"
-          maxLength={10}
           placeholder="Enter your mobile number"
           className="bg-[#f3f3f3]"
           value={mobileInput}
           onChange={(e) => {
-            setMobileInput(e.target.value);
-            setMobile(e.target.value); 
+            const value = e.target.value.replace(/\D/g, "");
+            if (value === "" || (/^[6-9]/.test(value) && value.length <= 10)) {
+              setMobileInput(value);
+              setMobile(value);
+            }
           }}
+          
         />
       </div>
 
@@ -66,17 +69,6 @@ export default function MobileLogin({ onOtpSent, setMobile}: MobileLoginProps) {
       >
         {loading ? "Sending OTP..." : "Get OTP"}
       </Button>
-{/* 
-      <div className="text-center text-[#606060] text-sm">
-        Don’t have an account?{" "}
-        <button
-          type="button"
-          className="text-[#156f85] hover:underline"
-          onClick={() => navigate("/")}
-        >
-          Register
-        </button>
-      </div> */}
     </form>
   );
 }

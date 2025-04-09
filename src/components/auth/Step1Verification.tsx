@@ -1,109 +1,100 @@
 "use client";
 
 import { OtpSection } from "@/components/auth/OtpSection";
+import React from "react";
 
-interface Step1VerificationProps {
-  mobileNumber: string;
-  setMobileNumber: (val: string) => void;
-  whatsappNumber: string;
-  setWhatsappNumber: (val: string) => void;
-  email: string;
-  setEmail: (val: string) => void;
-  mobileVerified: boolean;
-  setMobileVerified: (val: boolean) => void;
-  whatsappVerified: boolean;
-  setWhatsappVerified: (val: boolean) => void;
-  emailVerified: boolean;
-  setEmailVerified: (val: boolean) => void;
-  showMobileOtp: boolean;
-  setShowMobileOtp: (val: boolean) => void;
-  showWhatsappOtp: boolean;
-  setShowWhatsappOtp: (val: boolean) => void;
-  showEmailOtp: boolean;
-  setShowEmailOtp: (val: boolean) => void;
-  mobileOtp: string[];
-  setMobileOtp: (otp: string[]) => void;
-  whatsappOtp: string[];
-  setWhatsappOtp: (otp: string[]) => void;
-  emailOtp: string[];
-  setEmailOtp: (otp: string[]) => void;
+interface ContactInfoProps {
+    mobileNumber: string;
+    setMobileNumber: (val: string) => void;
+    whatsappNumber: string;
+    setWhatsappNumber: (val: string) => void;
+    email: string;
+    setEmail: (val: string) => void;
+    mobileVerified: boolean;
+    setMobileVerified: (val: boolean) => void;
+    whatsappVerified: boolean;
+    setWhatsappVerified: (val: boolean) => void;
+    emailVerified: boolean;
+    setEmailVerified: (val: boolean) => void;
+    showMobileOtp: boolean;
+    setShowMobileOtp: (val: boolean) => void;
+    showWhatsappOtp: boolean;
+    setShowWhatsappOtp: (val: boolean) => void;
+    showEmailOtp: boolean;
+    setShowEmailOtp: (val: boolean) => void;
+    mobileOtp: string[];
+    setMobileOtp: (otp: string[]) => void;
+    whatsappOtp: string[];
+    setWhatsappOtp: (otp: string[]) => void;
+    emailOtp: string[];
+    setEmailOtp: (otp: string[]) => void;
 }
 
-export const Step1Verification = ({
-  mobileNumber,
-  setMobileNumber,
-  whatsappNumber,
-  setWhatsappNumber,
-  email,
-  setEmail,
-  mobileVerified,
-  setMobileVerified,
-  whatsappVerified,
-  setWhatsappVerified,
-  emailVerified,
-  setEmailVerified,
-  showMobileOtp,
-  setShowMobileOtp,
-  showWhatsappOtp,
-  setShowWhatsappOtp,
-  showEmailOtp,
-  setShowEmailOtp,
-  mobileOtp,
-  setMobileOtp,
-  whatsappOtp,
-  setWhatsappOtp,
-  emailOtp,
-  setEmailOtp,
-}: Step1VerificationProps) => {
+interface Step1VerificationProps {
+    contactInfo: ContactInfoProps;
+  }
+
+const Step1VerificationComponent = ({ contactInfo }: Step1VerificationProps) => {
 
 
-  return (
-    <div className="space-y-6">
-    
-      
-        <OtpSection
-          label="Mobile Number"
-          type="mobile"
-          value={mobileNumber}
-          onChange={(val) => {
-            setMobileNumber(val);
-          }}
-          verified={mobileVerified}
-          setVerified={setMobileVerified}
-          showOtpInput={showMobileOtp}
-          setShowOtpInput={setShowMobileOtp}
-          otp={mobileOtp}
-          setOtp={setMobileOtp}
-        />
+    return (
+        <div className="space-y-6">
 
 
-        <OtpSection
-          label="WhatsApp Number"
-          type="whatsapp"
-          value={whatsappNumber}
-          onChange={setWhatsappNumber}
-          verified={whatsappVerified}
-          setVerified={setWhatsappVerified}
-          showOtpInput={showWhatsappOtp}
-          setShowOtpInput={setShowWhatsappOtp}
-          otp={whatsappOtp}
-          setOtp={setWhatsappOtp}
-          
-        />
-    
-      
-        <OtpSection
-          label="Email ID"
-          type="email"
-          value={email}
-          onChange={setEmail}
-          verified={emailVerified}
-          setVerified={setEmailVerified}
-          showOtpInput={showEmailOtp}
-          setShowOtpInput={setShowEmailOtp}
-          otp={emailOtp}
-          setOtp={setEmailOtp}
-        />
-    </div>
-  );
+            <OtpSection
+                label="Mobile Number"
+                type="mobile"
+                value={contactInfo.mobileNumber}
+                onChange={(val) => {
+                    const cleaned = val.replace(/\D/g, "");
+                    if (cleaned.length <= 10 && (/^[6-9]/.test(cleaned) || cleaned === "")) {
+                        contactInfo.setMobileNumber(cleaned);
+                    }
+                }}
+                verified={contactInfo.mobileVerified}
+                setVerified={contactInfo.setMobileVerified}
+                showOtpInput={contactInfo.showMobileOtp}
+                setShowOtpInput={contactInfo.setShowMobileOtp}
+                otp={contactInfo.mobileOtp}
+                setOtp={contactInfo.setMobileOtp}
+            />
+
+
+            <OtpSection
+                label="WhatsApp Number"
+                type="whatsapp"
+                value={contactInfo.whatsappNumber}
+                onChange={(val) => {
+                    const cleaned = val.replace(/\D/g, "");
+                    if (cleaned.length <= 10 && (/^[6-9]/.test(cleaned) || cleaned === "")) {
+                      contactInfo.setWhatsappNumber(cleaned);
+                    }
+                  }}
+                verified={contactInfo.whatsappVerified}
+                setVerified={contactInfo.setWhatsappVerified}
+                showOtpInput={contactInfo.showWhatsappOtp}
+                setShowOtpInput={contactInfo.setShowWhatsappOtp}
+                otp={contactInfo.whatsappOtp}
+                setOtp={contactInfo.setWhatsappOtp}
+
+            />
+
+
+            <OtpSection
+                label="Email ID"
+                type="email"
+                value={contactInfo.email}
+                onChange={contactInfo.setEmail}
+                verified={contactInfo.emailVerified}
+                setVerified={contactInfo.setEmailVerified}
+                showOtpInput={contactInfo.showEmailOtp}
+                setShowOtpInput={contactInfo.setShowEmailOtp}
+                otp={contactInfo.emailOtp}
+                setOtp={contactInfo.setEmailOtp}
+            />
+        </div>
+    );
 };
+const Step1Verification = React.memo(Step1VerificationComponent);
+
+export default Step1Verification;

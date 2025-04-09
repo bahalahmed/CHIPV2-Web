@@ -4,8 +4,9 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import React from "react";
 
-interface Step3PersonalInfoProps {
+interface PersonalInfoProps {
     fullName: string;
     setFullName: (val: string) => void;
     gender: string;
@@ -16,18 +17,19 @@ interface Step3PersonalInfoProps {
     setConfirmPassword: (val: string) => void;
 }
 
-export const Step3PersonalInfo = ({
-    fullName,
-    setFullName,
-    gender,
-    setGender,
-    password,
-    setPassword,
-    confirmPassword,
-    setConfirmPassword,
-}: Step3PersonalInfoProps) => {
+interface Step3PersonalInfoProps {
+    personalInfo: PersonalInfoProps;
+}
+
+
+const Step3PersonalInfo = ({ personalInfo }: Step3PersonalInfoProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+
+    const passwordsMatch =
+        personalInfo.password === personalInfo.confirmPassword;
+
 
     return (
         <div className="space-y-6">
@@ -39,8 +41,8 @@ export const Step3PersonalInfo = ({
                     <div>
                         <Label className="block mb-2 text-sm text-gray-600">Full Name</Label>
                         <Input
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
+                            value={personalInfo.fullName}
+                            onChange={(e) => personalInfo.setFullName(e.target.value)}
                             className="h-10 px-4 text-sm border border-gray-300 rounded-md bg-white"
                             placeholder="Enter your full name"
                         />
@@ -52,9 +54,9 @@ export const Step3PersonalInfo = ({
                             {["Male", "Female", "Other"].map((option) => (
                                 <Button
                                     key={option}
-                                    variant={gender === option ? "default" : "outline"}
-                                    onClick={() => setGender(option)}
-                                    className={`h-10 px-6 rounded-md text-sm font-medium ${gender === option
+                                    variant={personalInfo.gender === option ? "default" : "outline"}
+                                    onClick={() => personalInfo.setGender(option)}
+                                    className={`h-10 px-6 rounded-md text-sm font-medium ${personalInfo.gender === option
                                         ? "bg-[#183966] text-white"
                                         : "bg-white text-gray-800 border-gray-300"
                                         }`}
@@ -99,8 +101,8 @@ export const Step3PersonalInfo = ({
                         <Label className="block text-sm text-gray-600 mb-2">Enter Password</Label>
                         <Input
                             type={showPassword ? "text" : "password"}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={personalInfo.password}
+                            onChange={(e) => personalInfo.setPassword(e.target.value)}
                             className="h-10 px-4 text-sm border border-gray-300 rounded-md bg-white pr-10"
                             placeholder="Enter your password"
                         />
@@ -118,9 +120,11 @@ export const Step3PersonalInfo = ({
                         <Label className="block text-sm text-gray-600 mb-2">Re-enter Password</Label>
                         <Input
                             type={showConfirmPassword ? "text" : "password"}
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="h-10 px-4 text-sm border border-gray-300 rounded-md bg-white pr-10"
+                            value={personalInfo.confirmPassword}
+                            onChange={(e) => personalInfo.setConfirmPassword(e.target.value)}
+                            className={`h-10 px-4 text-sm border ${
+                                passwordsMatch ? "border-gray-300" : "border-red-500"
+                              } rounded-md bg-white pr-10`}
                             placeholder="Confirm your password"
                         />
                         <button
@@ -130,6 +134,11 @@ export const Step3PersonalInfo = ({
                         >
                             {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
+                        {!passwordsMatch && personalInfo.confirmPassword.length > 0 && (
+                            <p className="text-xs text-red-600 mt-1 ml-1">
+                                Passwords do not match
+                            </p>
+                        )}
                     </div>
 
                 </div>
@@ -137,6 +146,9 @@ export const Step3PersonalInfo = ({
         </div>
     );
 };
+
+const MemoizedStep3PersonalInfo = React.memo(Step3PersonalInfo);
+export default MemoizedStep3PersonalInfo;
 
 
 

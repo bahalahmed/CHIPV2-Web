@@ -3,8 +3,10 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import React from "react";
 
-interface Step4ApprovalProps {
+
+interface ReviewInfoProps {
     mobileNumber: string;
     whatsappNumber: string;
     email: string;
@@ -19,24 +21,12 @@ interface Step4ApprovalProps {
     fullName: string;
     gender: string;
     password: string;
-}
-
-export const Step4Approval = ({
-    mobileNumber,
-    whatsappNumber,
-    email,
-    selectedLevel,
-    state,
-    division,
-    district,
-    block,
-    sector,
-    organizationType,
-    designation,
-    fullName,
-    gender,
-    password,
-}: Step4ApprovalProps) => {
+  }
+  
+  interface Step4ApprovalProps {
+    reviewInfo: ReviewInfoProps;
+  }
+  const Step4Approval = ({ reviewInfo }: Step4ApprovalProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const renderRow = (label: string, value: string) => (
         <div className="flex justify-between">
@@ -50,39 +40,39 @@ export const Step4Approval = ({
             <Card className="bg-[#f8f9fc] p-6 rounded-md">
                 <h3 className="text-lg font-semibold ">Verification</h3>
                 <hr className=" border-gray-300" />
-                {renderRow("Mobile Number", mobileNumber)}
-                {renderRow("WhatsApp Number", whatsappNumber)}
-                {renderRow("Email ID", email)}
+                {renderRow("Mobile Number", reviewInfo.mobileNumber)}
+                {renderRow("WhatsApp Number", reviewInfo.whatsappNumber)}
+                {renderRow("Email ID",reviewInfo.email)}
             </Card>
 
             <Card className="bg-[#f8f9fc] p-6 rounded-md">
                 <h3 className="text-lg font-semibold ">Level</h3>
                 <hr className=" border-gray-300" />
-                {renderRow("Level", selectedLevel)}
+                {renderRow("Level", reviewInfo.selectedLevel)}
             </Card>
 
             <Card className="bg-[#f8f9fc] p-6 rounded-md">
                 <h3 className="text-lg font-semibold ">Geography</h3>
                 <hr className=" border-gray-300" />
-                {renderRow("State", state)}
-                {renderRow("Division", division)}
-                {renderRow("District", district)}
-                {renderRow("Block", block)}
-                {renderRow("Sector", sector)}
+                {renderRow("State", reviewInfo.state)}
+                {renderRow("Division", reviewInfo.division)}
+                {renderRow("District", reviewInfo.district)}
+                {renderRow("Block", reviewInfo.block)}
+                {renderRow("Sector", reviewInfo.sector)}
             </Card>
 
             <Card className="bg-[#f8f9fc] p-6 rounded-md">
                 <h3 className="text-lg font-semibold ">Department</h3>
                 <hr className=" border-gray-300" />
-                {renderRow("Type of Organisation", organizationType)}
-                {renderRow("Designation", designation)}
+                {renderRow("Type of Organisation", reviewInfo.organizationType)}
+                {renderRow("Designation", reviewInfo.designation)}
             </Card>
             <Card className="bg-[#f8f9fc] p-6 rounded-md">
 
                 <h3 className="text-lg font-semibold ">Personal Information</h3>
                 <hr className=" border-gray-300" />
-                {renderRow("Full Name", fullName)}
-                {renderRow("Gender", gender)}
+                {renderRow("Full Name", reviewInfo.fullName)}
+                {renderRow("Gender", reviewInfo.gender)}
             </Card>
             <Card className="bg-[#f8f9fc] p-6 rounded-md">
                 <div className="flex justify-between items-center ">
@@ -111,7 +101,7 @@ export const Step4Approval = ({
                 <div className="flex justify-between items-center">
                     <Label className="text-sm text-gray-600">Password</Label>
                     <span className="text-[#183966] font-medium text-sm">
-                        {showPassword ? password : "********"}
+                        {showPassword ? reviewInfo.password : "********"}
                     </span>
                 </div>
 
@@ -120,6 +110,8 @@ export const Step4Approval = ({
     );
 };
 
+const MemoizedStep4Approval = React.memo(Step4Approval);
+export default MemoizedStep4Approval;
 
 
 
