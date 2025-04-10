@@ -4,15 +4,17 @@ import { RootState } from "@/app/store";
 import { switchToEmail, switchToMobile, setOtpSent } from "@/features/auth/loginTabSlice";
 import EmailLogin from "./EmailLogin";
 import MobileLogin from "./MobileLogin";
-import OTPVerification from "./OtpVerification";
 import { useCallback, useState } from "react";
 import { RegisterDrawer } from "../auth/register-drawer";
+import { OtpSection } from "@/components/auth/OtpSection";
 
 export default function LoginWrapper() {
   const dispatch = useDispatch();
   const { method, otpSent } = useSelector((state: RootState) => state.loginTab);
   const [mobile, setMobile] = useState("");
-  const [registerDrawerOpen, setRegisterDrawerOpen] = useState(false)
+  const [registerDrawerOpen, setRegisterDrawerOpen] = useState(false);
+  const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
+
 
 
   const handleSwitch = useCallback(
@@ -24,17 +26,27 @@ export default function LoginWrapper() {
 
   if (method === "mobile" && otpSent) {
     return (
-      <section className="min-h-screen w-full flex items-center justify-center bg-[#f5f6fb] px-4 py-8">
-        <div className="w-full max-w-md rounded-xl shadow-lg bg-white p-6 sm:p-8">
-          <OTPVerification
-            mobile={mobile}
-            onChangeMobile={() => {
-              dispatch(setOtpSent(false));
-              setMobile("");
-            }}
-          />
-        </div>
-      </section>
+
+      <div className="w-full max-w-md rounded-xl shadow-lg bg-white p-6 sm:p-8">
+        <OtpSection
+          label="Mobile Number"
+          type="mobile"
+          value={mobile}
+          onChange={(val) => {
+            setMobile(val);
+            dispatch(setOtpSent(false)); // 🔄 Back to mobile input
+          }}
+          verified={false}
+          setVerified={() => { }} // Not needed in login
+          showOtpInput={true}
+          setShowOtpInput={() => { }} // Always true in login
+          otp={otp}
+          setOtp={setOtp}
+          mode="login"
+          redirectAfterVerify="/dashboard"
+        />
+      </div>
+
     );
   }
 
@@ -73,7 +85,7 @@ export default function LoginWrapper() {
             onOtpSent={() => dispatch(setOtpSent(true))} />
         )}
 
-        {method === "mobile" && otpSent && <OTPVerification mobile={mobile} />}
+
         <div className="text-center text-[#606060] text-sm mt-6">
           Don’t have an account?{" "}
           <button className="text-[#156f85] hover:underline" onClick={() => setRegisterDrawerOpen(true)}>

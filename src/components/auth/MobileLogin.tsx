@@ -1,10 +1,11 @@
 // src/components/auth/MobileLogin.tsx
-import { Input } from "@/components/ui/input";
+
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/features/auth/authSlice";
+import PhoneInput from "@/components/ui/PhoneInput";
 
 
 interface MobileLoginProps {
@@ -69,20 +70,13 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
         <label htmlFor="mobile" className="block text-[#606060] mb-1">
           Mobile Number
         </label>
-        <Input
-          id="mobile"
-          type="tel"
-          placeholder="Enter your mobile number"
-          className="bg-[#f3f3f3]"
+        <PhoneInput
           value={mobileInput}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, "");
-            if (value === "" || (/^[6-9]/.test(value) && value.length <= 10)) {
-              setMobileInput(value);
-              setMobile(value);
-            }
+          placeholder="Enter your mobile number"
+          onChange={(val) => {
+            setMobileInput(val);
+            setMobile(val);
           }}
-
         />
       </div>
 
