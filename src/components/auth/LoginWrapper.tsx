@@ -27,7 +27,7 @@ export default function LoginWrapper() {
   if (method === "mobile" && otpSent) {
     return (
 
-      <div className="w-full max-w-md rounded-xl shadow-lg bg-white p-6 sm:p-8">
+      <div className="w-full max-w-md rounded-xl shadow-lg bg-[var(--white)] p-6 sm:p-8">
         <OtpSection
           label="Mobile Number"
           type="mobile"
@@ -52,25 +52,25 @@ export default function LoginWrapper() {
 
 
   return (
-    <><div className="flex items-center justify-center  w-full px-6 md:px-6 py-8 bg-[#f5f6fb]">
-      <div className="w-full max-w-2xl bg-white p-6 md:p-8 rounded-xl shadow-lg">
-        <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-[#183966]">
+    <><div className="flex items-center justify-center  w-full px-6 md:px-6 py-8 bg-[#f8f9fc]">
+      <div className="w-full max-w-2xl bg-[var(--white)] p-6 md:p-8 rounded-xl shadow-lg">
+        <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-[var(--primary)]">
           Login <span className="text-gray-500 font-normal">with</span>
         </h2>
 
         <Tabs value={method}>
-          <TabsList className="flex mb-6 bg-[#f3f3f3] rounded-md p-1">
+          <TabsList className="flex mb-6 bg-[var(--bg-input)] rounded-md p-1">
             <TabsTrigger
               value="email"
               onClick={() => handleSwitch("email")}
-              className={`flex-1 py-2 px-4 rounded-md text-center font-medium ${method === "email" ? "bg-white text-black" : "text-[#8b8b8b]"}`}
+              className={`flex-1 py-2 px-4 rounded-md text-center font-medium ${method === "email" ? "bg-[var(--white)] text-black" : "text-[#8b8b8b]"}`}
             >
               Email
             </TabsTrigger>
             <TabsTrigger
               value="mobile"
               onClick={() => handleSwitch("mobile")}
-              className={`flex-1 py-2 px-4 rounded-md text-center font-medium ${method === "mobile" ? "bg-white text-black" : "text-[#8b8b8b]"}`}
+              className={`flex-1 py-2 px-4 rounded-md text-center font-medium ${method === "mobile" ? "bg-[var(--white)] text-black" : "text-[#8b8b8b]"}`}
             >
               Mobile
             </TabsTrigger>
@@ -86,9 +86,9 @@ export default function LoginWrapper() {
         )}
 
 
-        <div className="text-center text-[#606060] text-sm mt-6">
+        <div className="text-center text-[var(--text-muted)] text-sm mt-6">
           Don’t have an account?{" "}
-          <button className="text-[#156f85] hover:underline" onClick={() => setRegisterDrawerOpen(true)}>
+          <button className="text-[var(--accent)] hover:underline" onClick={() => setRegisterDrawerOpen(true)}>
             Register
           </button>
         </div>

@@ -23,7 +23,7 @@ const Step3PersonalInfoComponent = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="p-6 rounded-md bg-[#f8f9fc]">
+      <Card className="p-6 rounded-md bg-[var(--bg-light)]">
         <h3 className="text-lg font-medium">Personal Information</h3>
         <hr className="border-gray-300" />
 
@@ -35,7 +35,7 @@ const Step3PersonalInfoComponent = () => {
               onChange={(e) =>
                 dispatch(updatePersonalInfo({ fullName: e.target.value }))
               }
-              className="h-10 px-4 text-sm border border-gray-300 rounded-md bg-white"
+              className="h-10 px-4 text-sm border border-gray-300 rounded-md bg-[var(--bg-input)]"
               placeholder="Enter your full name"
             />
           </div>
@@ -54,9 +54,10 @@ const Step3PersonalInfoComponent = () => {
                   }
                   className={`h-10 px-6 rounded-md text-sm font-medium ${
                     gender === option
-                      ? "bg-primary text-white"
-                      : "bg-white text-gray-800 border-gray-300"
+                      ? "bg-[var(--primary)] text-[var(--white)] hover:bg-[var(--primary-dark)] hover:text-[var(--white)]"
+                      : "bg-[var(--btn-back-bg)] text-[var(--btn-back-text)] border border-[var(--btn-back-border)] hover:bg-[var(--btn-back-hover-bg)]"
                   }`}
+                  
                 >
                   {option}
                 </Button>
@@ -66,7 +67,7 @@ const Step3PersonalInfoComponent = () => {
         </div>
       </Card>
 
-      <Card className="bg-[#f8f9fc] p-6 rounded-md">
+      <Card className="bg-[var(--bg-light)] p-6 rounded-md">
         <h3 className="text-lg font-semibold">Password</h3>
 
         <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -102,13 +103,14 @@ const Step3PersonalInfoComponent = () => {
               onChange={(e) =>
                 dispatch(updatePersonalInfo({ password: e.target.value }))
               }
-              className="h-10 px-4 text-sm border border-gray-300 rounded-md bg-white pr-10"
+              className="h-10 px-4 text-sm border border-gray-300 rounded-md bg-[var(--bg-input)] pr-10"
+              
               placeholder="Enter your password"
             />
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700"
+              className="absolute right-3 top-[38px] text-gray-500   hover:text-gray-700"
             >
               {showPassword ? (
                 <EyeOff className="w-4 h-4" />
@@ -123,6 +125,7 @@ const Step3PersonalInfoComponent = () => {
               Re-enter Password
             </Label>
             <Input
+              
               type={showConfirmPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) =>
@@ -130,9 +133,9 @@ const Step3PersonalInfoComponent = () => {
                   updatePersonalInfo({ confirmPassword: e.target.value })
                 )
               }
-              className={`h-10 px-4 text-sm border ${
+              className={`h-10 px-4 text-sm border  ${
                 passwordsMatch ? "border-gray-300" : "border-red-500"
-              } rounded-md bg-white pr-10`}
+              } rounded-md bg-[var(--bg-input)] pr-10 `}
               placeholder="Confirm your password"
             />
             <button

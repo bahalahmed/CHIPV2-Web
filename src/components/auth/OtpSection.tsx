@@ -126,8 +126,8 @@ export function OtpSection({
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder="Enter your email"
-        className="bg-white font-semibold"
-      />
+        className="bg-[var(--bg-input)] pr-10" />
+    
     ) : (
       <PhoneInput
         value={value}
@@ -171,20 +171,18 @@ export function OtpSection({
         </h2>
         <p className="text-sm text-[#4B5563] flex justify-center items-center gap-2 flex-wrap">
           We have sent a 6 digit OTP code to{" "}
-          <span className="text-[#156f85] font-semibold">{value}</span>
-          <Button
-            type="button"
-            variant="ghost"
-            className="px-2 py-1 text-sm text-[#156f85] hover:underline"
-            onClick={handleChangeClick}
-          >
-            🔄 Change
-          </Button>
+          <span className="text-accent font-semibold">{value}</span>
+          <button
+              className="ml-1 text-sm text-accent flex items-center gap-1 hover:underline"
+              onClick={handleChangeClick}
+            >
+              🔄 Change
+            </button>
         </p>
         {renderOtpInput()}
-        <div className="text-sm text-[#183966] font-medium mt-1">
+        <div className="text-sm text-[var(--primary)] font-medium mt-1">
           {canResend ? (
-            <button onClick={handleSendOTP} className="hover:underline text-[#156f85]">
+            <button onClick={handleSendOTP} className="hover:underline text-accent">
               Resend OTP
             </button>
           ) : (
@@ -199,31 +197,31 @@ export function OtpSection({
 
   
   return (
-    <div className="bg-[#f8f9fc] p-6 rounded-xl">
+    <div className="bg-[var(--bg-light)] p-6 rounded-xl">
       <h3 className="text-lg font-medium mb-6">{label} Verification</h3>
       <hr className="mb-5 border-gray-300" />
 
       {verified ? (
         <div className="relative">
-          <Input value={value} disabled className="bg-white pr-10 font-semibold" />
+          <Input value={value} disabled className="bg-[var(--white)] pr-10 font-semibold" />
           <CheckCircle className="text-green-600 h-5 w-5 absolute top-1/2 right-3 -translate-y-1/2" />
         </div>
       ) : showOtpInput ? (
         <div className="text-center space-y-4">
           <p className="text-sm text-[#4B5563] flex justify-center items-center gap-2 flex-wrap">
             We have sent a 6-digit OTP code to{" "}
-            <span className="text-[#156f85] font-semibold">{value}</span>
+            <span className="text-accent font-semibold">{value}</span>
             <button
-              className="ml-1 text-sm text-[#156f85] flex items-center gap-1 hover:underline"
+              className="ml-1 text-sm text-accent flex items-center gap-1 hover:underline"
               onClick={handleChangeClick}
             >
               🔄 Change
             </button>
           </p>
           {renderOtpInput()}
-          <div className="text-sm text-[#183966] font-medium">
+          <div className="text-sm text-[var(--primary)] font-medium">
             {canResend ? (
-              <button onClick={handleSendOTP} className="hover:underline text-[#156f85]">
+              <button onClick={handleSendOTP} className="hover:underline text-accent">
                 Resend OTP
               </button>
             ) : (
@@ -240,7 +238,7 @@ export function OtpSection({
             {renderInputField()}
           </div>
           <Button
-            className="bg-[#183966] hover:bg-[#122c4f] h-10 w-[140px]"
+            className="bg-[var(--primary)] hover:bg-[var(--primary-dark)] h-10 w-[140px]"
             onClick={handleSendOTP}
           >
             Send OTP

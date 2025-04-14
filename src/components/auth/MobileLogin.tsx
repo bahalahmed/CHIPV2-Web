@@ -65,28 +65,32 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
 
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
+  <>  <form className="space-y-6" onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="mobile" className="block text-[#606060] mb-1">
+        <label htmlFor="mobile" className="block text-[var(--text-muted)]  mb-1">
           Mobile Number
         </label>
         <PhoneInput
           value={mobileInput}
           placeholder="Enter your mobile number"
+          
           onChange={(val) => {
             setMobileInput(val);
             setMobile(val);
+            
           }}
+          
         />
       </div>
 
       <Button
-        className="w-full bg-[#183966] text-white"
+        className="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--white)]"
         type="submit"
         disabled={loading}
       >
         {loading ? "Sending OTP..." : "Get OTP"}
       </Button>
-    </form>
+      </form>
+    </>
   );
 }

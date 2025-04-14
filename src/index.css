@@ -4,6 +4,13 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --accent:#156f85;
+  --bg-light: #f8f9fc;
+  --bg-input: #f3f3f3;
+  --btn-back-bg: #ffffff;
+  --btn-back-hover-bg: #f3f3f3;
+  --btn-back-text: #4B5563;
+  --btn-back-border: #D1D5DB;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -11,13 +18,13 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: #183966;
+  --primary-dark: #122c4f;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -36,6 +43,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --text-heading: #1F2937;
+  --text-gray: #4B5563;
+  --text-muted: #606060;
+  --white:white;
 }
 
 .dark {

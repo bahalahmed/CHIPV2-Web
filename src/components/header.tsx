@@ -12,8 +12,8 @@ export function Header() {
         />
         
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-[#183966]  mb-2">CHIP</h1>
-          <p className="text-[#183966]">
+          <h1 className="text-4xl font-bold text-primary  mb-2">CHIP</h1>
+          <p className="text-primary">
             Community Health Integrated Platform - CHIP
           </p>
         </div>
@@ -29,6 +29,7 @@ export function Header() {
       </header>
     );
   }
+
 
   
   

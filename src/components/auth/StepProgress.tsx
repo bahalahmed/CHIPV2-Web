@@ -27,7 +27,7 @@ export const StepProgress = ({ currentStep }: StepProgressProps) => {
                 <div className="h-0.5 w-full bg-[#D2D8F3] overflow-hidden relative">
                   <div
                     className={`h-full absolute top-0 left-0 transition-all duration-500 ${
-                      currentStep > item.step ? "w-full bg-gradient-to-r from-[#183966] to-[#183966]" : "w-0"
+                      currentStep > item.step ? "w-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]" : "w-0"
                     }`}
                   />
                 </div>
@@ -37,7 +37,7 @@ export const StepProgress = ({ currentStep }: StepProgressProps) => {
             {/* Step Icon */}
             <div className="z-10">
               {isCompleted ? (
-                <div className="bg-[#3D8C40] w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white">
+                <div className="bg-[#3D8C40] w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-[var(--white)]">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6"
@@ -50,11 +50,11 @@ export const StepProgress = ({ currentStep }: StepProgressProps) => {
                   </svg>
                 </div>
               ) : isCurrent ? (
-                <div className="bg-[#183966] w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white shadow-md">
+                <div className="bg-[var(--primary)] w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-[var(--white)] shadow-md">
                   {item.icon}
                 </div>
               ) : (
-                <div className="border-2 border-[#5A7AF1] text-[#5A7AF1] w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-white">
+                <div className="border-2 border-[#5A7AF1] text-[#5A7AF1] w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-[var(--white)]">
                   {item.icon}
                 </div>
               )}
@@ -63,7 +63,7 @@ export const StepProgress = ({ currentStep }: StepProgressProps) => {
             {/* Label */}
             <span
               className={`mt-2 text-xs sm:text-sm md:text-base font-medium ${
-                isCurrent ? "text-[#183966]" : "text-gray-500"
+                isCurrent ? "text-[var(--primary)]" : "text-gray-500"
               }`}
             >
               {item.label}

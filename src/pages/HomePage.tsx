@@ -5,7 +5,7 @@ import { MapSection } from "@/components/map-section";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f6fb]">
+    <div className="flex flex-col min-h-screen bg-[var(--bg-light)]">
 
       <Header />
 

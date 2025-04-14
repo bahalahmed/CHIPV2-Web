@@ -32,7 +32,7 @@ export default function PhoneInput({
       value={value}
       onChange={handleChange}
       placeholder={placeholder}
-      className="bg-white font-semibold"
+      className="bg-[var(--bg-input)] pr-10" 
       disabled={disabled}
     />
   );

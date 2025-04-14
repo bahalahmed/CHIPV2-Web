@@ -53,18 +53,18 @@ export default function EmailLogin() {
   return (
     <><form className="space-y-6" onSubmit={handleLogin}>
       <div className="space-y-2">
-        <label htmlFor="email" className="text-[#606060] block">Email</label>
+        <label htmlFor="email" className="text-[var(--text-muted)] block">Email</label>
         <Input
           id="email"
           type="email"
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-[#f3f3f3]" />
+          className="bg-[var(--bg-input)]" />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="text-[#606060] block">Password</label>
+        <label htmlFor="password" className="text-[var(--text-muted)] block">Password</label>
         <div className="relative">
           <Input
             id="password"
@@ -72,7 +72,7 @@ export default function EmailLogin() {
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-[#f3f3f3] pr-10" />
+            className="bg-[var(--bg-input)] pr-10" />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
@@ -86,14 +86,14 @@ export default function EmailLogin() {
       <div className="text-right">
         <button
           type="button"
-          className="text-[#156f85] hover:underline text-sm"
+          className="text-[var(--accent)] hover:underline text-sm"
           onClick={() => navigate("/forgot-password")}
         >
           Forget Password?
         </button>
       </div>
 
-      <Button className="w-full bg-[#183966] text-white" type="submit">Login</Button>
+      <Button className="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--white)]" type="submit">Login</Button>
 
     </form>
     </>

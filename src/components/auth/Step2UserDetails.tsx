@@ -33,29 +33,43 @@ const Step2UserDetails = () => {
         { key: "Block", value: levelInfo.block, field: "block", options: mockOptions.blocks },
         { key: "Sector/PHC", value: levelInfo.sector, field: "sector", options: mockOptions.sectors },
     ];
+    const isSelected = (level: string) => levelInfo.selectedLevel === level;
+    const isNoneSelected = !levelInfo.selectedLevel;
+
+    const baseClass =
+    "bg-[var(--white)] text-[var(--text-gray)] border border-[var(--border-gray)] hover:bg-gray-100";
+  
+    const selectedClass =
+    "bg-[var(--primary)] text-[var(--white)] hover:bg-[var(--primary-dark)] hover:text-[var(--white)]";
+  
 
     return (
         <div className="space-y-6">
-            <Card className="p-6 rounded-md bg-[#f8f9fc]">
+            <Card className="p-6 rounded-md bg-[var(--bg-light)]">
                 <h3 className="text-lg font-medium ">Level</h3>
                 <hr className=" border-gray-300" />
                 <p className="text-sm text-gray-600 ">Select Your Level</p>
+                
                 <div className="flex flex-wrap gap-2">
                     {["State", "Division", "District", "Block", "Sector/PHC"].map((level) => (
-                        <Button
-                            key={level}
-                            variant={levelInfo.selectedLevel === level ? "default" : "outline"}
-                            className={levelInfo.selectedLevel === level ? "bg-[#183966]" : ""}
-                            onClick={() => dispatch(updateLevelInfo({ selectedLevel: level }))}
-                        >
-                            {level}
-                        </Button>
+                       <Button
+                       key={level}
+                       variant="outline"
+                       className={
+                         isSelected(level) ? selectedClass : isNoneSelected ? baseClass : baseClass
+                       }
+                       onClick={() =>
+                         dispatch(updateLevelInfo({ selectedLevel: level }))
+                       }
+                     >
+                       {level}
+                     </Button>
                     ))}
                 </div>
             </Card>
 
 
-            <Card className="p-6 rounded-md bg-[#f8f9fc]">
+            <Card className="p-6 rounded-md bg-[var(--bg-light)]">
                 <h3 className="text-lg font-medium">Geography</h3>
                 <hr className="border-gray-300" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -70,7 +84,7 @@ const Step2UserDetails = () => {
                                         dispatch(updateLevelInfo({ [field]: val }))
                                     }
                                 >
-                                    <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-textMain font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <SelectTrigger className="w-full h-12 bg-[var(--white)] border border-gray-300 rounded-md px-4 py-2 text-sm text-textMain font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
                                         <SelectValue placeholder={`Select ${key}`} />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -85,7 +99,7 @@ const Step2UserDetails = () => {
                         ))}
                 </div>
             </Card>
-            <Card className="p-6 rounded-md bg-[#f8f9fc]">
+            <Card className="p-6 rounded-md bg-[var(--bg-light)]">
                 <h3 className="text-lg font-medium">Department</h3>
                 <hr className="border-gray-300" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -99,7 +113,7 @@ const Step2UserDetails = () => {
                                 dispatch(updateLevelInfo({ organizationType: val }))
                             }
                         >
-                            <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-textMain font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                            <SelectTrigger className="w-full h-12 bg-[var(--white)] border border-gray-300 rounded-md px-4 py-2 text-sm text-textMain font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
                                 <SelectValue placeholder="Select Type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -120,7 +134,7 @@ const Step2UserDetails = () => {
                                 dispatch(updateLevelInfo({ designation: val }))
                             }
                         >
-                            <SelectTrigger className="w-full h-12 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-textMain font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                            <SelectTrigger className="w-full h-12 bg-[var(--white)] border border-gray-300 rounded-md px-4 py-2 text-sm text-textMain font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
                                 <SelectValue placeholder="Select Designation" />
                             </SelectTrigger>
                             <SelectContent>

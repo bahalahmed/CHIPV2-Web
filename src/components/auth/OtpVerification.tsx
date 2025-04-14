@@ -65,12 +65,12 @@
 
 //       <p className="text-sm text-[#4B5563] flex justify-center items-center gap-2 flex-wrap">
 //         We have sent a 6 digit OTP code to{" "}
-//         <span className="text-[#156f85] font-semibold">{mobile}</span>
+//         <span className="text-accent font-semibold">{mobile}</span>
 //         {onChangeMobile && (
 //           <Button
 //             type="button"
 //             variant="ghost"
-//             className="px-2 py-1 text-sm text-[#156f85] hover:underline"
+//             className="px-2 py-1 text-sm text-accent hover:underline"
 //             onClick={onChangeMobile}
 //           >
 //             🔄 Change
@@ -102,9 +102,9 @@
 //       </div>
 
 
-//       <div className="text-sm text-[#183966] font-medium mt-1">
+//       <div className="text-sm text-primary font-medium mt-1">
 //         {canResend ? (
-//           <button onClick={handleResend} className="hover:underline text-[#156f85]">
+//           <button onClick={handleResend} className="hover:underline text-accent">
 //             Resend OTP
 //           </button>
 //         ) : (
