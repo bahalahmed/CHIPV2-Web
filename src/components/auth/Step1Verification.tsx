@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { OtpSection } from "@/components/auth/OtpSection";
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/app/store";
+import { OtpSection } from "@/components/auth/OtpSection"
+import React from "react"
+import { useDispatch, useSelector } from "react-redux"
+import type { RootState } from "@/app/store"
 import {
   updateContactInfo,
   setMobileVerified,
@@ -15,10 +15,10 @@ import {
   setMobileOtp,
   setWhatsappOtp,
   setEmailOtp,
-} from "@/features/registerForm/registerFormSlice";
+} from "@/features/registerForm/registerFormSlice"
 
 const Step1VerificationComponent = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
   const {
     mobileNumber,
     whatsappNumber,
@@ -32,7 +32,7 @@ const Step1VerificationComponent = () => {
     mobileOtp,
     whatsappOtp,
     emailOtp,
-  } = useSelector((state: RootState) => state.registerForm.contactInfo);
+  } = useSelector((state: RootState) => state.registerForm.contactInfo)
 
   return (
     <div className="space-y-6">
@@ -40,9 +40,7 @@ const Step1VerificationComponent = () => {
         label="Mobile Number"
         type="mobile"
         value={mobileNumber}
-        onChange={(val) =>
-          dispatch(updateContactInfo({ mobileNumber: val.replace(/\D/g, "") }))
-        }
+        onChange={(val) => dispatch(updateContactInfo({ mobileNumber: val.replace(/\D/g, "") }))}
         verified={mobileVerified}
         setVerified={(v) => dispatch(setMobileVerified(v))}
         showOtpInput={showMobileOtp}
@@ -55,9 +53,7 @@ const Step1VerificationComponent = () => {
         label="WhatsApp Number"
         type="whatsapp"
         value={whatsappNumber}
-        onChange={(val) =>
-          dispatch(updateContactInfo({ whatsappNumber: val.replace(/\D/g, "") }))
-        }
+        onChange={(val) => dispatch(updateContactInfo({ whatsappNumber: val.replace(/\D/g, "") }))}
         verified={whatsappVerified}
         setVerified={(v) => dispatch(setWhatsappVerified(v))}
         showOtpInput={showWhatsappOtp}
@@ -79,8 +75,8 @@ const Step1VerificationComponent = () => {
         setOtp={(otp) => dispatch(setEmailOtp(otp))}
       />
     </div>
-  );
-};
+  )
+}
 
-const Step1Verification = React.memo(Step1VerificationComponent);
-export default Step1Verification;
+const Step1Verification = React.memo(Step1VerificationComponent)
+export default Step1Verification

@@ -1,34 +1,36 @@
+"use client"
+
+import type React from "react"
+
 // src/components/auth/MobileLogin.tsx
 
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useDispatch } from "react-redux";
-import { setUser } from "@/features/auth/authSlice";
-import PhoneInput from "@/components/ui/PhoneInput";
-
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { toast } from "sonner"
+import { useDispatch } from "react-redux"
+import { setUser } from "@/features/auth/authSlice"
+import PhoneInput from "@/components/ui/PhoneInput"
 
 interface MobileLoginProps {
-  onOtpSent: () => void;
-  setMobile: (number: string) => void;
+  onOtpSent: () => void
+  setMobile: (number: string) => void
 }
 
-
 export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) {
-  const [mobileInput, setMobileInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [mobileInput, setMobileInput] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!mobileInput || mobileInput.length !== 10) {
-      toast.error("Please enter a valid 10-digit mobile number");
-      return;
+      toast.error("Please enter a valid 10-digit mobile number")
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
 
     try {
       // ✅ FUTURE: Replace with actual API call
@@ -41,56 +43,53 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
         email: "mobileuser@example.com",
         mobile: mobileInput,
         role: "User",
-      };
+      }
 
-      const mockToken = "mock-mobile-jwt-token";
+      const mockToken = "mock-mobile-jwt-token"
 
-      dispatch(setUser({ user: mockUser, token: mockToken }));
+      dispatch(setUser({ user: mockUser, token: mockToken }))
 
-      localStorage.setItem("auth", JSON.stringify({ user: mockUser, token: mockToken }));
+      localStorage.setItem("auth", JSON.stringify({ user: mockUser, token: mockToken }))
 
-      setMobile(mobileInput);
-      toast.success("OTP sent successfully!");
-      onOtpSent();
+      setMobile(mobileInput)
+      toast.success("OTP sent successfully!")
+      onOtpSent()
 
       // ✅ OPTIONAL: navigate to dashboard or OTP screen
       // navigate("/otp-verification");
-
     } catch {
-      toast.error("Failed to send OTP. Please try again.");
+      toast.error("Failed to send OTP. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
-
+  }
 
   return (
-  <>  <form className="space-y-6" onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="mobile" className="block text-[var(--text-muted)]  mb-1">
-          Mobile Number
-        </label>
-        <PhoneInput
-          value={mobileInput}
-          placeholder="Enter your mobile number"
-          
-          onChange={(val) => {
-            setMobileInput(val);
-            setMobile(val);
-            
-          }}
-          
-        />
-      </div>
+    <>
+      {" "}
+      <form className="space-y-6" onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="mobile" className="block text-muted-foreground mb-1">
+            Mobile Number
+          </label>
+          <PhoneInput
+            value={mobileInput}
+            placeholder="Enter your mobile number"
+            onChange={(val) => {
+              setMobileInput(val)
+              setMobile(val)
+            }}
+          />
+        </div>
 
-      <Button
-        className="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--white)]"
-        type="submit"
-        disabled={loading}
-      >
-        {loading ? "Sending OTP..." : "Get OTP"}
-      </Button>
+        <Button
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Sending OTP..." : "Get OTP"}
+        </Button>
       </form>
     </>
-  );
+  )
 }

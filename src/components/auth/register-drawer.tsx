@@ -4,7 +4,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/comp
 import { Button } from "@/components/ui/button"
 import React, { Suspense } from "react"
 
-
 // Lazy-loaded step components
 const Step1Verification = React.lazy(() => import("./Step1Verification"))
 const Step2UserDetails = React.lazy(() => import("./Step2UserDetails"))
@@ -53,9 +52,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
             <div>
               <SheetTitle className="text-xl sm:text-2xl font-bold">User Registration</SheetTitle>
             </div>
-            <SheetClose className="rounded-full p-1 hover:bg-gray-100">
-
-            </SheetClose>
+            <SheetClose className="rounded-full p-1 hover:bg-secondary"></SheetClose>
           </div>
         </SheetHeader>
 
@@ -81,7 +78,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
         {/* Navigation Buttons */}
         <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-4 mt-6 sm:mt-8">
           <Button
-            className="bg-[var(--btn-back-bg)] hover:bg-[var(--btn-back-hover-bg)] text-[var(--btn-back-text)] border border-[var(--btn-back-border)] w-full sm:w-auto order-2 sm:order-1"
+            className="bg-background hover:bg-secondary text-foreground border border-border w-full sm:w-auto order-2 sm:order-1"
             variant="outline"
             onClick={handleBack}
             disabled={step === 1}
@@ -90,7 +87,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
           </Button>
           {step < 4 ? (
             <Button
-              className="bg-[var(--primary)] hover:bg-[var(--primary-dark)] w-full sm:w-auto order-1 sm:order-2"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto order-1 sm:order-2"
               onClick={handleNext}
               disabled={
                 step === 1 &&

@@ -1,12 +1,16 @@
+"use client"
+
+import type React from "react"
+
 // src/components/ui/PhoneInput.tsx
 
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input"
 
 interface PhoneInputProps {
-  value: string;
-  onChange: (val: string) => void;
-  placeholder?: string;
-  disabled?: boolean;
+  value: string
+  onChange: (val: string) => void
+  placeholder?: string
+  disabled?: boolean
 }
 
 export default function PhoneInput({
@@ -16,13 +20,13 @@ export default function PhoneInput({
   disabled = false,
 }: PhoneInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\D/g, ""); // remove non-digits
+    const val = e.target.value.replace(/\D/g, "") // remove non-digits
 
     // ✅ Starts with 6-9 and up to 10 digits
     if (val === "" || (/^[6-9]/.test(val) && val.length <= 10)) {
-      onChange(val);
+      onChange(val)
     }
-  };
+  }
 
   return (
     <Input
@@ -32,8 +36,8 @@ export default function PhoneInput({
       value={value}
       onChange={handleChange}
       placeholder={placeholder}
-      className="bg-[var(--bg-input)] pr-10" 
+      className="bg-input pr-10"
       disabled={disabled}
     />
-  );
+  )
 }
