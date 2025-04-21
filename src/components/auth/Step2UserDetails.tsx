@@ -51,10 +51,10 @@ const Step2UserDetails = () => {
     }, [dispatch, levelInfo.block])
 
     useEffect(() => {
-        if (levelInfo.organizationType) {
-            dispatch(loadDesignations({ orgTypeId: levelInfo.organizationType }))
+        if (levelInfo.organizationTypeId) {
+            dispatch(loadDesignations({ orgTypeId: levelInfo.organizationTypeId }))
         }
-    }, [dispatch, levelInfo.organizationType])
+    }, [dispatch, levelInfo.organizationTypeId])
 
 
 
@@ -69,10 +69,10 @@ const Step2UserDetails = () => {
     const getResetPayload = (field: string) => {
         const resetMap: Record<string, string[]> = {
             state: ["division", "district", "block", "sector", "organizationType", "designation"],
-            division: ["district", "block", "sector", "organizationType", "designation"],
-            district: ["block", "sector", "organizationType", "designation"],
-            block: ["sector", "organizationType", "designation"],
-            sector: ["organizationType", "designation"],
+            division: ["district", "block", "sector"],
+            district: ["block", "sector"],
+            block: ["sector"],
+            sector: [],
             organizationType: ["designation"]
         }
 
@@ -162,16 +162,23 @@ const Step2UserDetails = () => {
                     <div>
                         <Label className="text-sm text-muted-foreground mb-2 block">Type of Organisation</Label>
                         <Select
-                            value={levelInfo.organizationType || undefined}
+                            value={levelInfo.organizationTypeId || undefined}
                             onValueChange={(val) => {
-                                dispatch(updateLevelInfo({ organizationType: val, designation: "" }))
+                                const selected = geo.orgTypes.find((opt) => opt.id === val)
+                                dispatch(
+                                    updateLevelInfo({
+                                        organizationTypeId: val,
+                                        organizationTypeLabel: selected?.name || "",
+                                        designationId: "",
+                                        designationLabel: "",
+                                    })
+                                )
                                 dispatch(resetGeoData("organizationType"))
+                                dispatch(loadDesignations({ orgTypeId: val }))
                             }}
                         >
-                            <SelectTrigger className="w-full h-12 bg-background border border-border rounded-md px-4 py-2 text-sm text-foreground font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                                <SelectValue>
-                                    {geo.orgTypes.find((opt) => opt.id === levelInfo.organizationType)?.name || "Select Type"}
-                                </SelectValue>
+                            <SelectTrigger className="w-full h-12 bg-background border border-border rounded-md px-4 py-2">
+                                <SelectValue>{levelInfo.organizationTypeLabel || "Select Type"}</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                                 {geo.orgTypes.map((opt: any) => (
@@ -186,14 +193,15 @@ const Step2UserDetails = () => {
                     <div>
                         <Label className="text-sm text-muted-foreground mb-2 block">Designation</Label>
                         <Select
-                            value={levelInfo.designation || undefined}
-                            onValueChange={(val) => dispatch(updateLevelInfo({ designation: val }))}
-                            disabled={!levelInfo.organizationType}
+                            value={levelInfo.designationId || undefined}
+                            onValueChange={(val) => {
+                                const selected = geo.designations.find((opt) => opt.id === val)
+                                dispatch(updateLevelInfo({ designationId: val, designationLabel: selected?.name || "" }))
+                            }}
+                            disabled={!levelInfo.organizationTypeId}
                         >
-                            <SelectTrigger className="w-full h-12 bg-background border border-border rounded-md px-4 py-2 text-sm text-foreground font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                                <SelectValue>
-                                    {geo.designations.find((opt) => opt.id === levelInfo.designation)?.name || "Select Designation"}
-                                </SelectValue>
+                            <SelectTrigger className="w-full h-12 bg-background border border-border rounded-md px-4 py-2">
+                                <SelectValue>{levelInfo.designationLabel || "Select Designation"}</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                                 {geo.designations.map((opt: any) => (

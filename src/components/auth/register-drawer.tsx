@@ -71,7 +71,17 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
             {step === 1 && <Step1Verification />}
             {step === 2 && <Step2UserDetails />}
             {step === 3 && <Step3PersonalInfo />}
-            {step === 4 && <Step4Approval reviewInfo={{ ...contactInfo, ...levelInfo, ...personalInfo }} />}
+            {step === 4 && (
+              <Step4Approval
+                reviewInfo={{
+                  ...contactInfo,
+                  ...levelInfo,
+                  ...personalInfo,
+                  organizationType: levelInfo.organizationTypeId || "",
+                  designation: levelInfo.designationId || "",
+                }}
+              />
+            )}
           </Suspense>
         </div>
 

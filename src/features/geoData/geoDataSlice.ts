@@ -56,7 +56,7 @@ const geoDataSlice = createSlice({
         division: ["districts", "blocks", "sectors"],
         district: ["blocks","sectors"],
         block: ["sectors"],
-        sector: ["designations"],
+        sector: [],
         organizationType: ["designations"]
       }
 

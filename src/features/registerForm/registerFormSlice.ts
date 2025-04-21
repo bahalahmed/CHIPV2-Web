@@ -19,15 +19,27 @@ interface ContactInfo {
 interface LevelInfo {
   selectedLevel: string;
   state: string;
+  stateLabel: string;
   division: string;
+  divisionLabel: string;
   district: string;
+  districtLabel: string;
   block: string;
+  blockLabel: string;
   sector: string;
-  organizationType: string;
-  designation: string;
+  sectorLabel: string;
+
+  organizationTypeId: string;
+  organizationTypeLabel: string;
+
+  designationId: string;
+  designationLabel: string;
 }
 
+
+
 interface PersonalInfo {
+  designation: string;
   fullName: string;
   gender: string;
   password: string;
@@ -65,14 +77,25 @@ const initialState: RegisterFormState = {
     district: "",
     block: "",
     sector: "",
-    organizationType: "",
-    designation: "",
+
+    organizationTypeId: "",
+    organizationTypeLabel: "",
+
+    designationId: "",
+    designationLabel: "",
+    stateLabel: "",
+    divisionLabel: "",
+    districtLabel: "",
+    blockLabel: "",
+    sectorLabel: ""
   },
+  
   personalInfo: {
     fullName: "",
     gender: "",
     password: "",
     confirmPassword: "",
+    designation: ""
   },
 };
 
