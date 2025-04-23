@@ -59,6 +59,8 @@
   --gray-section: oklch(210 40% 96.1%);
   --gray-section-foreground: #1f2937;
 
+  --white: #ffffff;
+
   /* Text colors */
   --text-heading: #1f2937;
   --text-gray: #4b5563;
@@ -99,6 +101,8 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+
+  --white: black;
 
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);

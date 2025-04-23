@@ -93,7 +93,7 @@ export default function EmailLogin({ onForgotPassword }: { onForgotPassword: () 
         </p>
         </div>
 
-        <Button className="w-full py-6 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium rounded-xl" type="submit">
+        <Button className="w-full py-5 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium rounded-xl" type="submit">
           Login
         </Button>
       </form>

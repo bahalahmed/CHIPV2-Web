@@ -39,7 +39,7 @@ export const StepProgress = ({ currentStep }: StepProgressProps) => {
             {/* Step Circle */}
             <div className="z-10">
               {isCompleted ? (
-                <div className="bg-[#3D8C40] w-9 h-9 rounded-full flex items-center justify-center text-white">
+                <div className="bg-[#3D8C40] w-9 h-9 rounded-full flex items-center justify-center text-background">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-4 w-4"
@@ -52,11 +52,11 @@ export const StepProgress = ({ currentStep }: StepProgressProps) => {
                   </svg>
                 </div>
               ) : isCurrent ? (
-                <div className="bg-primary w-9 h-9 rounded-full flex items-center justify-center text-white shadow-md">
+                <div className="bg-primary w-9 h-9 rounded-full flex items-center justify-center text-background shadow-md">
                   {item.icon}
                 </div>
               ) : (
-                <div className="border-2 border-accent text-accent w-9 h-9 rounded-full flex items-center justify-center bg-white">
+                <div className="border-2 border-accent text-accent w-9 h-9 rounded-full flex items-center justify-center bg-background">
                   {item.icon}
                 </div>
               )}

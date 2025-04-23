@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="py-3 px-4 md:px-8 text-[#606060] text-xs md:text-sm border-t border-[#d1d5db] bg-white">
+    <footer className="py-3 px-4 md:px-8 text-gray text-xs md:text-sm border-t border-border bg-background">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
           {/* Left section */}
@@ -9,7 +9,7 @@ export function Footer() {
               Helpline No.: <span className="font-medium">+91-7023025679</span>
             </div>
             <div>
-              <a href="#" className="hover:underline hover:text-[#183966]">
+              <a href="#" className="hover:underline hover:text-primary">
                 Watch: Training Videos
               </a>
             </div>
@@ -33,7 +33,7 @@ export function Footer() {
           <div className="flex flex-col items-center md:items-end space-y-1">
             <div>Nodal Officer: Dr. Arun Garg, IAS (AMD-NHM)</div>
             <div>
-              <a href="mailto:amdnhm.raj@gmail.com" className="hover:underline hover:text-[#183966]">
+              <a href="mailto:amdnhm.raj@gmail.com" className="hover:underline hover:text-primary">
                 Email: amdnhm.raj@gmail.com
               </a>
             </div>

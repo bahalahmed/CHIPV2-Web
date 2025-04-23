@@ -84,7 +84,7 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
         </div>
 
         <Button
-          className="w-full py-6  bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium rounded-xl"
+          className="w-full py-5  bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium rounded-xl"
           variant="default"
           type="submit"
           disabled={loading}
