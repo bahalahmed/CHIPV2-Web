@@ -3,7 +3,7 @@ export function MapSection() {
     return (
       <div className="w-full max-w-xl">
         <img
-          src="src/assets/region-map.png"
+          src="src/assets/Map.png"
           alt="Region Map"
           width={800}
           height={600}

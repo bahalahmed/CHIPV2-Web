@@ -7,9 +7,9 @@ import type React from "react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { toast } from "sonner"
-import { useDispatch } from "react-redux"
-import { setUser } from "@/features/auth/authSlice"
-import PhoneInput from "@/components/ui/PhoneInput"
+import { Smartphone } from 'lucide-react';
+//import { useAppDispatch } from '@/hooks/reduxHooks'
+
 
 interface MobileLoginProps {
   onOtpSent: () => void
@@ -20,7 +20,7 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
   const [mobileInput, setMobileInput] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const dispatch = useDispatch()
+  //const dispatch = useAppDispatch()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,7 +47,7 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
 
       const mockToken = "mock-mobile-jwt-token"
 
-      dispatch(setUser({ user: mockUser, token: mockToken }))
+      //dispatch(setUser({ user: mockUser, token: mockToken }))
 
       localStorage.setItem("auth", JSON.stringify({ user: mockUser, token: mockToken }))
 
@@ -68,22 +68,32 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
     <>
       {" "}
       <form className="space-y-6" onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="mobile" className="block text-muted-foreground mb-1">
+        <div className="space-y-2">
+          <label htmlFor="mobile" className="block text-md text-muted-foreground mb-2">
             Mobile Number
           </label>
-          <PhoneInput
-            value={mobileInput}
-            placeholder="Enter your mobile number"
-            onChange={(val) => {
-              setMobileInput(val)
-              setMobile(val)
-            }}
-          />
+          <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+            <Smartphone className="h-5 w-5 text-black" />
+          </div>
+          <input
+              type="phone"
+              placeholder="Enter your mobile number"
+              value={mobileInput}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 10)
+                setMobileInput(val)
+                setMobile(val)
+               }}
+              className=" w-full py-3 pl-12 text-sm  bg-input rounded-md border-none"
+              
+            />
+          </div>
         </div>
 
         <Button
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+          className="w-full py-6  bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium rounded-xl"
+          variant="default"
           type="submit"
           disabled={loading}
         >

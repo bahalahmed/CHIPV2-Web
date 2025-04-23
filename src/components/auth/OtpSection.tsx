@@ -1,17 +1,14 @@
 "use client"
 
-// src/components/auth/OtpSection.tsx
-
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { CheckCircle } from "lucide-react"
+import { CheckCircle,Smartphone,Mail } from "lucide-react"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import PhoneInput from "@/components/ui/PhoneInput"
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp"
-import { useDispatch } from "react-redux"
+import { useAppDispatch } from "@/hooks/reduxHooks"
 import { setOtpSent } from "@/features/auth/loginTabSlice"
+
 
 interface OtpSectionProps {
   label: string
@@ -27,6 +24,11 @@ interface OtpSectionProps {
   redirectAfterVerify?: string
   mode?: "login" | "default"
   onChange?: (value: string) => void
+  sameAsCheckbox?: {
+    checked: boolean
+    onChange: (checked: boolean) => void
+    label: string
+  }
 }
 
 export function OtpSection({
@@ -43,6 +45,7 @@ export function OtpSection({
   redirectAfterVerify,
   mode = "default",
   onChange,
+  sameAsCheckbox,
 }: OtpSectionProps) {
   const navigate = useNavigate()
   const [timer, setTimer] = useState(30)
@@ -94,7 +97,7 @@ export function OtpSection({
     toast.success("OTP sent successfully!")
   }
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const handleChangeClick = () => {
     setShowOtpInput(false)
     setVerified(false)
@@ -107,18 +110,66 @@ export function OtpSection({
     }
   }
 
-  const renderInputField = () =>
-    type === "email" ? (
-      <Input
-        type="email"
-        value={value}
-        onChange={(e) => onChange?.(e.target.value)}
-        placeholder="Enter your email"
-        className="bg-input pr-10"
-      />
-    ) : (
-      <PhoneInput value={value} onChange={(val) => onChange?.(val)} placeholder="Enter your mobile number" />
-    )
+  const getInputLabel = () => {
+    if (type === "mobile") return "Mobile Number"
+    if (type === "whatsapp") return "WhatsApp Number"
+    return "Email ID"
+  }
+
+  const getVerificationTitle = () => {
+    if (type === "mobile") return "Mobile Verification"
+    if (type === "whatsapp") return "WhatsApp Verification"
+    return "Email ID Verification"
+  }
+
+  const renderInputField = () => {
+    const placeholder = type === "email" ? "Enter your email" : "Enter your number"
+    const Icon = type === "email" ? Mail : Smartphone;
+
+    if (type === "email") {
+      return (
+        <div className="relative w-full">
+          {/* Icon on left */}
+          <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+            <Icon className="h-5 w-5 text-black" />
+          </div>
+    
+          <input
+            type={type === "email" ? "email" : "text"}
+            value={value}
+            onChange={(e) => {
+              const inputVal = type === "email"
+                ? e.target.value
+                : e.target.value.replace(/\D/g, "").slice(0, 10);
+              onChange?.(inputVal);
+            }}
+            placeholder={placeholder}
+            className="w-full h-10 pl-12 pr-4 bg-input text-sm border border-border rounded-md"
+          />
+        </div>
+      );
+    
+    } else {
+      return (
+        <div className="relative w-full">
+          {/* Icon on left */}
+          <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+            <Icon className="h-5 w-5 text-black" />
+          </div>
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => {
+              const val = e.target.value.replace(/\D/g, "").slice(0, 10)
+              onChange?.(val)
+            }}
+            placeholder={placeholder}
+            className="w-full h-10 pl-12 pr-4 bg-input text-sm border border-border rounded-md"
+          />
+        </div>
+      )
+    }
+  }
 
   // ✅ OTP Input UI
   const renderOtpInput = () => (
@@ -148,7 +199,7 @@ export function OtpSection({
 
   if (mode === "login" && showOtpInput) {
     return (
-      <div className="space-y-6 text-center">
+      <div className=" space-y-6 text-center">
         <h2 className="text-2xl font-semibold text-text-heading">
           Login <span className="text-muted-foreground font-normal">with</span>
         </h2>
@@ -162,42 +213,42 @@ export function OtpSection({
           </button>
         </p>
         {renderOtpInput()}
-        <div className="text-sm text-primary font-medium mt-1">
-          {canResend ? (
-            <button onClick={handleSendOTP} className="hover:underline text-accent">
-              Resend OTP
-            </button>
-          ) : (
-            <span className="text-text-heading">Resend OTP in 00:{timer.toString().padStart(2, "0")}</span>
-          )}
-        </div>
+        <div className="text-sm font-medium">
+            {canResend ? (
+              <button onClick={handleSendOTP} className="hover:underline text-accent">
+                Resend OTP
+              </button>
+            ) : (
+              <span className="text-text-heading">Resend OTP in 00:{timer.toString().padStart(2, "0")}</span>
+            )}
+          </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-muted p-6 rounded-xl">
-      <h3 className="text-lg font-medium mb-6">{label} Verification</h3>
-      <hr className="mb-5 border-border" />
+    <div className="bg-muted p-8 rounded-xl">
+      <h3 className="text-xl font-medium text-gray mb-2">{getVerificationTitle()}</h3>
+      <hr className="mb-4 border-border" />
 
       {verified ? (
         <div className="relative">
-          <Input value={value} disabled className="bg-background pr-10 font-semibold" />
+          <Input value={value} disabled className="bg-background pr-10 py-6 font-semibold" />
           <CheckCircle className="text-success h-5 w-5 absolute top-1/2 right-3 -translate-y-1/2" />
         </div>
       ) : showOtpInput ? (
         <div className="text-center space-y-4">
-          <p className="text-sm text-muted-foreground flex justify-center items-center gap-2 flex-wrap">
-            We have sent a 6-digit OTP code to <span className="text-accent font-semibold">{value}</span>
+          <p className="text-sm text-gray flex justify-center items-center gap-2 flex-wrap">
+            We have sent a 6-digit OTP code to <span className="text-primary font-semibold">{value}</span>
             <button
-              className="ml-1 text-sm text-accent flex items-center gap-1 hover:underline"
+              className="ml-1 text-sm text-primary flex items-center gap-1 hover:underline"
               onClick={handleChangeClick}
             >
               🔄 Change
             </button>
           </p>
           {renderOtpInput()}
-          <div className="text-sm text-primary font-medium">
+          <div className="text-sm font-medium">
             {canResend ? (
               <button onClick={handleSendOTP} className="hover:underline text-accent">
                 Resend OTP
@@ -208,15 +259,35 @@ export function OtpSection({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row md:items-end gap-4">
-          <div className="flex-1">
-            <label className="block text-sm text-muted-foreground mb-1">{label}</label>
-            {renderInputField()}
+        <>
+          <div>
+            <label className="block text-muted-foreground ml-1 mb-4">{getInputLabel()}</label>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">{renderInputField()}</div>
+              <button
+                onClick={handleSendOTP}
+                className="bg-primary hover:bg-primary/90 text-background font-medium rounded-lg h-10 px-6 min-w-[120px] whitespace-nowrap"
+              >
+                Send OTP
+              </button>
+            </div>
           </div>
-          <Button className="bg-primary hover:bg-primary/90 h-10 w-[140px]" onClick={handleSendOTP}>
-            Send OTP
-          </Button>
-        </div>
+
+          {/* ✅ Same as above checkbox (only for WhatsApp) */}
+          {type === "whatsapp" && sameAsCheckbox && (
+            <div className="flex items-center mt-4">
+              <label className="inline-flex items-center gap-2 text-heading">
+                <input
+                  type="checkbox"
+                  checked={sameAsCheckbox.checked}
+                  onChange={(e) => sameAsCheckbox.onChange(e.target.checked)}
+                  className="w-4 h-4 text-accent rounded border-border"
+                />
+                <span>Same as above</span>
+              </label>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

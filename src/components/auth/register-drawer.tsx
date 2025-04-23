@@ -47,10 +47,10 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
         className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl overflow-y-auto px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 pb-6 sm:pb-8"
         side="right"
       >
-        <SheetHeader className="mb-4 sm:mb-6">
+        <SheetHeader className="mb-4 sm:mb-2">
           <div className="flex justify-between items-center">
             <div>
-              <SheetTitle className="text-xl sm:text-2xl font-bold">User Registration</SheetTitle>
+              <SheetTitle className="text-xl text-primary sm:text-2xl font-bold">User Registration</SheetTitle>
             </div>
             <SheetClose className="rounded-full p-1 hover:bg-secondary"></SheetClose>
           </div>

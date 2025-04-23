@@ -115,13 +115,15 @@
 
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Eye, EyeOff, Pencil } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import React from "react"
-import { useDispatch } from "react-redux"
+import { useAppDispatch } from '@/hooks/reduxHooks'
+
 import { setStep } from "@/features/registerForm/registerFormSlice"
-import { useSelector } from "react-redux"
+import { useAppSelector } from '@/hooks/reduxHooks'
+
 import type { RootState } from "@/app/store"
 
 
@@ -148,9 +150,9 @@ interface Step4ApprovalProps {
 
 const Step4Approval = ({ reviewInfo }: Step4ApprovalProps) => {
     const [showPassword, setShowPassword] = useState(false)
-    const dispatch = useDispatch()
+    const dispatch = useAppDispatch()
 
-    const geo = useSelector((state: RootState) => state.geoData)
+    const geo = useAppSelector((state: RootState) => state.geoData)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const getLabelById = (list: any[], id: string) => {
@@ -174,8 +176,7 @@ const Step4Approval = ({ reviewInfo }: Step4ApprovalProps) => {
                 onClick={() => dispatch(setStep(stepNum))}
                 className="text-sm text-primary flex items-center gap-1 hover:bg-transparent hover:text-primary"
             >
-                <Pencil className="w-4 h-4" />
-                Edit
+
             </Button>
         </div>
     )
@@ -231,17 +232,17 @@ const Step4Approval = ({ reviewInfo }: Step4ApprovalProps) => {
                             onClick={() => setShowPassword((prev) => !prev)}
                             className="text-sm text-primary flex items-center gap-1 hover:bg-transparent hover:text-primary"
                         >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            {showPassword ? "Hide" : "Show"}
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => dispatch(setStep(3))}
-                            className="text-sm text-primary flex items-center gap-1 hover:bg-transparent hover:text-primary"
-                        >
-                            <Pencil className="w-4 h-4" />
-                            Edit
+                            {showPassword ? (
+                                <>
+                                    <EyeOff className="w-4 h-4" />
+                                    Hide
+                                </>
+                            ) : (
+                                <>
+                                    <Eye className="w-4 h-4" />
+                                    Show
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>

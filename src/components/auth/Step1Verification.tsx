@@ -34,8 +34,9 @@ const Step1VerificationComponent = () => {
     emailOtp,
   } = useSelector((state: RootState) => state.registerForm.contactInfo)
 
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <OtpSection
         label="Mobile Number"
         type="mobile"
@@ -60,8 +61,14 @@ const Step1VerificationComponent = () => {
         setShowOtpInput={(v) => dispatch(setShowWhatsappOtp(v))}
         otp={whatsappOtp}
         setOtp={(otp) => dispatch(setWhatsappOtp(otp))}
+        sameAsCheckbox={{
+          checked: whatsappNumber === mobileNumber,
+          onChange: (checked) =>
+            dispatch(updateContactInfo({ whatsappNumber: checked ? mobileNumber : "" })),
+          label: "Same as above",
+        }}
+        
       />
-
       <OtpSection
         label="Email ID"
         type="email"

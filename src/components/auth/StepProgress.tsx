@@ -13,7 +13,7 @@ import { Shield, User, ThumbsUp } from "lucide-react";
  
  export const StepProgress = ({ currentStep }: StepProgressProps) => {
    return (
-     <div className="flex items-center justify-between mb-8 px-2 sm:px-4 lg:px-6">
+     <div className="flex items-center justify-between  px-1 sm:px-4 lg:px-0">
        {steps.map((item, index) => {
          const isCompleted = currentStep > item.step;
          const isCurrent = currentStep === item.step;
