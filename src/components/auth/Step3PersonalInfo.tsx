@@ -4,12 +4,12 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
-import { Eye, EyeOff } from "lucide-react"
-import { useState } from "react"
+
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "@/app/store"
 import { updatePersonalInfo } from "@/features/registerForm/registerFormSlice"
+import PasswordInputField from "../shared/PasswordInputField"
 
 const Step3PersonalInfoComponent = () => {
   const dispatch = useDispatch()
@@ -17,8 +17,6 @@ const Step3PersonalInfoComponent = () => {
     (state: RootState) => state.registerForm.personalInfo,
   )
 
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const passwordsMatch = password === confirmPassword
 
   return (
@@ -88,40 +86,21 @@ const Step3PersonalInfoComponent = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
             <Label className="block text-sm text-muted-foreground mb-2">Enter Password</Label>
-            <Input
-              type={showPassword ? "text" : "password"}
+            <PasswordInputField
               value={password}
-              onChange={(e) => dispatch(updatePersonalInfo({ password: e.target.value }))}
-              className="h-10 px-4 text-sm border border-border rounded-md bg-input pr-10"
-              placeholder="Enter your password"
+              onChange={(val) => dispatch(updatePersonalInfo({ password: val }))}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground"
-            >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
           </div>
 
           <div className="relative">
             <Label className="block text-sm text-muted-foreground mb-2">Re-enter Password</Label>
-            <Input
-              type={showConfirmPassword ? "text" : "password"}
+            <PasswordInputField
               value={confirmPassword}
-              onChange={(e) => dispatch(updatePersonalInfo({ confirmPassword: e.target.value }))}
-              className={`h-10 px-4 text-sm border ${
-                passwordsMatch ? "border-border" : "border-destructive"
-              } rounded-md bg-input pr-10`}
+              onChange={(val) => dispatch(updatePersonalInfo({ confirmPassword: val }))}
               placeholder="Confirm your password"
+              compareWith={password}
+              showMismatchError
             />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground"
-            >
-              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
             {!passwordsMatch && confirmPassword.length > 0 && (
               <p className="text-xs text-destructive mt-1 ml-1">Passwords do not match</p>
             )}

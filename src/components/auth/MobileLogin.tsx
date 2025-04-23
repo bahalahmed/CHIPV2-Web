@@ -7,7 +7,8 @@ import type React from "react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { toast } from "sonner"
-import { Smartphone } from 'lucide-react';
+
+import PhoneInputField from "../shared/PhoneInputField"
 //import { useAppDispatch } from '@/hooks/reduxHooks'
 
 
@@ -72,23 +73,14 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
           <label htmlFor="mobile" className="block text-md text-muted-foreground mb-2">
             Mobile Number
           </label>
-          <div className="relative">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-4">
-            <Smartphone className="h-5 w-5 text-black" />
-          </div>
-          <input
-              type="phone"
-              placeholder="Enter your mobile number"
-              value={mobileInput}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, "").slice(0, 10)
-                setMobileInput(val)
-                setMobile(val)
-               }}
-              className=" w-full py-3 pl-12 text-sm  bg-input rounded-md border-none"
-              
-            />
-          </div>
+          <PhoneInputField
+            value={mobileInput}
+            onChange={(val) => {
+              setMobileInput(val)
+              setMobile(val)
+            }}
+          />
+
         </div>
 
         <Button

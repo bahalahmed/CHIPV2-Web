@@ -1,14 +1,12 @@
 "use client"
 
 import type React from "react"
-
-// src/components/auth/EmailLogin.tsx
-import { Eye, Mail, Lock ,EyeOff} from "lucide-react"
 import { useState } from "react"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
+import PasswordInputField from "../shared/PasswordInputField"
+import EmailInputField from "../shared/EmailInputField"
 // import { useAppDispatch } from '@/hooks/reduxHooks'
 // import { login } from '@/features/auth/authSlice'
 
@@ -18,7 +16,6 @@ export default function EmailLogin({ onForgotPassword }: { onForgotPassword: () 
   const navigate = useNavigate()
   //const dispatch = useAppDispatch()
 
-  const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
@@ -74,45 +71,14 @@ export default function EmailLogin({ onForgotPassword }: { onForgotPassword: () 
           <label htmlFor="email" className="block text-md text-muted-foreground mb-2">
             Email
           </label>
-          <div className="relative">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-4">
-            <Mail className="h-5 w-5 text-black" />
-          </div>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="pl-12 py-6 bg-input border-none"
-          />
-          </div>
+          <EmailInputField value={email} onChange={setEmail} />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="password" className="block text-md text-muted-foreground">
             Password
           </label>
-          <div className="relative">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-4">
-            <Lock className="h-5 w-5 text-black" />
-          </div>
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-12 py-6 border-none bg-input"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
+          <PasswordInputField value={password} onChange={setPassword} />
         </div>
 
         <div className="text-right">

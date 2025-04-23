@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { CheckCircle,Smartphone,Mail } from "lucide-react"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp"
 import { useAppDispatch } from "@/hooks/reduxHooks"
 import { setOtpSent } from "@/features/auth/loginTabSlice"
+import PhoneInputField from "../shared/PhoneInputField"
+import EmailInputField from "../shared/EmailInputField"
+import { CheckCircle } from "lucide-react"
+
 
 
 interface OtpSectionProps {
@@ -123,51 +126,24 @@ export function OtpSection({
   }
 
   const renderInputField = () => {
-    const placeholder = type === "email" ? "Enter your email" : "Enter your number"
-    const Icon = type === "email" ? Mail : Smartphone;
-
     if (type === "email") {
       return (
-        <div className="relative w-full">
-          {/* Icon on left */}
-          <div className="absolute inset-y-0 left-0 flex items-center pl-4">
-            <Icon className="h-5 w-5 text-black" />
-          </div>
-    
-          <input
-            type={type === "email" ? "email" : "text"}
-            value={value}
-            onChange={(e) => {
-              const inputVal = type === "email"
-                ? e.target.value
-                : e.target.value.replace(/\D/g, "").slice(0, 10);
-              onChange?.(inputVal);
-            }}
-            placeholder={placeholder}
-            className="w-full h-10 pl-12 pr-4 bg-input text-sm border border-border rounded-md"
-          />
-        </div>
-      );
-    
+        <EmailInputField
+          value={value}
+          onChange={(val) => onChange?.(val)}
+          placeholder="Enter your email"
+        />
+      )
+
     } else {
       return (
-        <div className="relative w-full">
-          {/* Icon on left */}
-          <div className="absolute inset-y-0 left-0 flex items-center pl-4">
-            <Icon className="h-5 w-5 text-black" />
-          </div>
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => {
-              const val = e.target.value.replace(/\D/g, "").slice(0, 10)
-              onChange?.(val)
-            }}
-            placeholder={placeholder}
-            className="w-full h-10 pl-12 pr-4 bg-input text-sm border border-border rounded-md"
-          />
-        </div>
+        <PhoneInputField
+          value={value}
+          onChange={(val) => onChange?.(val)}
+          placeholder="Enter your number"
+        />
       )
+
     }
   }
 
@@ -214,14 +190,14 @@ export function OtpSection({
         </p>
         {renderOtpInput()}
         <div className="text-sm font-medium">
-            {canResend ? (
-              <button onClick={handleSendOTP} className="hover:underline text-accent">
-                Resend OTP
-              </button>
-            ) : (
-              <span className="text-text-heading">Resend OTP in 00:{timer.toString().padStart(2, "0")}</span>
-            )}
-          </div>
+          {canResend ? (
+            <button onClick={handleSendOTP} className="hover:underline text-accent">
+              Resend OTP
+            </button>
+          ) : (
+            <span className="text-text-heading">Resend OTP in 00:{timer.toString().padStart(2, "0")}</span>
+          )}
+        </div>
       </div>
     )
   }
