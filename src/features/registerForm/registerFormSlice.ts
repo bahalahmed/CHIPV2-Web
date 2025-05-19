@@ -32,6 +32,9 @@ interface LevelInfo {
   organizationTypeId: string;
   organizationTypeLabel: string;
 
+  organizationId: string;
+  organizationLabel: string;
+
   designationId: string;
   designationLabel: string;
 }
@@ -78,6 +81,9 @@ const initialState: RegisterFormState = {
 
     organizationTypeId: "",
     organizationTypeLabel: "",
+
+    organizationId: "",
+    organizationLabel: "",
 
     designationId: "",
     designationLabel: "",

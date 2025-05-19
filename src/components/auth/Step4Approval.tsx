@@ -96,6 +96,7 @@ const Step4Approval = ({ reviewInfo }: Step4ApprovalProps) => {
                 {renderHeader("Department", 2)}
                 <hr className="border-border" />
                 {renderRow("Type of Organisation", getLabelById(geo.orgTypes, reviewInfo.organizationType))}
+                {renderRow("Name of Organisation", getLabelById(geo.organizations, reviewInfo.organization))}
                 {renderRow("Designation", getLabelById(geo.designations, reviewInfo.designation))}
             </Card>
 

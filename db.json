@@ -351,41 +351,105 @@
       { "id": "DPH-MH", "name": "Director - PH MH", "stateId": "MH" },
       { "id": "DFW-MH", "name": "Director - FW MH", "stateId": "MH" }
     ],
+    "organizations": [
+      { "id": "RJ-MH-1", "name": "Rajasthan Mental Health Institute", "orgTypeId": "DMH" },
+      { "id": "RJ-MH-2", "name": "Jaipur Psychiatric Center", "orgTypeId": "DMH" },
+
+      { "id": "RJ-CH-1", "name": "Rajasthan Child Health Foundation", "orgTypeId": "DCH" },
+      { "id": "RJ-CH-2", "name": "Child Care Specialists Jaipur", "orgTypeId": "DCH" },
+      
+      { "id": "RJ-FW-1", "name": "Rajasthan Family Welfare Department", "orgTypeId": "DFW" },
+      { "id": "RJ-FW-2", "name": "Family Planning Association RJ", "orgTypeId": "DFW" },
+      
+      { "id": "KA-KH-1", "name": "Karnataka Health Services", "orgTypeId": "DKH" },
+      { "id": "KA-KH-2", "name": "Bangalore Medical Institute", "orgTypeId": "DKH" },
+      
+      { "id": "KA-WH-1", "name": "Women's Health Initiative Karnataka", "orgTypeId": "DWH" },
+      { "id": "KA-WH-2", "name": "Maternal Care Specialists Bangalore", "orgTypeId": "DWH" },
+      
+      { "id": "KA-PH-1", "name": "Karnataka Public Health Department", "orgTypeId": "DPH" },
+      { "id": "KA-PH-2", "name": "Preventive Health Services KA", "orgTypeId": "DPH" },
+      
+      { "id": "MH-KH-1", "name": "Maharashtra Health Services", "orgTypeId": "DKH-MH" },
+      { "id": "MH-KH-2", "name": "Mumbai Medical Foundation", "orgTypeId": "DKH-MH" },
+      
+      { "id": "MH-PH-1", "name": "Maharashtra Public Health Department", "orgTypeId": "DPH-MH" },
+      { "id": "MH-PH-2", "name": "Public Health Institute Mumbai", "orgTypeId": "DPH-MH" },
+      
+      { "id": "MH-FW-1", "name": "Maharashtra Family Welfare Center", "orgTypeId": "DFW-MH" },
+      { "id": "MH-FW-2", "name": "Family Planning Services Mumbai", "orgTypeId": "DFW-MH" }
+    ],
     "designations": [
-      { "id": "PDMH", "name": "Project Director - MH", "orgTypeId": "DMH" },
-      { "id": "DDMH", "name": "Deputy Director - MH", "orgTypeId": "DMH" },
-      { "id": "ADMH", "name": "Assistant Director - MH", "orgTypeId": "DMH" },
+      { "id": "PDMH-1", "name": "Project Director - MH", "organizationId": "RJ-MH-1" },
+      { "id": "DDMH-1", "name": "Deputy Director - MH", "organizationId": "RJ-MH-1" },
+      { "id": "ADMH-1", "name": "Assistant Director - MH", "organizationId": "RJ-MH-1" },
       
-      { "id": "PDCH", "name": "Project Director - CH", "orgTypeId": "DCH" },
-      { "id": "DDCH", "name": "Deputy Director - CH", "orgTypeId": "DCH" },
-      { "id": "ADCH", "name": "Assistant Director - CH", "orgTypeId": "DCH" },
+      { "id": "PDMH-2", "name": "Project Director - MH", "organizationId": "RJ-MH-2" },
+      { "id": "DDMH-2", "name": "Deputy Director - MH", "organizationId": "RJ-MH-2" },
+      { "id": "ADMH-2", "name": "Assistant Director - MH", "organizationId": "RJ-MH-2" },
       
-      { "id": "PDFW", "name": "Project Director - FW", "orgTypeId": "DFW" },
-      { "id": "DDFW", "name": "Deputy Director - FW", "orgTypeId": "DFW" },
-      { "id": "ADFW", "name": "Assistant Director - FW", "orgTypeId": "DFW" },
+      { "id": "PDCH-1", "name": "Project Director - CH", "organizationId": "RJ-CH-1" },
+      { "id": "DDCH-1", "name": "Deputy Director - CH", "organizationId": "RJ-CH-1" },
+      { "id": "ADCH-1", "name": "Assistant Director - CH", "organizationId": "RJ-CH-1" },
       
-      { "id": "PDKH", "name": "Project Director - KH", "orgTypeId": "DKH" },
-      { "id": "DDKH", "name": "Deputy Director - KH", "orgTypeId": "DKH" },
-      { "id": "ADKH", "name": "Assistant Director - KH", "orgTypeId": "DKH" },
+      { "id": "PDCH-2", "name": "Project Director - CH", "organizationId": "RJ-CH-2" },
+      { "id": "DDCH-2", "name": "Deputy Director - CH", "organizationId": "RJ-CH-2" },
+      { "id": "ADCH-2", "name": "Assistant Director - CH", "organizationId": "RJ-CH-2" },
       
-      { "id": "PDWH", "name": "Project Director - WH", "orgTypeId": "DWH" },
-      { "id": "DDWH", "name": "Deputy Director - WH", "orgTypeId": "DWH" },
-      { "id": "ADWH", "name": "Assistant Director - WH", "orgTypeId": "DWH" },
+      { "id": "PDFW-1", "name": "Project Director - FW", "organizationId": "RJ-FW-1" },
+      { "id": "DDFW-1", "name": "Deputy Director - FW", "organizationId": "RJ-FW-1" },
+      { "id": "ADFW-1", "name": "Assistant Director - FW", "organizationId": "RJ-FW-1" },
       
-      { "id": "PDPH", "name": "Project Director - PH", "orgTypeId": "DPH" },
-      { "id": "DDPH", "name": "Deputy Director - PH", "orgTypeId": "DPH" },
-      { "id": "ADPH", "name": "Assistant Director - PH", "orgTypeId": "DPH" },
+      { "id": "PDFW-2", "name": "Project Director - FW", "organizationId": "RJ-FW-2" },
+      { "id": "DDFW-2", "name": "Deputy Director - FW", "organizationId": "RJ-FW-2" },
+      { "id": "ADFW-2", "name": "Assistant Director - FW", "organizationId": "RJ-FW-2" },
       
-      { "id": "PDKMH", "name": "Project Director - KH MH", "orgTypeId": "DKH-MH" },
-      { "id": "DDKMH", "name": "Deputy Director - KH MH", "orgTypeId": "DKH-MH" },
-      { "id": "ADKMH", "name": "Assistant Director - KH MH", "orgTypeId": "DKH-MH" },
+      { "id": "PDKH-1", "name": "Project Director - KH", "organizationId": "KA-KH-1" },
+      { "id": "DDKH-1", "name": "Deputy Director - KH", "organizationId": "KA-KH-1" },
+      { "id": "ADKH-1", "name": "Assistant Director - KH", "organizationId": "KA-KH-1" },
       
-      { "id": "PDPMH", "name": "Project Director - PH MH", "orgTypeId": "DPH-MH" },
-      { "id": "DDPMH", "name": "Deputy Director - PH MH", "orgTypeId": "DPH-MH" },
-      { "id": "ADPMH", "name": "Assistant Director - PH MH", "orgTypeId": "DPH-MH" },
+      { "id": "PDKH-2", "name": "Project Director - KH", "organizationId": "KA-KH-2" },
+      { "id": "DDKH-2", "name": "Deputy Director - KH", "organizationId": "KA-KH-2" },
+      { "id": "ADKH-2", "name": "Assistant Director - KH", "organizationId": "KA-KH-2" },
       
-      { "id": "PDFMH", "name": "Project Director - FW MH", "orgTypeId": "DFW-MH" },
-      { "id": "DDFMH", "name": "Deputy Director - FW MH", "orgTypeId": "DFW-MH" },
-      { "id": "ADFMH", "name": "Assistant Director - FW MH", "orgTypeId": "DFW-MH" }
+      { "id": "PDWH-1", "name": "Project Director - WH", "organizationId": "KA-WH-1" },
+      { "id": "DDWH-1", "name": "Deputy Director - WH", "organizationId": "KA-WH-1" },
+      { "id": "ADWH-1", "name": "Assistant Director - WH", "organizationId": "KA-WH-1" },
+      
+      { "id": "PDWH-2", "name": "Project Director - WH", "organizationId": "KA-WH-2" },
+      { "id": "DDWH-2", "name": "Deputy Director - WH", "organizationId": "KA-WH-2" },
+      { "id": "ADWH-2", "name": "Assistant Director - WH", "organizationId": "KA-WH-2" },
+      
+      { "id": "PDPH-1", "name": "Project Director - PH", "organizationId": "KA-PH-1" },
+      { "id": "DDPH-1", "name": "Deputy Director - PH", "organizationId": "KA-PH-1" },
+      { "id": "ADPH-1", "name": "Assistant Director - PH", "organizationId": "KA-PH-1" },
+      
+      { "id": "PDPH-2", "name": "Project Director - PH", "organizationId": "KA-PH-2" },
+      { "id": "DDPH-2", "name": "Deputy Director - PH", "organizationId": "KA-PH-2" },
+      { "id": "ADPH-2", "name": "Assistant Director - PH", "organizationId": "KA-PH-2" },
+      
+      { "id": "PDKMH-1", "name": "Project Director - KH MH", "organizationId": "MH-KH-1" },
+      { "id": "DDKMH-1", "name": "Deputy Director - KH MH", "organizationId": "MH-KH-1" },
+      { "id": "ADKMH-1", "name": "Assistant Director - KH MH", "organizationId": "MH-KH-1" },
+      
+      { "id": "PDKMH-2", "name": "Project Director - KH MH", "organizationId": "MH-KH-2" },
+      { "id": "DDKMH-2", "name": "Deputy Director - KH MH", "organizationId": "MH-KH-2" },
+      { "id": "ADKMH-2", "name": "Assistant Director - KH MH", "organizationId": "MH-KH-2" },
+      
+      { "id": "PDPMH-1", "name": "Project Director - PH MH", "organizationId": "MH-PH-1" },
+      { "id": "DDPMH-1", "name": "Deputy Director - PH MH", "organizationId": "MH-PH-1" },
+      { "id": "ADPMH-1", "name": "Assistant Director - PH MH", "organizationId": "MH-PH-1" },
+      
+      { "id": "PDPMH-2", "name": "Project Director - PH MH", "organizationId": "MH-PH-2" },
+      { "id": "DDPMH-2", "name": "Deputy Director - PH MH", "organizationId": "MH-PH-2" },
+      { "id": "ADPMH-2", "name": "Assistant Director - PH MH", "organizationId": "MH-PH-2" },
+      
+      { "id": "PDFMH-1", "name": "Project Director - FW MH", "organizationId": "MH-FW-1" },
+      { "id": "DDFMH-1", "name": "Deputy Director - FW MH", "organizationId": "MH-FW-1" },
+      { "id": "ADFMH-1", "name": "Assistant Director - FW MH", "organizationId": "MH-FW-1" },
+      
+      { "id": "PDFMH-2", "name": "Project Director - FW MH", "organizationId": "MH-FW-2" },
+      { "id": "DDFMH-2", "name": "Deputy Director - FW MH", "organizationId": "MH-FW-2" },
+      { "id": "ADFMH-2", "name": "Assistant Director - FW MH", "organizationId": "MH-FW-2" }
     ]
   }

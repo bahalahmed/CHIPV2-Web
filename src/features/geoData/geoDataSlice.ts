@@ -9,6 +9,7 @@ interface GeoState {
   blocks: any[]
   sectors: any[]
   orgTypes: any[]
+  organizations: any[]
   designations: any[]
   loading: boolean
   error: string | null
@@ -21,6 +22,7 @@ const initialState: GeoState = {
   blocks: [],
   sectors: [],
   orgTypes: [],
+  organizations: [],
   designations: [],
   loading: false,
   error: null
@@ -37,10 +39,15 @@ export const loadOrgTypesByState = createAsyncThunk(
     async (stateId: string) => (await geoApi.fetchOrgTypesByState(stateId)).data
   )
   
-  export const loadDesignations = createAsyncThunk(
+  export const loadOrganizations = createAsyncThunk(
+    "geo/loadOrganizations",
+    async (orgTypeId: string) => (await geoApi.fetchOrganizationsByOrgType(orgTypeId)).data
+  )
+  
+export const loadDesignations = createAsyncThunk(
     "geo/loadDesignations",
-    async ({ orgTypeId }: { orgTypeId: string }) => {
-      return (await geoApi.fetchDesignationsByOrgType(orgTypeId)).data
+    async ({ organizationId }: { organizationId: string }) => {
+      return (await geoApi.fetchDesignationsByOrganization(organizationId)).data
     }
   )
   
@@ -52,12 +59,13 @@ const geoDataSlice = createSlice({
   reducers: {
     resetGeoData: (state, action: PayloadAction<string>) => {
       const resetMap: Record<string, (keyof GeoState)[]> = {
-        state: ["divisions", "districts", "blocks", "sectors", "orgTypes", "designations"],
+        state: ["divisions", "districts", "blocks", "sectors", "orgTypes", "organizations", "designations"],
         division: ["districts", "blocks", "sectors"],
         district: ["blocks","sectors"],
         block: ["sectors"],
         sector: [],
-        organizationType: ["designations"]
+        organizationType: ["organizations", "designations"],
+        organization: ["designations"]
       }
 
       const keysToReset = resetMap[action.payload] || []
@@ -93,6 +101,10 @@ const geoDataSlice = createSlice({
         state.loading = false
       })
       
+      .addCase(loadOrganizations.fulfilled, (state, action) => {
+        state.organizations = action.payload
+        state.loading = false
+      })
       .addCase(loadDesignations.fulfilled, (state, action) => {
         state.designations = action.payload
         state.loading = false

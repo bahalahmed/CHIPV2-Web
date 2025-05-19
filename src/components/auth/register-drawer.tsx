@@ -41,9 +41,11 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
         ...levelInfo,
         ...personalInfo,
         organizationType: levelInfo.organizationTypeId || "",
+        organization: levelInfo.organizationId || "",
         designation: levelInfo.designationId || "",
 
         organizationTypeLabel: levelInfo.organizationTypeLabel || "",
+        organizationLabel: levelInfo.organizationLabel || "",
         designationLabel: levelInfo.designationLabel || "",
       };
   
@@ -90,6 +92,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
     ...levelInfo,
     ...personalInfo,
     organizationType: levelInfo.organizationTypeId || "",
+    organization: levelInfo.organizationId || "",
     designation: levelInfo.designationId || "",
   }), [contactInfo, levelInfo, personalInfo])
 

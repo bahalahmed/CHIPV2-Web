@@ -20,8 +20,11 @@ export const fetchSectorsByBlock = (blockId: string) =>
 export const fetchOrgTypesByState = (stateId: string) =>
     axios.get(`${BASE_URL}/organizationTypes`, { params: { stateId } })
   
-  export const fetchDesignationsByOrgType = (orgTypeId: string) =>
-    axios.get(`${BASE_URL}/designations`, { params: { orgTypeId } })
+  export const fetchOrganizationsByOrgType = (orgTypeId: string) =>
+    axios.get(`${BASE_URL}/organizations`, { params: { orgTypeId } })
+
+export const fetchDesignationsByOrganization = (organizationId: string) =>
+    axios.get(`${BASE_URL}/designations`, { params: { organizationId } })
   
 
 // export const fetchDesignationsByOrgAndGeo = (
