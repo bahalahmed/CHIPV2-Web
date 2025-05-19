@@ -98,7 +98,7 @@ const Step2UserDetails = () => {
 
     return (
         <div className="space-y-6">
-            <Card className="p-3 rounded-md bg-muted">
+            <Card className="p-6 rounded-md bg-muted">
                 <h3 className="text-lg font-medium">Select Your Level</h3>
                 <hr className="border-border" />
                

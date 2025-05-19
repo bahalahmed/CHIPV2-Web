@@ -40,9 +40,11 @@ export function ApprovalDialog({ onSubmit, reviewInfo }: ApprovalDialogProps)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">Send for Approval</Button>
-      </DialogTrigger>
+         <DialogTrigger asChild>
+      <Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground text-sm sm:text-base py-2 px-3 sm:px-4 h-auto">
+        Send for Approval
+      </Button>
+    </DialogTrigger>
       <DialogContent className="sm:max-w-md text-center">
         {!submitted ? (
           <>

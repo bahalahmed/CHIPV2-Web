@@ -1,8 +1,6 @@
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
 import React from "react"
 import { useAppDispatch } from '@/hooks/reduxHooks'
 
@@ -23,10 +21,10 @@ interface ReviewInfoProps {
     block: string
     sector: string
     organizationType: string
+    organization: string
     designation: string
     firstName: string
     lastName?: string
-    password: string
 }
 
 interface Step4ApprovalProps {
@@ -34,7 +32,6 @@ interface Step4ApprovalProps {
 }
 
 const Step4Approval = ({ reviewInfo }: Step4ApprovalProps) => {
-    const [showPassword, setShowPassword] = useState(false)
     const dispatch = useAppDispatch()
 
     const geo = useAppSelector((state: RootState) => state.geoData)
@@ -108,38 +105,7 @@ const Step4Approval = ({ reviewInfo }: Step4ApprovalProps) => {
                 {reviewInfo.lastName && renderRow("Last Name", reviewInfo.lastName)}
             </Card>
 
-            <Card className="bg-muted p-6 rounded-md">
-                <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Password</h3>
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowPassword((prev) => !prev)}
-                            className="text-sm text-primary flex items-center gap-1 hover:bg-transparent hover:text-primary"
-                        >
-                            {showPassword ? (
-                                <>
-                                    <EyeOff className="w-4 h-4" />
-                                    Hide
-                                </>
-                            ) : (
-                                <>
-                                    <Eye className="w-4 h-4" />
-                                    Show
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                </div>
-                <hr className="border-border" />
-                <div className="flex justify-between items-center">
-                    <Label className="text-sm text-muted-foreground">Password</Label>
-                    <span className="text-primary font-medium text-sm">
-                        {showPassword ? reviewInfo.password : "********"}
-                    </span>
-                </div>
-            </Card>
+
         </div>
     )
 }
