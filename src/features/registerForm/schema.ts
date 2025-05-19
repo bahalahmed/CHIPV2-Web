@@ -22,8 +22,7 @@ export const RegisterFormSchema = z
     designationId: z.string().min(1),
 
     firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    gender: z.string().min(1, "Gender is required"),
+    lastName: z.string().optional(),
     password: z
       .string()
       .regex(

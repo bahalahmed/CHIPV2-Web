@@ -38,8 +38,8 @@ interface LevelInfo {
 
 interface PersonalInfo {
   designation: string;
-  fullName: string;
-  gender: string;
+  firstName: string;
+  lastName?: string;
   password: string;
   confirmPassword: string;
 }
@@ -89,8 +89,8 @@ const initialState: RegisterFormState = {
   },
 
   personalInfo: {
-    fullName: "",
-    gender: "",
+    firstName: "",
+    lastName: "",
     password: "",
     confirmPassword: "",
     designation: "",
@@ -185,8 +185,8 @@ const registerFormSlice = createSlice({
       // Personal Info
       state.personalInfo = {
         ...state.personalInfo,
-        fullName: data.fullName || "",
-        gender: data.gender || "",
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
         password: data.password || "",
         confirmPassword: data.password || "", // 👈 prefill both
         designation: data.designation || "",

@@ -33,6 +33,7 @@ export const login = createAsyncThunk(
   ) => {
     try {
       console.log("logging in with", username, password);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const res = await loginUser(username, password);
       
 
@@ -55,7 +56,7 @@ export const login = createAsyncThunk(
 
 // ✅ Thunk: logout
 export const logout = createAsyncThunk('auth/logout', async () => {
-  await logoutUser();
+  logoutUser();
 });
 
 const authSlice = createSlice({
@@ -101,3 +102,7 @@ const authSlice = createSlice({
 
 export const { resetAuth, setError } = authSlice.actions;
 export default authSlice.reducer;
+function logoutUser() {
+  throw new Error('Function not implemented.');
+}
+
