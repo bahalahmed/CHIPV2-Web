@@ -24,8 +24,8 @@ interface ReviewInfoProps {
     sector: string
     organizationType: string
     designation: string
-    fullName: string
-    gender: string
+    firstName: string
+    lastName?: string
     password: string
 }
 
@@ -103,8 +103,8 @@ const Step4Approval = ({ reviewInfo }: Step4ApprovalProps) => {
             <Card className="bg-muted p-6 rounded-md">
                 {renderHeader("Personal Information", 3)}
                 <hr className="border-border" />
-                {renderRow("Full Name", reviewInfo.fullName)}
-                {renderRow("Gender", reviewInfo.gender)}
+                {renderRow("First Name", reviewInfo.firstName)}
+                {reviewInfo.lastName && renderRow("Last Name", reviewInfo.lastName)}
             </Card>
 
             <Card className="bg-muted p-6 rounded-md">

@@ -13,7 +13,7 @@ import PasswordInputField from "../shared/PasswordInputField"
 
 const Step3PersonalInfoComponent = () => {
   const dispatch = useDispatch()
-  const { fullName, gender, password, confirmPassword } = useSelector(
+  const { firstName, lastName, password, confirmPassword } = useSelector(
     (state: RootState) => state.registerForm.personalInfo,
   )
 
@@ -27,34 +27,27 @@ const Step3PersonalInfoComponent = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label className="block mb-2 text-sm text-muted-foreground">Full Name</Label>
+            <Label className="block mb-2 text-sm text-muted-foreground">First Name</Label>
             <Input
-              value={fullName}
-              onChange={(e) => dispatch(updatePersonalInfo({ fullName: e.target.value }))}
+              value={firstName}
+              onChange={(e) => dispatch(updatePersonalInfo({ firstName: e.target.value }))}
               className="h-10 px-4 text-sm border border-border rounded-md bg-input"
-              placeholder="Enter your full name"
+              placeholder="Enter your first name"
+              required
             />
           </div>
 
           <div>
-            <Label className="block mb-2 text-sm text-muted-foreground">Select Your Gender</Label>
-            <div className="flex gap-2">
-              {["Male", "Female", "Other"].map((option) => (
-                <Button
-                  key={option}
-                  variant={gender === option ? "default" : "outline"}
-                  onClick={() => dispatch(updatePersonalInfo({ gender: option }))}
-                  className={
-                    gender === option
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "bg-background text-muted-foreground border border-border hover:bg-secondary"
-                  }
-                >
-                  {option}
-                </Button>
-              ))}
-            </div>
+            <Label className="block mb-2 text-sm text-muted-foreground">Last Name <span className="text-xs text-muted-foreground">(Optional)</span></Label>
+            <Input
+              value={lastName || ''}
+              onChange={(e) => dispatch(updatePersonalInfo({ lastName: e.target.value }))}
+              className="h-10 px-4 text-sm border border-border rounded-md bg-input"
+              placeholder="Enter your last name"
+            />
           </div>
+
+
         </div>
       </Card>
 
