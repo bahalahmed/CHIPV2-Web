@@ -2,13 +2,18 @@
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import React, { Suspense } from "react"
+import React, { Suspense, useMemo } from "react"
+import { useEffect } from "react"
+import { populateFromLocalStorage } from "@/features/registerForm/registerFormSlice"
+
+
 
 // Lazy-loaded step components
 const Step1Verification = React.lazy(() => import("./Step1Verification"))
 const Step2UserDetails = React.lazy(() => import("./Step2UserDetails"))
 const Step3PersonalInfo = React.lazy(() => import("./Step3PersonalInfo"))
 const Step4Approval = React.lazy(() => import("./Step4Approval"))
+
 
 import { StepProgress } from "@/components/auth/StepProgress"
 
@@ -29,17 +34,67 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
   const { step, contactInfo, levelInfo, personalInfo } = useSelector((state: RootState) => state.registerForm)
 
   const handleNext = () => {
-    if (step < 4) dispatch(setStep(step + 1))
-  }
+    if (step < 4) {
+     
+      const reviewInfo = {
+        ...contactInfo,
+        ...levelInfo,
+        ...personalInfo,
+        organizationType: levelInfo.organizationTypeId || "",
+        designation: levelInfo.designationId || "",
+
+        organizationTypeLabel: levelInfo.organizationTypeLabel || "",
+        designationLabel: levelInfo.designationLabel || "",
+      };
+  
+      localStorage.setItem("userRegistrationData", JSON.stringify(reviewInfo));
+  
+      dispatch(setStep(step + 1));
+    }
+  };
+  
 
   const handleBack = () => {
     if (step > 1) dispatch(setStep(step - 1))
   }
-
   const handleApprovalSubmit = () => {
-    dispatch(resetForm())
-    onOpenChange(false)
-  }
+    console.log("✅ Submitting registration:", reviewInfo);
+
+
+    localStorage.setItem("userRegistrationData", JSON.stringify(reviewInfo));
+
+
+    setTimeout(() => {
+      dispatch(resetForm());
+      localStorage.removeItem("userRegistrationData");
+      console.log("🧼 Form reset completed. LocalStorage cleared.");
+      onOpenChange(false); // Close drawer
+    }, 300);
+  };
+
+
+
+  useEffect(() => {
+    const savedData = localStorage.getItem("userRegistrationData");
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      dispatch(populateFromLocalStorage(parsed));
+    }
+  }, [dispatch]);
+
+
+
+
+  const reviewInfo = useMemo(() => ({
+    ...contactInfo,
+    ...levelInfo,
+    ...personalInfo,
+    organizationType: levelInfo.organizationTypeId || "",
+    designation: levelInfo.designationId || "",
+  }), [contactInfo, levelInfo, personalInfo])
+
+
+
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -72,15 +127,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
             {step === 2 && <Step2UserDetails />}
             {step === 3 && <Step3PersonalInfo />}
             {step === 4 && (
-              <Step4Approval
-                reviewInfo={{
-                  ...contactInfo,
-                  ...levelInfo,
-                  ...personalInfo,
-                  organizationType: levelInfo.organizationTypeId || "",
-                  designation: levelInfo.designationId || "",
-                }}
-              />
+              <Step4Approval reviewInfo={reviewInfo} />
             )}
           </Suspense>
         </div>
@@ -108,7 +155,12 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
             </Button>
           ) : (
             <div className="w-full sm:w-auto order-1 sm:order-2">
-              <ApprovalDialog onSubmit={handleApprovalSubmit} />
+              <ApprovalDialog
+                reviewInfo={Object.fromEntries(
+                  Object.entries(reviewInfo).map(([k, v]) => [k, String(v)])
+                )}
+                onSubmit={handleApprovalSubmit}
+              />
             </div>
           )}
         </div>

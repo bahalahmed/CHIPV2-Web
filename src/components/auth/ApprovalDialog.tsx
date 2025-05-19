@@ -1,7 +1,5 @@
-"use client"
-
-// src/components/auth/ApprovalDialog.tsx
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   Dialog,
   DialogContent,
@@ -16,20 +14,28 @@ import { AlertTriangle } from "lucide-react"
 
 import { toast } from "sonner"
 interface ApprovalDialogProps {
+  reviewInfo: Record<string, string>
   onSubmit: () => void
 }
 
-export function ApprovalDialog({ onSubmit }: ApprovalDialogProps) {
+export function ApprovalDialog({ onSubmit, reviewInfo }: ApprovalDialogProps)
+{
   const [open, setOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const navigate = useNavigate()
 
   const handleConfirm = () => {
     setSubmitted(true)
     toast.success("Sent for Approval ✅")
-    onSubmit() // parent can close drawer or send data
-    setTimeout(() => {
-      setOpen(false)
-    }, 1000)
+
+    // 🟡 Save to localStorage
+
+    localStorage.setItem("userRegistrationData", JSON.stringify(reviewInfo))
+    // 🟢 Placeholder for future API call
+    // await submitUserToAPI(reviewInfo)
+
+    onSubmit?.()
+    navigate("/user-details")
   }
 
   return (

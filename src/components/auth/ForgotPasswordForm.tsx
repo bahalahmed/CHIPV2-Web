@@ -17,7 +17,13 @@ export default function ForgotPassword({ onBack }: ForgotPasswordFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!email) {
+          toast.error("Please enter a valid email address")
+          return
+        }
     setIsLoading(true)
+
+    
 
     await new Promise((resolve) => setTimeout(resolve, 1000))
     setIsSubmitted(true)

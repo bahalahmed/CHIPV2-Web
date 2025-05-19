@@ -1,5 +1,5 @@
 import AppRoutes from "./routes";
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/homepage/theme-provider"
 
 
 

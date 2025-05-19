@@ -36,8 +36,6 @@ interface LevelInfo {
   designationLabel: string;
 }
 
-
-
 interface PersonalInfo {
   designation: string;
   fullName: string;
@@ -87,15 +85,15 @@ const initialState: RegisterFormState = {
     divisionLabel: "",
     districtLabel: "",
     blockLabel: "",
-    sectorLabel: ""
+    sectorLabel: "",
   },
-  
+
   personalInfo: {
     fullName: "",
     gender: "",
     password: "",
     confirmPassword: "",
-    designation: ""
+    designation: "",
   },
 };
 
@@ -153,6 +151,47 @@ const registerFormSlice = createSlice({
     updatePersonalInfo(state, action: PayloadAction<Partial<PersonalInfo>>) {
       state.personalInfo = { ...state.personalInfo, ...action.payload };
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    populateFromLocalStorage(state, action: PayloadAction<any>) {
+      const data = action.payload;
+
+      // Contact Info
+      state.contactInfo = {
+        ...state.contactInfo,
+        mobileNumber: data.mobileNumber || "",
+        whatsappNumber: data.whatsappNumber || "",
+        email: data.email || "",
+        mobileVerified: data.mobileVerified || false,
+        whatsappVerified: data.whatsappVerified || false,
+        emailVerified: data.emailVerified || false,
+      };
+
+      // Level Info
+      state.levelInfo = {
+        ...state.levelInfo,
+        selectedLevel: data.selectedLevel || "",
+        state: data.state || "",
+        division: data.division || "",
+        district: data.district || "",
+        block: data.block || "",
+        sector: data.sector || "",
+        organizationTypeId: data.organizationType || "",
+        designationId: data.designation || "",
+
+        organizationTypeLabel: data.organizationTypeLabel || "",
+        designationLabel: data.designationLabel || "",
+      };
+
+      // Personal Info
+      state.personalInfo = {
+        ...state.personalInfo,
+        fullName: data.fullName || "",
+        gender: data.gender || "",
+        password: data.password || "",
+        confirmPassword: data.password || "", // 👈 prefill both
+        designation: data.designation || "",
+      };
+    },
   },
 });
 
@@ -170,9 +209,9 @@ export const {
   setMobileOtp,
   setWhatsappOtp,
   setEmailOtp,
-
   updateLevelInfo,
   updatePersonalInfo,
+  populateFromLocalStorage,
 } = registerFormSlice.actions;
 
 export default registerFormSlice.reducer;

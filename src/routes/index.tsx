@@ -1,7 +1,8 @@
 import HomePage from "@/pages/HomePage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import DashboardPage from "@/pages/DashboardPage";
-import ForgotPassword from "@/components/auth/ForgotPasswordForm.tsx";
+import UserDetailsPage from "@/components/userregistration/user-details";
+import UserEditPage from "@/components/userregistration/user-edit";
 
 
 
@@ -9,10 +10,10 @@ const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/forgot-password" element={<ForgotPassword onBack={function (): void {
-        throw new Error("Function not implemented.");
-      } }/>} />
+        <Route path="/dashboard" element={<DashboardPage/>} />
+        <Route path="/user-details" element={<UserDetailsPage />} />
+        <Route path="/user-edit" element={<UserEditPage />} /> 
+ 
     </Routes>
   </BrowserRouter>
 );

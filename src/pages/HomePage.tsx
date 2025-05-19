@@ -1,7 +1,7 @@
-import { Footer } from "@/components/footer"
-import { Header } from "@/components/header"
+import { Footer } from "@/components/homepage/footer"
+import { Header } from "@/components/homepage/header"
 import LoginWrapper from "@/components/auth/LoginWrapper"
-import { MapSection } from "@/components/map-section"
+import { MapSection } from "@/components/homepage/map-section"
 
 export default function HomePage() {
   return (
