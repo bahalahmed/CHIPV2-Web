@@ -1,23 +1,79 @@
-import { Shield, User, ThumbsUp } from "lucide-react";
+// src/components/StepProgress.tsx
+import React from 'react';
 
 interface StepProgressProps {
   currentStep: number;
 }
 
-const steps = [
-  { step: 1, label: "Verification", icon: <Shield className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5" /> },
-  { step: 2, label: "User Details", icon: <User className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5" /> },
-  { step: 3, label: "Personal Info", icon: <User className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5" /> },
-  { step: 4, label: "Approval", icon: <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5" /> },
+interface Step {
+  step: number;
+  label: string;
+  iconType: string;
+}
+
+const steps: Step[] = [
+  { step: 1, label: "Verification", iconType: "verification" },
+  { step: 2, label: "User Details", iconType: "geo" },
+  { step: 3, label: "Personal Info", iconType: "pi" },
+  { step: 4, label: "Approval", iconType: "approval" },
 ];
 
-export const StepProgress = ({ currentStep }: StepProgressProps) => {
+export const StepProgress: React.FC<StepProgressProps> = ({ currentStep }) => {
+  // Function to get the appropriate icon based on step status and type
+  const getStepIcon = (stepNumber: number, iconType: string): string => {
+    if (currentStep > stepNumber) {
+      
+      switch (iconType) {
+        case "verification":
+          return "src/assets/icons/verification2.svg";
+        case "geo":
+          return "src/assets/icons/geo3.svg";
+        case "pi":
+          return "src/assets/icons/pi3.svg";
+        case "approval":
+          return "src/icons/approval2.svg";
+        default:
+          return "";
+      }
+    } else if (currentStep === stepNumber) {
+      
+      switch (iconType) {
+        case "verification":
+          return "src/assets/icons/verification1.svg";
+        case "geo":
+          return "src/assets/icons/geo2.svg";
+        case "pi":
+          return "src/assets/icons/pi2.svg";
+        case "approval":
+          return "src/assets/icons/approval2.svg";
+        default:
+          return "";
+      }
+    } else {
+    
+      switch (iconType) {
+        case "verification":
+          
+          return "src/assets/icons/geo1.svg";
+        case "geo":
+          return "src/assets/icons/geo1.svg";
+        case "pi":
+          return "src/assets/icons/pi1.svg";
+        case "approval":
+          return "src/assets/icons/approval1.svg";
+        default:
+          return "";
+      }
+    }
+  };
+
   return (
     <div className="flex items-center justify-between px-2 sm:px-4 md:px-6 lg:px-0 mb-4">
       {steps.map((item, index) => {
         const isCompleted = currentStep > item.step;
         const isCurrent = currentStep === item.step;
         const isLast = index === steps.length - 1;
+        const iconSrc = getStepIcon(item.step, item.iconType);
 
         return (
           <div key={item.step} className="flex flex-col items-center flex-1 relative">
@@ -27,46 +83,51 @@ export const StepProgress = ({ currentStep }: StepProgressProps) => {
                 <div className="h-0.5 w-full bg-secondary relative">
                   <div
                     className={`h-full absolute top-0 left-0 transition-all duration-500 ${
-                      currentStep > item.step
-                        ? "w-full bg-gradient-to-r from-primary to-primary"
-                        : "w-0"
+                      currentStep > item.step ? "w-full bg-gradient-to-r from-primary to-primary" : "w-0"
                     }`}
                   />
                 </div>
               </div>
             )}
 
-            {/* Step Circle */}
+            {/* Step Circle with Icon */}
             <div className="z-10">
               {isCompleted ? (
                 <div className="bg-[#3D8C40] w-9 h-9 rounded-full flex items-center justify-center text-background">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+                  <img
+                    src={iconSrc || "/placeholder.svg"}
+                    alt={`${item.label} completed`}
+                    width={39}
+                    height={38}
+                    className="w-9 h-9"
+                  />
                 </div>
               ) : isCurrent ? (
                 <div className="bg-primary w-9 h-9 rounded-full flex items-center justify-center text-background shadow-md">
-                  {item.icon}
+                  <img
+                    src={iconSrc || "/placeholder.svg"}
+                    alt={`${item.label} active`}
+                    width={39}
+                    height={38}
+                    className="w-9 h-9"
+                  />
                 </div>
               ) : (
                 <div className="border-2 border-accent text-accent w-9 h-9 rounded-full flex items-center justify-center bg-background">
-                  {item.icon}
+                  <img
+                    src={iconSrc || "/placeholder.svg"}
+                    alt={`${item.label} inactive`}
+                    width={39}
+                    height={38}
+                    className="w-9 h-9"
+                  />
                 </div>
               )}
             </div>
 
             {/* Step Label */}
             <span
-              className={`mt-1 text-xs sm:text-sm font-medium ${
-                isCurrent ? "text-primary" : "text-muted-foreground"
-              }`}
+              className={`mt-1 text-xs sm:text-sm font-medium ${isCurrent ? "text-primary" : "text-muted-foreground"}`}
             >
               {item.label}
             </span>
