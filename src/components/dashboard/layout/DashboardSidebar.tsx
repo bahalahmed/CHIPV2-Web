@@ -40,8 +40,8 @@ export function DashboardSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b border-gray-200 py-4">
         <div className="flex flex-col px-4">
-          <div className="font-bold text-xl text-[#404040]">CHIP</div>
-          <div className="text-[#ff6e32] text-sm">Dashboard</div>
+          <div className="font-bold text-xl text-text-gray">CHIP</div>
+          <div className="text-accent text-sm">Dashboard</div>
         </div>
       </SidebarHeader>
 
@@ -79,7 +79,7 @@ export function DashboardSidebar() {
                   <SidebarMenuSubButton asChild isActive={isActive("/district")}>
                     <Link to="/district" className="flex justify-between">
                       <span>District</span>
-                      <span className="ml-auto bg-[#ff6e32] text-white text-xs rounded-full px-1.5 py-0.5">3</span>
+                      <span className="ml-auto bg-accent text-white text-xs rounded-full px-1.5 py-0.5">3</span>
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
@@ -123,7 +123,7 @@ export function DashboardSidebar() {
                   <SidebarMenuSubButton asChild isActive={isActive("/sub-district-hospital")}>
                     <Link to="/sub-district-hospital" className="flex justify-between">
                       <span>Sub-District Hospital</span>
-                      <span className="ml-auto bg-[#ff6e32] text-white text-xs rounded-full px-1.5 py-0.5">2</span>
+                      <span className="ml-auto bg-accent text-white text-xs rounded-full px-1.5 py-0.5">2</span>
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
@@ -167,7 +167,7 @@ export function DashboardSidebar() {
                   <SidebarMenuSubButton asChild isActive={isActive("/dashboard-users")}>
                     <Link to="/dashboard-users" className="flex justify-between">
                       <span>Dashboard Users</span>
-                      <span className="ml-auto bg-[#ff6e32] text-white text-xs rounded-full px-1.5 py-0.5">200</span>
+                      <span className="ml-auto bg-accent text-white text-xs rounded-full px-1.5 py-0.5">200</span>
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>

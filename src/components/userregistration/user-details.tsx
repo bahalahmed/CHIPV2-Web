@@ -23,7 +23,7 @@ export default function UserDetailsPage() {
   const renderRow = (label: string, value: string) => (
     <div className="flex">
       <span className="w-1/3 text-gray-500">{label}:</span>
-      <span className="w-2/3 font-medium text-[#183966]">{value || "-"}</span>
+      <span className="w-2/3 font-medium text-primary">{value || "-"}</span>
     </div>
   )
 
@@ -75,17 +75,17 @@ export default function UserDetailsPage() {
             <div className="bg-red-50 border border-red-100 rounded-lg p-6 text-center">
               <h3 className="text-xl font-semibold text-red-600 mb-1">Approval pending</h3>
               <p className="text-gray-700 mb-2">
-                Request Id: <span className="text-[#183966] font-semibold">#KB-APP-{Date.now()}</span>
+                Request Id: <span className="text-primary font-semibold">#KB-APP-{Date.now()}</span>
               </p>
               <p className="text-gray-600 mb-4">
                 Request for approval has been sent to higher authorities. Kindly wait for the approval.
                 After approval you will be able to log in to your dashboard.
               </p>
-              <a href="#" className="text-[#183966] hover:underline font-medium">
+              <a href="#" className="text-primary hover:underline font-medium">
                 Contact Your Admin
               </a>
               <div className="mt-4">
-                <Button className="bg-[#183966] hover:bg-[#183966]/90" onClick={handleBackToLogin}>
+                <Button className="bg-primary hover:bg-primary/90" onClick={handleBackToLogin}>
                   Back to Login
                 </Button>
               </div>

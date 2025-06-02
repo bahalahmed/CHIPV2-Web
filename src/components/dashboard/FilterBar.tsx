@@ -80,7 +80,7 @@ export function FilterBar() {
       </div>
 
       <div className="flex justify-end mt-4">
-        <Button className="bg-[#1e3a8a] hover:bg-[#1a357d] text-white">Apply</Button>
+        <Button className="bg-primary hover:bg-primary/90 text-white">Apply</Button>
       </div>
     </div>
   )

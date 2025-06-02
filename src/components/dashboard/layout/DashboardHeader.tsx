@@ -13,7 +13,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 
 export function DashboardHeader() {
   return (
-    <header className="bg-[#1e3a8a] text-white py-2 px-4 flex items-center justify-between">
+    <header className="bg-primary text-white py-2 px-4 flex items-center justify-between">
       <div className="flex items-center">
         <SidebarTrigger className="mr-2 text-white" />
         <div className="flex items-center">
@@ -34,13 +34,13 @@ export function DashboardHeader() {
           <div className="text-sm">Community Health Integrated Platform - CHIP 2</div>
         </div>
 
-        <Button variant="ghost" size="icon" className="mr-2 text-white hover:bg-[#2a4494]">
+        <Button variant="ghost" size="icon" className="mr-2 text-white hover:bg-primary/80">
           <Bell className="h-5 w-5" />
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-[#2a4494]">
+            <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-primary/80">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="https://github.com/shadcn.png" alt="John Wick" />
                 <AvatarFallback>JW</AvatarFallback>

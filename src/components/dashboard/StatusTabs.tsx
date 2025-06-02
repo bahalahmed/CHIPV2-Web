@@ -17,7 +17,7 @@ export function StatusTabs({ selectedStatus, onStatusChange }: StatusTabsProps) 
           <TabsTrigger
             key={status}
             value={status}
-            className="data-[state=active]:bg-[#1e3a8a] data-[state=active]:text-white"
+            className="data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             {status}
           </TabsTrigger>

@@ -81,14 +81,14 @@ export default function UserEditPage() {
                     id="fullName"
                     value={userData.fullName}
                     onChange={(e) => handleChange("fullName", e.target.value)}
-                    className="bg-[#f6f6f8] border-none"
+                    className="bg-input border-none"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
                   <Select value={userData.gender} onValueChange={(val) => handleChange("gender", val)}>
-                    <SelectTrigger className="bg-[#f6f6f8] border-none">
+                    <SelectTrigger className="bg-input border-none">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
@@ -109,7 +109,7 @@ export default function UserEditPage() {
                 <div className="space-y-2">
                   <Label>Department</Label>
                   <Select value={userData.department} onValueChange={(val) => handleChange("department", val)}>
-                    <SelectTrigger className="bg-[#f6f6f8] border-none">
+                    <SelectTrigger className="bg-input border-none">
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                     <SelectContent>
@@ -124,7 +124,7 @@ export default function UserEditPage() {
                 <div className="space-y-2">
                   <Label>Designation</Label>
                   <Select value={userData.designation} onValueChange={(val) => handleChange("designation", val)}>
-                    <SelectTrigger className="bg-[#f6f6f8] border-none">
+                    <SelectTrigger className="bg-input border-none">
                       <SelectValue placeholder="Select designation" />
                     </SelectTrigger>
                     <SelectContent>
@@ -139,7 +139,7 @@ export default function UserEditPage() {
                 <div className="space-y-2">
                   <Label>Programs/Cell</Label>
                   <Select value={userData.programsCell} onValueChange={(val) => handleChange("programsCell", val)}>
-                    <SelectTrigger className="bg-[#f6f6f8] border-none">
+                    <SelectTrigger className="bg-input border-none">
                       <SelectValue placeholder="Select program" />
                     </SelectTrigger>
                     <SelectContent>
@@ -154,7 +154,7 @@ export default function UserEditPage() {
                 <div className="space-y-2">
                   <Label>Level</Label>
                   <Select value={userData.level} onValueChange={(val) => handleChange("level", val)}>
-                    <SelectTrigger className="bg-[#f6f6f8] border-none">
+                    <SelectTrigger className="bg-input border-none">
                       <SelectValue placeholder="Select level" />
                     </SelectTrigger>
                     <SelectContent>
@@ -169,7 +169,7 @@ export default function UserEditPage() {
                 <div className="space-y-2">
                   <Label>State Name</Label>
                   <Select value={userData.stateName} onValueChange={(val) => handleChange("stateName", val)}>
-                    <SelectTrigger className="bg-[#f6f6f8] border-none">
+                    <SelectTrigger className="bg-input border-none">
                       <SelectValue placeholder="Select state" />
                     </SelectTrigger>
                     <SelectContent>
@@ -184,7 +184,7 @@ export default function UserEditPage() {
                 <div className="space-y-2">
                   <Label>Division Name</Label>
                   <Select value={userData.divisionName} onValueChange={(val) => handleChange("divisionName", val)}>
-                    <SelectTrigger className="bg-[#f6f6f8] border-none">
+                    <SelectTrigger className="bg-input border-none">
                       <SelectValue placeholder="Select division" />
                     </SelectTrigger>
                     <SelectContent>
@@ -199,7 +199,7 @@ export default function UserEditPage() {
                 <div className="space-y-2">
                   <Label>District Name</Label>
                   <Select value={userData.districtName} onValueChange={(val) => handleChange("districtName", val)}>
-                    <SelectTrigger className="bg-[#f6f6f8] border-none">
+                    <SelectTrigger className="bg-input border-none">
                       <SelectValue placeholder="Select district" />
                     </SelectTrigger>
                     <SelectContent>
@@ -214,7 +214,7 @@ export default function UserEditPage() {
                 <div className="space-y-2">
                   <Label>Block Name</Label>
                   <Select value={userData.blockName} onValueChange={(val) => handleChange("blockName", val)}>
-                    <SelectTrigger className="bg-[#f6f6f8] border-none">
+                    <SelectTrigger className="bg-input border-none">
                       <SelectValue placeholder="Select block" />
                     </SelectTrigger>
                     <SelectContent>
@@ -232,7 +232,7 @@ export default function UserEditPage() {
                     id="sectorName"
                     value={userData.sectorName}
                     onChange={(e) => handleChange("sectorName", e.target.value)}
-                    className="bg-[#f6f6f8] border-none"
+                    className="bg-input border-none"
                   />
                 </div>
               </div>
@@ -243,7 +243,7 @@ export default function UserEditPage() {
               <Button type="button" variant="outline" onClick={handleCancel} className="border-gray-300">
                 Cancel
               </Button>
-              <Button type="submit" className="bg-[#183966] hover:bg-[#183966]/90">
+              <Button type="submit" className="bg-primary hover:bg-primary/90">
                 Save Changes
               </Button>
             </div>

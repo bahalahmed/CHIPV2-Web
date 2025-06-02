@@ -9,7 +9,7 @@ function App() {
     <div className="min-h-screen">
       <AppRoutes />
     </div>
-        </ThemeProvider>
+  </ThemeProvider>
 
   );
 }

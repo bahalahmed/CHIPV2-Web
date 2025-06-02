@@ -18,7 +18,7 @@ export function RoleTabs({ selectedRole, onRoleChange }: RoleTabsProps) {
             <TabsTrigger
               key={role}
               value={role}
-              className="px-4 py-2 rounded-none data-[state=active]:bg-[#1e3a8a] data-[state=active]:text-white whitespace-nowrap"
+              className="px-4 py-2 rounded-none data-[state=active]:bg-primary data-[state=active]:text-white whitespace-nowrap"
             >
               {role}
             </TabsTrigger>

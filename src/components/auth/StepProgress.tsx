@@ -93,7 +93,7 @@ export const StepProgress: React.FC<StepProgressProps> = ({ currentStep }) => {
             {/* Step Circle with Icon */}
             <div className="z-10">
               {isCompleted ? (
-                <div className="bg-[#3D8C40] w-9 h-9 rounded-full flex items-center justify-center text-background">
+                <div className="bg-success w-9 h-9 rounded-full flex items-center justify-center text-background">
                   <img
                     src={iconSrc || "/placeholder.svg"}
                     alt={`${item.label} completed`}

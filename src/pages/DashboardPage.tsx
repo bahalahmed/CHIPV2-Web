@@ -62,7 +62,7 @@ export default function DashboardPage() {
         <UsersTable users={filteredUsers} />
 
         <div className="fixed bottom-6 right-6">
-          <Button className="bg-[#1e3a8a] hover:bg-[#1a357d] text-white rounded-full h-12 w-12 p-0 shadow-lg">
+          <Button className="bg-primary hover:bg-primary/90 text-white rounded-full h-12 w-12 p-0 shadow-lg">
             <Plus className="h-6 w-6" />
           </Button>
         </div>

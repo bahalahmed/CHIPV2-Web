@@ -59,11 +59,11 @@
   
 //   return (
 //     <div className="space-y-6 text-center">
-//       <h2 className="text-2xl font-semibold text-[#1F2937]">
+//       <h2 className="text-2xl font-semibold text-text-heading">
 //         Login <span className="font-normal text-gray-500">with</span>
 //       </h2>
 
-//       <p className="text-sm text-[#4B5563] flex justify-center items-center gap-2 flex-wrap">
+//       <p className="text-sm text-text-gray flex justify-center items-center gap-2 flex-wrap">
 //         We have sent a 6 digit OTP code to{" "}
 //         <span className="text-accent font-semibold">{mobile}</span>
 //         {onChangeMobile && (
@@ -108,7 +108,7 @@
 //             Resend OTP
 //           </button>
 //         ) : (
-//           <span className="text-[#1F2937]">Resend OTP in 00:{timer.toString().padStart(2, "0")}</span>
+//           <span className="text-text-heading">Resend OTP in 00:{timer.toString().padStart(2, "0")}</span>
 //         )}
 //       </div>
 //     </div>
