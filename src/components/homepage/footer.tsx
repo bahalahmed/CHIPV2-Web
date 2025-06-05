@@ -1,40 +1,78 @@
 export function Footer() {
   return (
-    <footer className="py-3 px-4 md:px-8 text-gray text-xs md:text-sm border-t border-border bg-background">
-      <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
-          {/* Left section */}
-          <div className="flex flex-col items-center md:items-start space-y-1">
-            <div>
-              Helpline No.: <span className="font-medium">+91-7023025679</span>
+    <footer className="bg-white border-t border-[rgba(2,2,2,0.15)] overflow-x-hidden">
+      {/* Desktop layout - matches Figma exactly */}
+      <div className="hidden lg:flex justify-between items-center px-4 xl:px-16 py-8 gap-4 xl:gap-16 max-w-full mx-auto min-h-[120px]">
+        {/* Left section - Helpline */}
+        <div className="flex flex-col items-start gap-[6px] min-w-0 flex-shrink-0">
+          <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] whitespace-nowrap">
+            Helpline No. : +91-9999999999
+          </div>
+          <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] whitespace-nowrap">
+            <a href="#" className="hover:underline">
+              Watch : Training Videos
+            </a>
+          </div>
+        </div>
+
+        {/* Center section - Content info */}
+        <div className="flex flex-col items-center gap-2 flex-1 min-w-0 px-4">
+          <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] text-center">
+            Content Owned & Managed by : National Health Mission (NHM), Dept. of Medical, Health & Family Welfare, Govt.
+            of Karnataka
+          </div>
+          <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] text-center">
+            Supported by : Software designed and developed by Khushi Baby
+          </div>
+        </div>
+
+        {/* Right section - Nodal Officer */}
+        <div className="flex flex-col items-start gap-[6px] min-w-0 flex-shrink-0">
+          <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] whitespace-nowrap">
+            Nodal Officer :Dr. Khanna, IAS (AMD-NHM)
+          </div>
+          <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] whitespace-nowrap">
+            <a href="mailto:HealthOfficials@karnataka.gov.in" className="hover:underline">
+              Email : HealthOfficials@karnataka.gov.in
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile/Tablet layout - responsive */}
+      <div className="lg:hidden px-4 py-6">
+        <div className="flex flex-col gap-6 text-center">
+          {/* Mobile - Helpline */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
+              Helpline No. : +91-9999999999
             </div>
-            <div>
-              <a href="#" className="hover:underline hover:text-primary">
-                Watch: Training Videos
+            <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
+              <a href="#" className="hover:underline">
+                Watch : Training Videos
               </a>
             </div>
           </div>
 
-          {/* Center section */}
-          <div className="text-center md:text-left leading-relaxed">
-            <div>
-              Content Owned & Managed by:{" "} <span className="font-small">
-      National Health Mission (NHM), Dept. of Medical, Health & Family Welfare,
-      Govt. of Rajasthan
-    </span>
+          {/* Mobile - Content info */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
+              Content Owned & Managed by : National Health Mission (NHM), Dept. of Medical, Health & Family Welfare,
+              Govt. of Karnataka
             </div>
-           
-            <div text-center md:text-left >
-              Supported by: Software designed and developed by Khushi Baby
+            <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
+              Supported by : Software designed and developed by Khushi Baby
             </div>
           </div>
 
-          {/* Right section */}
-          <div className="flex flex-col items-center md:items-end space-y-1">
-            <div>Nodal Officer: Dr. Arun Garg, IAS (AMD-NHM)</div>
-            <div>
-              <a href="mailto:amdnhm.raj@gmail.com" className="hover:underline hover:text-primary">
-                Email: amdnhm.raj@gmail.com
+          {/* Mobile - Nodal Officer */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
+              Nodal Officer :Dr. Khanna, IAS (AMD-NHM)
+            </div>
+            <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
+              <a href="mailto:HealthOfficials@karnataka.gov.in" className="hover:underline">
+                Email : HealthOfficials@karnataka.gov.in
               </a>
             </div>
           </div>
