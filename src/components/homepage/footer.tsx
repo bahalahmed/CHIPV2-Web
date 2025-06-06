@@ -2,7 +2,7 @@ import { FooterProps } from '../../types/state';
 import { getStateConfig } from '../../config/stateConfigs';
 
 export function Footer({ stateConfig }: FooterProps = {}) {
-  // Use provided stateConfig or default to Karnataka
+  // Use provided stateConfig or default to Rajasthan
   const currentStateConfig = stateConfig || getStateConfig('KA');
   return (
     <footer className="bg-white border-t border-[rgba(2,2,2,0.15)] overflow-x-hidden">

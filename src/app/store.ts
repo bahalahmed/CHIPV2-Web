@@ -4,7 +4,8 @@ import loginTabReducer from "@/features/auth/loginTabSlice";
 import authReducer from "@/features/auth/authSlice";
 import registerFormReducer from "@/features/registerForm/registerFormSlice";
 import otpReducer from "@/features/auth/otpSlice";
-import geoDataReducer from "@/features/geoData/geoDataSlice"
+import geoDataReducer from "@/features/geoData/geoDataSlice";
+import stateReducer from "@/features/state/stateSlice";
 
 
 
@@ -15,6 +16,7 @@ export const store = configureStore({
     registerForm: registerFormReducer,
     otp: otpReducer,
     geoData: geoDataReducer,
+    state: stateReducer,
   },
 });
 

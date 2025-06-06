@@ -1,8 +1,15 @@
 import { StateConfig } from '../types/state';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 export interface StateApiResponse {
   success: boolean;
   data: StateConfig;
+  message?: string;
+}
+
+export interface StatesListApiResponse {
+  success: boolean;
+  data: StateConfig[];
   message?: string;
 }
 
@@ -12,22 +19,9 @@ export const stateApi = {
     try {
       const endpoint = stateCode 
         ? `/api/states/${stateCode}`
-        : '/api/states/current'; // Backend determines from user session/IP
-      
-      const response = await fetch(endpoint, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // If auth required
-        }
-      });
+        : '/api/states/current'; 
+      const result: StateApiResponse = await fetchWithAuth(endpoint);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch state config: ${response.statusText}`);
-      }
-
-      const result: StateApiResponse = await response.json();
-      
       if (!result.success) {
         throw new Error(result.message || 'Failed to get state configuration');
       }
@@ -41,21 +35,9 @@ export const stateApi = {
     }
   },
 
-  // Get all available states
   getAllStates: async (): Promise<StateConfig[]> => {
     try {
-      const response = await fetch('/api/states', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch states: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      const result: StatesListApiResponse = await fetchWithAuth('/api/states');
       return result.data || [];
     } catch (error) {
       console.error('Error fetching all states:', error);

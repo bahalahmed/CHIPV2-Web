@@ -4,8 +4,9 @@ export const stateConfigs: Record<string, StateConfig> = {
   KA: {
     stateCode: 'KA',
     stateName: 'Karnataka',
-    emblemUrl: '/src/assets/icons/karnataka_emblem.svg', // You'll need to add this asset
-    emblemAlt: 'Karnataka State Emblem',
+    mapUrl: 'src/assets/Map.svg',
+    leftLogoUrl: 'src/assets/icons/Seal_of_Karnataka 1.svg',
+    rightLogoUrl: 'src/assets/icons/NHM PNG Logo.svg',
     nodalOfficer: 'Dr. Khanna, IAS (AMD-NHM)',
     helplineNumber: '+91-9999999999',
     email: 'HealthOfficials@karnataka.gov.in'
@@ -13,8 +14,9 @@ export const stateConfigs: Record<string, StateConfig> = {
   MH: {
     stateCode: 'MH',
     stateName: 'Maharashtra',
-    emblemUrl: '/src/assets/icons/maharashtra_emblem.svg', // You'll need to add this asset
-    emblemAlt: 'Maharashtra State Emblem',
+    mapUrl: '/src/assets/maps/maharashtra-map.svg',
+    leftLogoUrl: '/src/assets/logos/maharashtra-left.svg',
+    rightLogoUrl: 'src/assets/icons/NHM PNG Logo.svg',
     nodalOfficer: 'Dr. Sharma, IAS (AMD-NHM)',
     helplineNumber: '+91-8888888888',
     email: 'HealthOfficials@maharashtra.gov.in'
@@ -22,15 +24,15 @@ export const stateConfigs: Record<string, StateConfig> = {
   RJ: {
     stateCode: 'RJ',
     stateName: 'Rajasthan',
-    emblemUrl: '/src/assets/icons/rajasthan_emblem.svg', // You'll need to add this asset
-    emblemAlt: 'Rajasthan State Emblem',
+    mapUrl: 'src/assets/Map.png',
+    leftLogoUrl: 'src/assets/left.png ',
+    rightLogoUrl: 'src/assets/icons/NHM PNG Logo.svg',
     nodalOfficer: 'Dr. Rajesh, IAS (AMD-NHM)',
     helplineNumber: '+91-7777777777',
     email: 'HealthOfficials@rajasthan.gov.in'
   },
-  // Add more states as needed
 };
 
 export const getStateConfig = (stateCode: string): StateConfig => {
-  return stateConfigs[stateCode.toUpperCase()] || stateConfigs.KA; // Default to Karnataka
+  return stateConfigs[stateCode.toUpperCase()] || stateConfigs.KA; 
 };

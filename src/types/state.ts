@@ -1,8 +1,9 @@
 export interface StateConfig {
   stateCode: string;
   stateName: string;
-  emblemUrl: string;
-  emblemAlt: string;
+  mapUrl?: string;
+  leftLogoUrl?: string;
+  rightLogoUrl?: string;
   nodalOfficer?: string;
   helplineNumber?: string;
   email?: string;
