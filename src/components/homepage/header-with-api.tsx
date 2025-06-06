@@ -1,26 +1,41 @@
 import { HeaderProps } from '../../types/state';
-import { getStateConfig } from '../../config/stateConfigs';
+import { useStateConfig } from '../../hooks/useStateConfig';
 
-export function Header({ stateConfig }: HeaderProps = {}) {
-  // Use provided stateConfig or default to Karnataka
-  const currentStateConfig = stateConfig || getStateConfig('KA');
+export function HeaderWithApi({ stateConfig: propStateConfig }: HeaderProps = {}) {
+  // Use prop stateConfig if provided, otherwise fetch from API
+  const { stateConfig: apiStateConfig, loading, error } = useStateConfig();
+  
+  const currentStateConfig = propStateConfig || apiStateConfig;
+
+  if (loading) {
+    return (
+      <header className="bg-background shadow-[0_2px_8px_rgba(2,2,2,0.15)] py-2 md:py-3 lg:py-[10px] px-4 md:px-8 lg:px-[60px]">
+        <div className="flex justify-center items-center h-[90px]">
+          <div className="animate-pulse text-gray-500">Loading state configuration...</div>
+        </div>
+      </header>
+    );
+  }
+
+  if (error) {
+    console.warn('Failed to load state config, using fallback:', error);
+  }
+
   return (
     <header className="bg-background shadow-[0_2px_8px_rgba(2,2,2,0.15)] py-2 md:py-3 lg:py-[10px] px-4 md:px-8 lg:px-[60px]">
       <div className="flex flex-col items-center gap-[10px] max-w-[1800px] mx-auto">
-        {/* Mobile & Tablet layout - single row with logos and center content */}
+        {/* Mobile & Tablet layout */}
         <div className="flex w-full lg:hidden justify-between items-center">
-          {/* Left Logo */}
           <img
             src={currentStateConfig.emblemUrl}
             alt={currentStateConfig.emblemAlt}
             className="h-8 w-auto sm:h-10 md:h-12 flex-shrink-0"
             loading="lazy"
           />
-
-          {/* Center content */}
+          
           <div className="flex flex-col items-center flex-1 mx-4">
             <img
-              src="/Users/bahalahmad/CHIPV2-Web/src/assets/icons/Indian Govt. Sign.svg"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Indian%20Govt.%20Sign-d9mL21OXihbPhBkcFNJqTvXutku1Dz.svg"
               alt="Government of India Emblem"
               className="h-6 w-auto sm:h-8 md:h-10 mb-1"
               loading="lazy"
@@ -35,18 +50,16 @@ export function Header({ stateConfig }: HeaderProps = {}) {
             </div>
           </div>
 
-          {/* Right Logo */}
           <img
-            src="src/assets/icons/NHM PNG Logo.svg"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NHM%20PNG%20Logo-et90asjrngviyvrBZqvkmUIbcIKLoz.svg"
             alt="National Health Mission Logo"
             className="h-8 w-auto sm:h-10 md:h-12 flex-shrink-0"
             loading="lazy"
           />
         </div>
 
-        {/* Desktop layout - following Figma specs exactly */}
+        {/* Desktop layout */}
         <div className="hidden lg:flex lg:items-center lg:justify-between lg:w-full lg:h-[90px]">
-          {/* Left Logo - State Emblem */}
           <div className="flex flex-col justify-center items-center w-[80px] h-[80px]">
             <img
               src={currentStateConfig.emblemUrl}
@@ -56,7 +69,6 @@ export function Header({ stateConfig }: HeaderProps = {}) {
             />
           </div>
 
-          {/* Center - Main Logo with Indian Emblem and Title */}
           <div className="flex items-center gap-[40px] w-[378px] h-[90px]">
             <img
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Indian%20Govt.%20Sign-d9mL21OXihbPhBkcFNJqTvXutku1Dz.svg"
@@ -74,7 +86,6 @@ export function Header({ stateConfig }: HeaderProps = {}) {
             </div>
           </div>
 
-          {/* Right Logo - NHM */}
           <div className="flex flex-col items-start w-[60px] h-[60px]">
             <img
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NHM%20PNG%20Logo-et90asjrngviyvrBZqvkmUIbcIKLoz.svg"
@@ -86,5 +97,5 @@ export function Header({ stateConfig }: HeaderProps = {}) {
         </div>
       </div>
     </header>
-  )
+  );
 }

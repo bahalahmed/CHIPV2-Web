@@ -1,4 +1,9 @@
-export function Footer() {
+import { FooterProps } from '../../types/state';
+import { getStateConfig } from '../../config/stateConfigs';
+
+export function Footer({ stateConfig }: FooterProps = {}) {
+  // Use provided stateConfig or default to Karnataka
+  const currentStateConfig = stateConfig || getStateConfig('KA');
   return (
     <footer className="bg-white border-t border-[rgba(2,2,2,0.15)] overflow-x-hidden">
       {/* Desktop layout - matches Figma exactly */}
@@ -6,7 +11,7 @@ export function Footer() {
         {/* Left section - Helpline */}
         <div className="flex flex-col items-start gap-[6px] min-w-0 flex-shrink-0">
           <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] whitespace-nowrap">
-            Helpline No. : +91-9999999999
+            Helpline No. : {currentStateConfig.helplineNumber || '+91-9999999999'}
           </div>
           <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] whitespace-nowrap">
             <a href="#" className="hover:underline">
@@ -19,7 +24,7 @@ export function Footer() {
         <div className="flex flex-col items-center gap-2 flex-1 min-w-0 px-4">
           <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] text-center">
             Content Owned & Managed by : National Health Mission (NHM), Dept. of Medical, Health & Family Welfare, Govt.
-            of Karnataka
+            of {currentStateConfig.stateName}
           </div>
           <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] text-center">
             Supported by : Software designed and developed by Khushi Baby
@@ -29,11 +34,11 @@ export function Footer() {
         {/* Right section - Nodal Officer */}
         <div className="flex flex-col items-start gap-[6px] min-w-0 flex-shrink-0">
           <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] whitespace-nowrap">
-            Nodal Officer :Dr. Khanna, IAS (AMD-NHM)
+            Nodal Officer : {currentStateConfig.nodalOfficer || 'Dr. Khanna, IAS (AMD-NHM)'}
           </div>
           <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] whitespace-nowrap">
-            <a href="mailto:HealthOfficials@karnataka.gov.in" className="hover:underline">
-              Email : HealthOfficials@karnataka.gov.in
+            <a href={`mailto:${currentStateConfig.email || 'HealthOfficials@karnataka.gov.in'}`} className="hover:underline">
+              Email : {currentStateConfig.email || 'HealthOfficials@karnataka.gov.in'}
             </a>
           </div>
         </div>
@@ -45,7 +50,7 @@ export function Footer() {
           {/* Mobile - Helpline */}
           <div className="flex flex-col items-center gap-2">
             <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
-              Helpline No. : +91-9999999999
+              Helpline No. : {currentStateConfig.helplineNumber || '+91-9999999999'}
             </div>
             <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
               <a href="#" className="hover:underline">
@@ -58,7 +63,7 @@ export function Footer() {
           <div className="flex flex-col items-center gap-2">
             <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
               Content Owned & Managed by : National Health Mission (NHM), Dept. of Medical, Health & Family Welfare,
-              Govt. of Karnataka
+              Govt. of {currentStateConfig.stateName}
             </div>
             <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
               Supported by : Software designed and developed by Khushi Baby
@@ -68,11 +73,11 @@ export function Footer() {
           {/* Mobile - Nodal Officer */}
           <div className="flex flex-col items-center gap-2">
             <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
-              Nodal Officer :Dr. Khanna, IAS (AMD-NHM)
+              Nodal Officer : {currentStateConfig.nodalOfficer || 'Dr. Khanna, IAS (AMD-NHM)'}
             </div>
             <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
-              <a href="mailto:HealthOfficials@karnataka.gov.in" className="hover:underline">
-                Email : HealthOfficials@karnataka.gov.in
+              <a href={`mailto:${currentStateConfig.email || 'HealthOfficials@karnataka.gov.in'}`} className="hover:underline">
+                Email : {currentStateConfig.email || 'HealthOfficials@karnataka.gov.in'}
               </a>
             </div>
           </div>
