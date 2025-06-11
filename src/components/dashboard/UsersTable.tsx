@@ -8,6 +8,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
+import { useNavigate } from "react-router-dom"
 
 interface User {
   id: number
@@ -24,6 +25,13 @@ interface UsersTableProps {
 }
 
 export function UsersTable({ users }: UsersTableProps) {
+  const navigate = useNavigate()
+
+  // Handle view details navigation
+  const handleViewDetails = (userId: number) => {
+    navigate(`/user-details/${userId}`)
+  }
+
   // Status badge color mapping
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -68,11 +76,19 @@ export function UsersTable({ users }: UsersTableProps) {
                 <TableCell>{user.updatedBy}</TableCell>
                 <TableCell className="text-right">
                   {user.status.toLowerCase() === "pending" ? (
-                    <Button variant="link" className="text-blue-600 hover:text-blue-800">
+                    <Button 
+                      variant="link" 
+                      className="text-blue-600 hover:text-blue-800"
+                      onClick={() => handleViewDetails(user.id)}
+                    >
                       Approval/Reject
                     </Button>
                   ) : (
-                    <Button variant="link" className="text-blue-600 hover:text-blue-800">
+                    <Button 
+                      variant="link" 
+                      className="text-blue-600 hover:text-blue-800"
+                      onClick={() => handleViewDetails(user.id)}
+                    >
                       View Details
                     </Button>
                   )}

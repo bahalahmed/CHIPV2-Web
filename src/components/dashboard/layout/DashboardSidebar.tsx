@@ -26,7 +26,7 @@ export function DashboardSidebar() {
     healthWorkers: true,
   })
 
-  // Reset open groups when sidebar collapses to icon mode
+  
   const isActive = (path: string) => location.pathname === path
 
   const toggleGroup = (group: keyof typeof openGroups) => {

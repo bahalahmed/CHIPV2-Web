@@ -33,8 +33,7 @@ export const login = createAsyncThunk(
   ) => {
     try {
       console.log("logging in with", username, password);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const res = await loginUser(username, password);
+      await loginUser(username, password);
       
 
       // ✅ You may receive a token or rely on httpOnly cookie
