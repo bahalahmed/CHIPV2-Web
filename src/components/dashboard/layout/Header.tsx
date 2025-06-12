@@ -1,4 +1,14 @@
+"use client"
+
 import { ChevronDown } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface HeaderProps {
   title?: string
@@ -14,71 +24,58 @@ export function Header({
   title = "Application Users",
   breadcrumbs = [{ label: "Platform Users" }, { label: "Application Users" }],
   userName = "Kane",
-  userAvatar,
+  userAvatar = "/images/user-avatar.png",
 }: HeaderProps) {
   return (
-    <div className="flex flex-row items-center p-2 gap-5 w-full h-[76px] bg-[#182E6F] rounded-xl">
-      {/* Heading & Path */}
-      <div className="flex flex-col justify-center items-start p-0 gap-2.5 flex-1 h-[49px]">
-        {/* Title */}
-        <h1 className="w-[158px] h-[23px] font-['Roboto'] font-medium text-xl leading-[23px] flex items-center text-white">
-          {title}
-        </h1>
+    <div className="flex items-center justify-between w-full h-[76px] bg-[#182E6F] px-6 py-3 rounded-xl">
+      {/* Left Section - Title and Breadcrumbs */}
+      <div className="flex flex-col">
+        {/* Main Title */}
+        <h1 className="text-white text-lg py-2 font-medium leading-tight">{title}</h1>
 
-        {/* Breadcrumb Path */}
-        <div className="flex flex-row items-center p-0 w-[218px] h-4 rounded-lg">
+        {/* Breadcrumb */}
+        <div className="flex items-center text-white/80 text-sm">
           {breadcrumbs.map((crumb, index) => (
-            <div key={index} className="flex flex-row items-center">
-              {index > 0 && (
-                <div className="flex flex-row justify-center items-center px-1 w-[14px] h-4 rounded-lg">
-                  <span className="w-1.5 h-4 font-['Roboto'] font-normal text-sm leading-4 flex items-center text-center text-white">
-                    /
-                  </span>
-                </div>
-              )}
-              <div className="flex flex-row justify-center items-center p-0 w-[110px] h-4 rounded-lg">
-                <span className="w-[110px] h-4 font-['Roboto'] font-normal text-sm leading-4 flex items-center text-center text-white">
-                  {crumb.label}
-                </span>
-              </div>
-            </div>
+            <span key={index}>
+              {index > 0 && <span className="mx-1">/</span>}
+              {crumb.label}
+            </span>
           ))}
         </div>
       </div>
 
-      {/* Right Items */}
-      <div className="flex flex-row items-center p-1.5 gap-4 w-[224px] h-[60px] bg-[#F6F6F8] rounded-lg">
-        {/* Menu Profile Item */}
-        <div className="flex flex-row items-center py-1 px-2 gap-4 w-[200px] h-12 bg-white rounded-lg">
-          {/* Title */}
-          <div className="flex flex-row items-center p-0 gap-2.5 flex-1 h-10">
+      {/* Right Section - User Profile Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <div className="flex items-center gap-3 bg-white rounded-lg px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors">
             {/* User Avatar */}
-            <div className="flex flex-row justify-center items-center p-0 gap-2.5 w-10 h-10">
-              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
-                {userAvatar ? (
-                  <img
-                    src={userAvatar || "/placeholder.svg?height=40&width=40"}
-                    alt={userName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="font-['Roboto'] font-normal text-sm text-[#303030]">{userName?.charAt(0)}</span>
-                )}
-              </div>
+            <div className="w-8 h-8 rounded-full overflow-hidden">
+              <img
+                src={userAvatar || "/placeholder.svg?height=32&width=32"}
+                alt={userName}
+                className="w-full h-full object-cover"
+              />
             </div>
 
             {/* User Name */}
-            <span className="w-[59px] h-[19px] font-['Roboto'] font-normal text-base leading-[19px] flex items-center text-[#303030]">
-              Hi, {userName}
-            </span>
-          </div>
+            <span className="text-gray-700 text-sm font-medium">Hi, {userName}</span>
 
-          {/* Arrow Down */}
-          <div className="flex flex-row justify-center items-center p-0.5 gap-2.5 w-4 h-4">
-            <ChevronDown className="w-3 h-[7.5px] text-[#363636]" />
+            {/* Dropdown Arrow */}
+            <ChevronDown className="w-4 h-4 text-gray-600" />
           </div>
-        </div>
-      </div>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>Profile Settings</DropdownMenuItem>
+          <DropdownMenuItem>Account Preferences</DropdownMenuItem>
+          <DropdownMenuItem>Notifications</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>Help & Support</DropdownMenuItem>
+          <DropdownMenuItem className="text-red-600">Sign Out</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }

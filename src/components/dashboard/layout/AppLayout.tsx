@@ -56,7 +56,6 @@ export function AppLayout({ children }: AppLayoutProps) {
           title="Application Users"
           breadcrumbs={[{ label: "Platform Users" }, { label: "Application Users" }]}
           userName="Kane"
-          
         />
 
         {/* Page Content */}
