@@ -13,12 +13,10 @@ interface CarGroup {
   label: string
   cars: Car[]
 }
-
 interface Car {
   value: string
   label: string
 }
-
 // Car data
 const carGroups: CarGroup[] = [
   {

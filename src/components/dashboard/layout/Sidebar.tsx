@@ -72,19 +72,19 @@ export function Sidebar({ collapsed = false, onToggle, className }: SidebarProps
   return (
     <div
       className={cn(
-        "relative flex flex-col bg-white rounded-2xl transition-all duration-300 h-fit max-h-[calc(100vh-1rem)] overflow-y-auto",
-        collapsed ? "w-20" : "w-80",
+        "relative flex flex-col bg-white rounded-2xl transition-all duration-300 h-[calc(100vh-1rem)] overflow-y-auto pl-4",
+        collapsed ? "w-24" : "w-96",
         className,
       )}
     >
       {/* Logo Section */}
       <div className={cn("flex flex-col items-center gap-1 transition-all duration-300", collapsed ? "p-3" : "p-5")}>
         {collapsed ? (
-          <h1 className="text-2xl font-semibold text-[#182E6F] font-['K2D']">CHIP</h1>
+          <h1 className="text-2xl font-semibold text-[#182E6F]">CHIP</h1>
         ) : (
           <>
-            <h1 className="text-4xl font-semibold text-[#182E6F] font-['K2D'] leading-[47px]">CHIP</h1>
-            <p className="text-xl font-semibold text-[#182E6F] font-['K2D'] leading-[26px]">Dashboard</p>
+            <h1 className="text-4xl font-semibold text-[#182E6F] leading-[47px]">CHIP</h1>
+            <p className="text-xl font-semibold text-[#182E6F] leading-[26px]">Dashboard</p>
           </>
         )}
       </div>
@@ -96,10 +96,10 @@ export function Sidebar({ collapsed = false, onToggle, className }: SidebarProps
       <div className="flex-1 p-0 min-h-0">
         {/* Main Menu Label */}
         <div className={cn("px-5 py-2 flex items-center", collapsed && "justify-center px-2")}>
-          <span className={cn("text-xs text-gray-400 font-['Poppins']", collapsed && "hidden")}>MAIN MENU</span>
+          <span className={cn("text-xs text-gray-400", collapsed && "hidden")}>MAIN MENU</span>
           {collapsed && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 font-['Poppins']">MAIN MENU</span>
+              <span className="text-xs text-gray-400">MAIN MENU</span>
             </div>
           )}
         </div>
@@ -120,7 +120,7 @@ export function Sidebar({ collapsed = false, onToggle, className }: SidebarProps
                 <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
                   <div className="text-[#182E6F]">{getIcon(item.icon)}</div>
                   {!collapsed && (
-                    <span className="text-lg font-medium text-[#182E6F] font-['Poppins']">{item.title}</span>
+                    <span className="text-lg font-medium text-[#182E6F]">{item.title}</span>
                   )}
                 </div>
                 {!collapsed && (
@@ -144,7 +144,7 @@ export function Sidebar({ collapsed = false, onToggle, className }: SidebarProps
                         subItem.isActive ? "bg-[#182E6F] text-white" : "bg-white hover:bg-gray-50 text-[#303030]",
                       )}
                     >
-                      <span className="text-base font-normal font-['Roboto']">{subItem.title}</span>
+                      <span className="text-base font-normal">{subItem.title}</span>
                       {subItem.hasNotification && subItem.notificationCount && (
                         <div className="bg-[#FF6E32] text-white text-sm px-3 py-1 rounded-full min-w-[34px] h-7 flex items-center justify-center">
                           {subItem.notificationCount}

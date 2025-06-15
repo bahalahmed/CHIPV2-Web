@@ -174,7 +174,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
         <div className="w-full lg:w-[400px] bg-white rounded-2xl p-4 flex flex-col gap-4">
           {/* Application User Header */}
           <div className="bg-[#EBECEE] p-3 rounded-lg">
-            <span className="text-base font-medium text-[#303030] font-['Poppins']">Application User</span>
+            <span className="text-base font-medium text-[#303030] ">Application User</span>
           </div>
 
           {/* User Profile */}
@@ -192,8 +192,8 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
               </Badge>
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-medium text-[#303030] font-['Poppins'] mb-1">{userData.name}</h2>
-              <p className="text-base text-[#808080] font-['Poppins']">{userData.department}</p>
+              <h2 className="text-2xl font-medium text-[#303030]  mb-1">{userData.name}</h2>
+              <p className="text-base text-[#808080] ">{userData.department}</p>
             </div>
           </div>
 
@@ -203,28 +203,28 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
           {/* Account Details */}
           <div className="space-y-4">
             <div className="flex flex-col gap-1">
-              <h3 className="text-xl font-normal text-[#303030] font-['Poppins']">Accounts Details</h3>
+              <h3 className="text-xl font-normal text-[#303030] ">Accounts Details</h3>
               <div className="w-15 h-0.5 bg-[#182E6F]" />
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between py-1">
-                <span className="text-base text-[#808080] font-['Poppins']">Mobile No.</span>
+                <span className="text-base text-[#808080] ">Mobile No.</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-base text-[#303030] font-['Poppins']">{userData.mobile}</span>
+                  <span className="text-base text-[#303030] ">{userData.mobile}</span>
                   <CheckCircle className="w-4 h-4 text-[#34A853]" />
                 </div>
               </div>
 
               <div className="flex items-center justify-between py-1">
-                <span className="text-base text-[#808080] font-['Poppins']">WhatsApp No.</span>
-                <span className="text-base text-[#303030] font-['Poppins']">{userData.whatsapp}</span>
+                <span className="text-base text-[#808080] ">WhatsApp No.</span>
+                <span className="text-base text-[#303030] ">{userData.whatsapp}</span>
               </div>
 
               <div className="flex items-center justify-between py-1">
-                <span className="text-base text-[#808080] font-['Poppins']">Primary Email</span>
+                <span className="text-base text-[#808080] ">Primary Email</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-base text-[#303030] font-['Poppins'] break-all">{userData.email}</span>
+                  <span className="text-base text-[#303030]  break-all">{userData.email}</span>
                   <CheckCircle className="w-4 h-4 text-[#34A853] flex-shrink-0" />
                 </div>
               </div>
@@ -234,29 +234,29 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
           {/* Employment Information */}
           <div className="space-y-4">
             <div className="flex flex-col gap-1">
-              <h3 className="text-xl font-normal text-[#303030] font-['Poppins']">Employment Information</h3>
+              <h3 className="text-xl font-normal text-[#303030] ">Employment Information</h3>
               <div className="w-15 h-0.5 bg-[#182E6F]" />
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between py-1">
-                <span className="text-base text-[#808080] font-['Poppins']">Health Facility ID</span>
-                <span className="text-base text-[#303030] font-['Poppins']">{userData.healthFacilityId}</span>
+                <span className="text-base text-[#808080] ">Health Facility ID</span>
+                <span className="text-base text-[#303030] ">{userData.healthFacilityId}</span>
               </div>
 
               <div className="flex items-center justify-between py-1">
-                <span className="text-base text-[#808080] font-['Poppins']">HFR ID</span>
-                <span className="text-base text-[#303030] font-['Poppins']">{userData.hfrId}</span>
+                <span className="text-base text-[#808080] ">HFR ID</span>
+                <span className="text-base text-[#303030] ">{userData.hfrId}</span>
               </div>
 
               <div className="flex items-center justify-between py-1">
-                <span className="text-base text-[#808080] font-['Poppins']">NIN ID</span>
-                <span className="text-base text-[#303030] font-['Poppins']">{userData.ninId}</span>
+                <span className="text-base text-[#808080] ">NIN ID</span>
+                <span className="text-base text-[#303030] ">{userData.ninId}</span>
               </div>
 
               <div className="flex items-center justify-between py-1">
-                <span className="text-base text-[#808080] font-['Poppins']">ASHA ID</span>
-                <span className="text-base text-[#303030] font-['Poppins']">{userData.ashaId}</span>
+                <span className="text-base text-[#808080] ">ASHA ID</span>
+                <span className="text-base text-[#303030] ">{userData.ashaId}</span>
               </div>
             </div>
           </div>
@@ -289,29 +289,29 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
             <div className="flex-1 bg-white rounded-2xl p-4 min-w-0">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
-                  <h3 className="text-lg font-medium text-[#303030] font-['Poppins']">Heading Title</h3>
+                  <h3 className="text-lg font-medium text-[#303030] ">Heading Title</h3>
                   <div className="w-15 h-0.5 bg-[#182E6F]" />
                 </div>
                 <div className="space-y-3">
                   <div className="flex flex-col sm:flex-row justify-between">
-                    <span className="text-base text-[#808080] font-['Poppins'] sm:w-[40%]">State Name</span>
-                    <span className="text-base text-[#303030] font-['Poppins'] sm:w-[60%]">{userData.stateName}</span>
+                    <span className="text-base text-[#808080]  sm:w-[40%]">State Name</span>
+                    <span className="text-base text-[#303030]  sm:w-[60%]">{userData.stateName}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between">
-                    <span className="text-base text-[#808080] font-['Poppins'] sm:w-[40%]">Division Name</span>
-                    <span className="text-base text-[#303030] font-['Poppins'] sm:w-[60%]">
+                    <span className="text-base text-[#808080]  sm:w-[40%]">Division Name</span>
+                    <span className="text-base text-[#303030]  sm:w-[60%]">
                       {userData.divisionName}
                     </span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between">
-                    <span className="text-base text-[#808080] font-['Poppins'] sm:w-[40%]">District Name</span>
-                    <span className="text-base text-[#303030] font-['Poppins'] sm:w-[60%]">
+                    <span className="text-base text-[#808080]  sm:w-[40%]">District Name</span>
+                    <span className="text-base text-[#303030]  sm:w-[60%]">
                       {userData.districtName}
                     </span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between">
-                    <span className="text-base text-[#808080] font-['Poppins'] sm:w-[40%]">Block Name</span>
-                    <span className="text-base text-[#303030] font-['Poppins'] sm:w-[60%]">{userData.blockName}</span>
+                    <span className="text-base text-[#808080]  sm:w-[40%]">Block Name</span>
+                    <span className="text-base text-[#303030]  sm:w-[60%]">{userData.blockName}</span>
                   </div>
                 </div>
               </div>
@@ -320,25 +320,25 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
             <div className="flex-1 bg-white rounded-2xl p-4 min-w-0">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
-                  <h3 className="text-lg font-medium text-[#303030] font-['Poppins']">Heading Title</h3>
+                  <h3 className="text-lg font-medium text-[#303030] ">Heading Title</h3>
                   <div className="w-15 h-0.5 bg-[#182E6F]" />
                 </div>
                 <div className="space-y-3">
                   <div className="flex flex-col sm:flex-row justify-between">
-                    <span className="text-base text-[#808080] font-['Poppins'] sm:w-[40%]">Type of Organization</span>
-                    <span className="text-base text-[#303030] font-['Poppins'] sm:w-[60%]">
+                    <span className="text-base text-[#808080]  sm:w-[40%]">Type of Organization</span>
+                    <span className="text-base text-[#303030]  sm:w-[60%]">
                       {userData.organizationType}
                     </span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between">
-                    <span className="text-base text-[#808080] font-['Poppins'] sm:w-[40%]">Name of Organization</span>
-                    <span className="text-base text-[#303030] font-['Poppins'] sm:w-[60%]">
+                    <span className="text-base text-[#808080]  sm:w-[40%]">Name of Organization</span>
+                    <span className="text-base text-[#303030]  sm:w-[60%]">
                       {userData.organizationName}
                     </span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between">
-                    <span className="text-base text-[#808080] font-['Poppins'] sm:w-[40%]">Designation</span>
-                    <span className="text-base text-[#303030] font-['Poppins'] sm:w-[60%]">{userData.designation}</span>
+                    <span className="text-base text-[#808080]  sm:w-[40%]">Designation</span>
+                    <span className="text-base text-[#303030]  sm:w-[60%]">{userData.designation}</span>
                   </div>
                 </div>
               </div>
@@ -353,7 +353,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col gap-1">
                     <h3
-                      className={`text-lg font-medium font-['Poppins'] ${isApproved ? "text-[#303030]" : "text-[#808080]"}`}
+                      className={`text-lg font-medium  ${isApproved ? "text-[#303030]" : "text-[#808080]"}`}
                     >
                       Program Permissions
                     </h3>
@@ -377,7 +377,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
                   <div className="flex items-center justify-center p-4 bg-[#F6F6F8] rounded-xl">
                     <div className="text-center">
                       <Lock className="w-8 h-8 text-[#808080] mx-auto mb-2" />
-                      <p className="text-sm text-[#808080] font-['Poppins']">
+                      <p className="text-sm text-[#808080] ">
                         Permissions will be available after approval
                       </p>
                     </div>
@@ -387,7 +387,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
                 {isApproved && !programPermissionsEnabled && (
                   <div className="flex items-center justify-center p-4 bg-[#F6F6F8] rounded-xl">
                     <div className="text-center">
-                      <p className="text-sm text-[#808080] font-['Poppins']">
+                      <p className="text-sm text-[#808080] ">
                         Enable Program Permissions to configure settings
                       </p>
                     </div>
@@ -410,7 +410,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
                                   expandedSections.includes(section.id) ? "bg-[#E2E3FF]" : "bg-[#F6F6F8]"
                                 }`}
                               >
-                                <span className="text-lg font-medium text-[#303030] font-['Poppins']">
+                                <span className="text-lg font-medium text-[#303030] ">
                                   {section.title}
                                 </span>
                                 <ChevronDown
@@ -427,7 +427,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
                                     <Checkbox id={`${section.id}-${index}`} />
                                     <label
                                       htmlFor={`${section.id}-${index}`}
-                                      className="text-base text-[#303030] font-['Poppins'] cursor-pointer"
+                                      className="text-base text-[#303030]  cursor-pointer"
                                     >
                                       {permission}
                                     </label>
@@ -450,7 +450,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col gap-1">
                     <h3
-                      className={`text-lg font-medium font-['Poppins'] ${isApproved ? "text-[#303030]" : "text-[#808080]"}`}
+                      className={`text-lg font-medium  ${isApproved ? "text-[#303030]" : "text-[#808080]"}`}
                     >
                       Admin Permissions
                     </h3>
@@ -474,7 +474,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
                   <div className="flex items-center justify-center p-4 bg-[#F6F6F8] rounded-xl">
                     <div className="text-center">
                       <Lock className="w-8 h-8 text-[#808080] mx-auto mb-2" />
-                      <p className="text-sm text-[#808080] font-['Poppins']">
+                      <p className="text-sm text-[#808080] ">
                         Permissions will be available after approval
                       </p>
                     </div>
@@ -484,7 +484,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
                 {isApproved && !adminPermissionsEnabled && (
                   <div className="flex items-center justify-center p-4 bg-[#F6F6F8] rounded-xl">
                     <div className="text-center">
-                      <p className="text-sm text-[#808080] font-['Poppins']">
+                      <p className="text-sm text-[#808080] ">
                         Enable Admin Permissions to configure settings
                       </p>
                     </div>
@@ -507,7 +507,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
                                   expandedSections.includes(section.id) ? "bg-[#E2E3FF]" : "bg-[#F6F6F8]"
                                 }`}
                               >
-                                <span className="text-lg font-medium text-[#303030] font-['Poppins']">
+                                <span className="text-lg font-medium text-[#303030] ">
                                   {section.title}
                                 </span>
                                 <ChevronDown
@@ -524,7 +524,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
                                     <Checkbox id={`${section.id}-${index}`} />
                                     <label
                                       htmlFor={`${section.id}-${index}`}
-                                      className="text-base text-[#303030] font-['Poppins'] cursor-pointer"
+                                      className="text-base text-[#303030]  cursor-pointer"
                                     >
                                       {permission}
                                     </label>
@@ -580,7 +580,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
               </svg>
             </div>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-medium text-[#303030] font-['Poppins'] text-center">
+              <DialogTitle className="text-2xl font-medium text-[#303030]  text-center">
                 Confirmation
               </DialogTitle>
             </DialogHeader>
@@ -588,7 +588,7 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
 
           {/* Text Section */}
           <div className="w-[460px] text-center">
-            <p className="text-base font-normal text-[#808080] font-['Poppins'] leading-6">
+            <p className="text-base font-normal text-[#808080]  leading-6">
               You've submitted your details. If everything looks correct, click 'Approve' to proceed or cancel to make
               changes
             </p>
@@ -598,14 +598,14 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
           <div className="flex justify-end items-center gap-2 w-[460px]">
             <Button
               onClick={handleCancelApproval}
-              className="w-[100px] h-12 bg-[#ECF1FF] hover:bg-[#D6D7F5] text-[#303030] text-lg font-normal font-['Roboto'] rounded-lg"
+              className="w-[100px] h-12 bg-[#ECF1FF] hover:bg-[#D6D7F5] text-[#303030] text-lg font-normal  rounded-lg"
             >
               Cancel
             </Button>
             <Button
               onClick={handleConfirmApproval}
               disabled={isProcessing}
-              className="w-[100px] h-12 bg-[#3D8C40] hover:bg-[#2F6B32] text-white text-lg font-medium font-['Roboto'] rounded-lg disabled:opacity-50"
+              className="w-[100px] h-12 bg-[#3D8C40] hover:bg-[#2F6B32] text-white text-lg font-medium  rounded-lg disabled:opacity-50"
             >
               {isProcessing ? "Processing..." : "Approve"}
             </Button>
@@ -633,11 +633,11 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
             {/* Content */}
             <div className="flex flex-col items-center gap-2 w-[464px]">
               <DialogHeader>
-                <DialogTitle className="text-lg font-semibold text-[#0F172A] font-['Inter'] text-center">
+                <DialogTitle className="text-lg font-semibold text-[#0F172A]  text-center">
                   Confirmation
                 </DialogTitle>
               </DialogHeader>
-              <p className="text-sm font-normal text-[#49454F] font-['Inter'] leading-5 text-center w-[464px]">
+              <p className="text-sm font-normal text-[#49454F]  leading-5 text-center w-[464px]">
                 Please check all the details before rejecting.
               </p>
             </div>
@@ -647,14 +647,14 @@ export function UserDetailsContent({ }: UserDetailsContentProps) {
           <div className="flex justify-end items-center gap-2 w-[464px]">
             <Button
               onClick={handleCancelRejection}
-              className="w-[100px] h-12 bg-[#ECF1FF] hover:bg-[#D6D7F5] text-[#303030] text-lg font-medium font-['Roboto'] rounded-lg"
+              className="w-[100px] h-12 bg-[#ECF1FF] hover:bg-[#D6D7F5] text-[#303030] text-lg font-medium  rounded-lg"
             >
               Cancel
             </Button>
             <Button
               onClick={handleConfirmRejection}
               disabled={isProcessing}
-              className="w-[100px] h-12 bg-[#E42D23] hover:bg-[#C41E1A] text-white text-lg font-medium font-['Roboto'] rounded-lg disabled:opacity-50"
+              className="w-[100px] h-12 bg-[#E42D23] hover:bg-[#C41E1A] text-white text-lg font-medium  rounded-lg disabled:opacity-50"
             >
               {isProcessing ? "Processing..." : "Reject"}
             </Button>

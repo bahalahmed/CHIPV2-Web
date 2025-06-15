@@ -44,7 +44,7 @@ export function FilterSection({ filters, onFilterChange }: FilterSectionProps) {
       {/* Left Filter Group - Type and Level */}
       <div className="flex flex-col sm:flex-row gap-4 p-2 bg-white rounded-xl">
         <div className="flex flex-col gap-4 min-w-0">
-          <label className="text-base text-[#808080] font-['Poppins'] truncate">Type of Users</label>
+          <label className="text-base text-[#808080] truncate">Type of Users</label>
           <div className="relative">
             <Select value={filters.userType} onValueChange={(value) => onFilterChange("userType", value)}>
               <SelectTrigger className="w-full sm:w-56 h-12 bg-[#F6F6F8] border-0 text-base">
@@ -63,7 +63,7 @@ export function FilterSection({ filters, onFilterChange }: FilterSectionProps) {
         </div>
 
         <div className="flex flex-col gap-4 min-w-0">
-          <label className="text-base text-[#808080] font-['Poppins'] truncate">Level of Users</label>
+          <label className="text-base text-[#808080] truncate">Level of Users</label>
           <div className="relative">
             <Select value={filters.userLevel} onValueChange={(value) => onFilterChange("userLevel", value)}>
               <SelectTrigger className="w-full sm:w-56 h-12 bg-[#F6F6F8] border-0 text-base">
@@ -89,7 +89,7 @@ export function FilterSection({ filters, onFilterChange }: FilterSectionProps) {
             .slice(2)
             .map(([key, options]) => (
               <div key={key} className="flex flex-col gap-4 min-w-0">
-                <label className="text-base text-[#808080] font-['Roboto'] capitalize truncate">
+                <label className="text-base text-[#808080] capitalize truncate">
                   {key.replace(/([A-Z])/g, " $1").trim()}
                 </label>
                 <div className="relative">

@@ -155,7 +155,7 @@ export function DataTable({
               <button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
-                className={`px-3 py-2 rounded-lg text-sm sm:text-base font-['Roboto'] transition-colors whitespace-nowrap ${
+                className={`px-3 py-2 rounded-lg text-sm sm:text-base  transition-colors whitespace-nowrap ${
                   activeTab === tab.id ? "bg-[#B8C0FF] text-[#303030]" : "text-[#303030] hover:bg-gray-100"
                 }`}
               >
@@ -199,7 +199,7 @@ export function DataTable({
                       {getStatusText(user.status)}
                     </Badge>
                   </div>
-                  <h3 className="font-medium text-[#363636] font-['Roboto']">{user.name}</h3>
+                  <h3 className="font-medium text-[#363636] ">{user.name}</h3>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -219,11 +219,11 @@ export function DataTable({
               <div className="space-y-2 text-sm">
                 <div>
                   <span className="text-gray-500">Department: </span>
-                  <span className="text-[#363636] font-['Roboto']">{user.department}</span>
+                  <span className="text-[#363636] ">{user.department}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">Geography: </span>
-                  <span className="text-[#363636] font-['Roboto']">{user.geography}</span>
+                  <span className="text-[#363636] ">{user.geography}</span>
                 </div>
               </div>
             </CardContent>
@@ -247,7 +247,7 @@ export function DataTable({
                     ${column.sortable ? "hover:bg-[#d6d7f5]" : ""}
                   `}
                 >
-                  <span className="font-['Roboto'] font-medium text-base leading-[19px] flex items-center text-[#363636]">
+                  <span className=" font-medium text-base leading-[19px] flex items-center text-[#363636]">
                     {column.title}
                   </span>
                   {getSortIcon(column.key)}
@@ -260,18 +260,18 @@ export function DataTable({
               {data.map((user, index) => (
                 <div key={user.id} className="flex border-b border-gray-200">
                   <div className="w-16 flex items-center justify-center p-3">
-                    <span className="text-base text-[#363636] font-['Roboto']">
+                    <span className="text-base text-[#363636] ">
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </span>
                   </div>
                   <div className="flex-1 flex items-center p-3 border-l border-gray-200">
-                    <span className="text-base text-[#363636] font-['Roboto']">{user.name}</span>
+                    <span className="text-base text-[#363636] ">{user.name}</span>
                   </div>
                   <div className="flex-1 flex items-center p-3 border-l border-gray-200">
-                    <span className="text-base text-[#363636] font-['Roboto']">{user.department}</span>
+                    <span className="text-base text-[#363636] ">{user.department}</span>
                   </div>
                   <div className="flex-1 flex items-center p-3 border-l border-gray-200">
-                    <span className="text-base text-[#363636] font-['Roboto']">{user.geography}</span>
+                    <span className="text-base text-[#363636] ">{user.geography}</span>
                   </div>
                   <div className="flex-1 flex items-center p-3 border-l border-gray-200">
                     <Badge variant="outline" className={getStatusColor(user.status)}>
@@ -281,7 +281,7 @@ export function DataTable({
                   <div className="flex-1 flex items-center p-3 border-l border-gray-200">
                     <button
                       onClick={() => handleViewDetails(user.id.toString())}
-                      className="text-base text-[#3639F2] underline font-['Roboto'] hover:text-[#2028D2]"
+                      className="text-base text-[#3639F2] underline  hover:text-[#2028D2]"
                     >
                       View Details
                     </button>
@@ -308,7 +308,7 @@ export function DataTable({
               <SelectItem value="50">50</SelectItem>
             </SelectContent>
           </Select>
-          <span className="text-sm sm:text-base text-[#303030] font-['Poppins']">Items per page</span>
+          <span className="text-sm sm:text-base text-[#303030] ">Items per page</span>
         </div>
 
         {/* Page Navigation */}

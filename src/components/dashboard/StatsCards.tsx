@@ -85,7 +85,7 @@ export function StatsCards({
                   activeCategory === tab ? "bg-[#B8C0FF] shadow-sm" : "hover:bg-gray-100"
                 }`}
               >
-                <span className="text-sm sm:text-base text-[#303030] font-['Roboto']">{tab}</span>
+                <span className="text-sm sm:text-base text-[#303030]">{tab}</span>
               </button>
             ))}
           </div>
@@ -104,11 +104,11 @@ export function StatsCards({
                 : "bg-[#F6F6F8] hover:bg-[#EEEEEE]"
             }`}
           >
-            <span className="text-xs sm:text-base font-medium text-[#303030] font-['Poppins'] text-center leading-tight">
+            <span className="text-xs sm:text-base font-medium text-[#303030] text-center leading-tight">
               {card.title}
             </span>
             <span
-              className="text-2xl sm:text-4xl font-normal text-center font-['Poppins']"
+              className="text-2xl sm:text-4xl font-normal text-center"
               style={{ color: card.color }}
             >
               {card.value}
@@ -121,7 +121,7 @@ export function StatsCards({
       {/* Active Filter Indicator */}
       {selectedStatCard && (
         <div className="mt-4 flex items-center justify-center gap-2 p-2 bg-[#E2E3FF] rounded-lg">
-          <span className="text-sm text-[#303030] font-['Roboto']">
+          <span className="text-sm text-[#303030]">
             Filtering by: <strong>{cards.find((c) => c.type === selectedStatCard)?.title}</strong>
           </span>
           <button
