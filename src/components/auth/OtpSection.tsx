@@ -11,8 +11,6 @@ import PhoneInputField from "../shared/PhoneInputField"
 import EmailInputField from "../shared/EmailInputField"
 import { CheckCircle } from "lucide-react"
 
-
-
 interface OtpSectionProps {
   label: string
   type: "mobile" | "whatsapp" | "email"
@@ -51,26 +49,51 @@ export function OtpSection({
   sameAsCheckbox,
 }: OtpSectionProps) {
   const navigate = useNavigate()
-  const [timer, setTimer] = useState(30)
+  const dispatch = useAppDispatch()
+  const [timer, setTimer] = useState(60)
   const [canResend, setCanResend] = useState(false)
   const [resendTrigger, setResendTrigger] = useState(0)
+  const [isVerifying, setIsVerifying] = useState(false)
 
   const handleSubmitOtp = () => {
     const fullOtp = otp.join("")
+    
+    // ✅ Only validate when we have exactly 6 digits
     if (fullOtp.length === 6 && /^\d{6}$/.test(fullOtp)) {
-      toast.success(`${label} verified successfully!`)
-      setVerified(true)
-      onVerified?.()
-      if (redirectAfterVerify) navigate(redirectAfterVerify)
+      setIsVerifying(true)
+      
+      // ✅ Add a small delay to simulate real OTP verification
+      setTimeout(() => {
+        toast.success(`${label} verified successfully!`)
+        setVerified(true)
+        
+        // ✅ Reset OTP state after successful verification
+        if (mode === "login") {
+          dispatch(setOtpSent(false))
+        }
+        
+        onVerified?.()
+        
+        if (redirectAfterVerify) {
+          // ✅ Use normal navigation (not replace) so back button works properly
+          navigate(redirectAfterVerify)
+        }
+        
+        setIsVerifying(false)
+      }, 500) // Small delay for better UX
     }
+    // ✅ Don't show error for incomplete OTP (less than 6 digits)
   }
 
+  // ✅ Only trigger validation when OTP is complete (6 digits)
   useEffect(() => {
-    if (otp.every((digit) => digit !== "")) handleSubmitOtp()
+    if (otp.every((digit) => digit !== "") && otp.length === 6) {
+      handleSubmitOtp()
+    }
   }, [otp])
 
   useEffect(() => {
-    setTimer(30)
+    setTimer(60)
     setCanResend(false)
     const countdown = setInterval(() => {
       setTimer((prev) => {
@@ -100,13 +123,13 @@ export function OtpSection({
     toast.success("OTP sent successfully!")
   }
 
-  const dispatch = useAppDispatch()
   const handleChangeClick = () => {
     setShowOtpInput(false)
     setVerified(false)
     setOtp(Array(6).fill(""))
     setTimer(60)
     setCanResend(false)
+    setIsVerifying(false)
 
     if (mode === "login") {
       dispatch(setOtpSent(false))
@@ -143,11 +166,10 @@ export function OtpSection({
           placeholder="Enter your number"
         />
       )
-
     }
   }
 
-  // ✅ OTP Input UI
+  // ✅ OTP Input UI with better handling
   const renderOtpInput = () => (
     <div className="flex justify-center">
       <InputOTP
@@ -155,8 +177,14 @@ export function OtpSection({
         value={otp.join("")}
         onChange={(val) => {
           const sanitized = val.replace(/\D/g, "").slice(0, 6)
-          setOtp(sanitized.split(""))
+          const otpArray = sanitized.split("")
+          // ✅ Pad with empty strings to maintain 6-length array
+          while (otpArray.length < 6) {
+            otpArray.push("")
+          }
+          setOtp(otpArray)
         }}
+        disabled={isVerifying}
       >
         <InputOTPGroup>
           <InputOTPSlot index={0} />
@@ -175,7 +203,7 @@ export function OtpSection({
 
   if (mode === "login" && showOtpInput) {
     return (
-      <div className=" space-y-6 text-center">
+      <div className="space-y-6 text-center">
         <h2 className="text-2xl font-semibold text-text-heading">
           Login <span className="text-muted-foreground font-normal">with</span>
         </h2>
@@ -184,19 +212,42 @@ export function OtpSection({
           <button
             className="ml-1 text-sm text-accent flex items-center gap-1 hover:underline"
             onClick={handleChangeClick}
+            disabled={isVerifying}
           >
             🔄 Change
           </button>
         </p>
+        
         {renderOtpInput()}
+        
+        {/* ✅ Show verification status */}
+        {isVerifying && (
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+            Verifying OTP...
+          </div>
+        )}
+        
         <div className="text-sm font-medium">
           {canResend ? (
-            <button onClick={handleSendOTP} className="hover:underline text-accent">
+            <button 
+              onClick={handleSendOTP} 
+              className="hover:underline text-accent"
+              disabled={isVerifying}
+            >
               Resend OTP
             </button>
           ) : (
             <span className="text-text-heading">Resend OTP in 00:{timer.toString().padStart(2, "0")}</span>
           )}
+        </div>
+
+        {/* ✅ Demo hint */}
+        <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
+          💡 Demo: Enter any 6-digit number to verify (e.g., 123456)
         </div>
       </div>
     )

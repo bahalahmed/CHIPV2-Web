@@ -6,7 +6,7 @@ import type { RootState } from "@/app/store"
 import { switchToEmail, switchToMobile, setOtpSent } from "@/features/auth/loginTabSlice"
 import EmailLogin from "./EmailLogin"
 import MobileLogin from "./MobileLogin"
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { RegisterDrawer } from "../auth/register-drawer"
 import { OtpSection } from "@/components/auth/OtpSection"
 import ForgotPasswordForm from "./ForgotPasswordForm"
@@ -25,6 +25,19 @@ export default function LoginWrapper() {
     },
     [dispatch]
   )
+
+  // ✅ Reset OTP state when component mounts or when switching methods
+  useEffect(() => {
+    setOtp(Array(6).fill(""))
+    setMobile("")
+  }, [method])
+
+  // ✅ Clean up OTP state when component unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(setOtpSent(false))
+    }
+  }, [dispatch])
 
   if (method === "mobile" && otpSent) {
     return (
@@ -96,7 +109,7 @@ export default function LoginWrapper() {
           )}
           {!showForgotPassword && (
             <div className="text-center text-muted-foreground text-sm mt-6">
-              Don’t have an account?{" "}
+              Don't have an account?{" "}
               <button
                 className="text-accent hover:underline"
                 onClick={() => setRegisterDrawerOpen(true)}
