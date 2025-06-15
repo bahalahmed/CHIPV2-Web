@@ -105,7 +105,7 @@ export function OtpSection({
     setShowOtpInput(false)
     setVerified(false)
     setOtp(Array(6).fill(""))
-    setTimer(30)
+    setTimer(60)
     setCanResend(false)
 
     if (mode === "login") {
