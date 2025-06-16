@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import PhoneInputField from "../shared/PhoneInputField"
 import { mobileLoginSchema, type MobileLoginData, formatPhoneNumber, isValidPhone } from "@/lib/validations"
 // import { useAppDispatch } from '@/hooks/reduxHooks'
+// import { useSendOtpMutation, createOtpRequest } from "@/features/auth/authApiSlice"
 
 interface MobileLoginProps {
   onOtpSent: () => void
@@ -18,6 +19,9 @@ interface MobileLoginProps {
 export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) {
   const [loading, setLoading] = useState(false)
   // const dispatch = useAppDispatch()
+  
+  // TODO: Uncomment when API is ready
+  // const [sendOtp, { isLoading: isOtpLoading }] = useSendOtpMutation()
 
   // ✅ React Hook Form with Zod validation
   const {
@@ -45,11 +49,16 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
     try {
       console.log("✅ Validated mobile data:", data)
       
-      // ✅ FUTURE: Replace with actual API call
-      // const res = await axios.post("/api/auth/send-otp", { mobile: data.mobile })
-      // const { success, message } = res.data
+      // TODO: Uncomment when API is ready - Using RTK Query
+      // const otpRequest = createOtpRequest('mobile', data.mobile)
+      // const response = await sendOtp(otpRequest).unwrap()
+      // 
+      // console.log('✅ OTP sent successfully:', response)
+      // setMobile(data.mobile)
+      // toast.success(response.message || "OTP sent successfully!")
+      // onOtpSent()
 
-      // Mock API call simulation
+      // MOCK IMPLEMENTATION - Remove when API is ready
       await new Promise(resolve => setTimeout(resolve, 1000))
 
       const mockUser = {
@@ -152,6 +161,8 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
         type="button"
         onClick={handleGetOtpClick}
         disabled={loading || isSubmitting} // Only disable when loading/submitting
+        // TODO: When API is ready, also disable when isOtpLoading
+        // disabled={loading || isSubmitting || isOtpLoading}
         aria-describedby="get-otp-button-description"
       >
         {(loading || isSubmitting) ? (

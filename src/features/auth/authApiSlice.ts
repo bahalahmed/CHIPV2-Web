@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import PasswordSecurity from '@/utils/passwordSecurity';
 
 // Types for API responses
 interface LoginRequest {
@@ -127,20 +128,92 @@ export const authApiSlice = createApi({
   keepUnusedDataFor: 60, // Keep cache for 1 minute
   refetchOnMountOrArgChange: 30, // Refetch if data is older than 30 seconds
   endpoints: (builder) => ({
-    // Email/Password Login
+    // Email/Password Login (MOCKED for development)
     loginWithEmail: builder.mutation<LoginResponse, LoginRequest>({
-      query: (credentials) => ({
-        url: '/users/login',
-        method: 'POST',
-        body: credentials,
-      }),
-      invalidatesTags: ['User', 'Session'],
-      transformErrorResponse: (response: FetchBaseQueryError) => {
-        return {
-          status: response.status,
-          message: (response.data as any)?.message || 'Login failed',
+      // TODO: Uncomment this when API is ready
+      // query: (credentials) => {
+      //   // Hash password before sending
+      //   const hashedCredentials = {
+      //     ...credentials,
+      //     password: PasswordSecurity.hashPassword(credentials.password)
+      //   };
+      //   
+      //   console.log('🔒 Password hashed for secure transmission');
+      //   
+      //   return {
+      //     url: '/auth/login',
+      //     method: 'POST',
+      //     body: hashedCredentials,
+      //   };
+      // },
+      // transformErrorResponse: (response: FetchBaseQueryError) => {
+      //   return {
+      //     status: response.status,
+      //     message: (response.data as any)?.message || 'Login failed',
+      //   };
+      // },
+      
+      // MOCK IMPLEMENTATION - Remove when API is ready
+      queryFn: async (credentials) => {
+        // Hash password like the real API would
+        const hashedPassword = PasswordSecurity.hashPassword(credentials.password);
+        
+        console.log('🔄 Mock Login - Original Password:', credentials.password);
+        console.log('🔒 Mock Login - Hashed Password:', hashedPassword);
+        console.log('🔄 Mock Login - Email:', credentials.email);
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Mock validation - accept any email with "admin" or valid format
+        const isValidEmail = credentials.email?.includes('@') || false;
+        const isValidPassword = credentials.password && credentials.password.length > 0;
+        
+        if (!isValidEmail) {
+          return {
+            error: {
+              status: 422,
+              data: {
+                success: false,
+                message: 'Please enter a valid email address',
+                errors: [{ field: 'email', message: 'Invalid email format' }]
+              }
+            }
+          };
+        }
+        
+        if (!isValidPassword) {
+          return {
+            error: {
+              status: 422,
+              data: {
+                success: false,
+                message: 'Password is required',
+                errors: [{ field: 'password', message: 'Password cannot be empty' }]
+              }
+            }
+          };
+        }
+        
+        // Mock successful login response
+        const mockUser = {
+          id: "mock_user_" + Date.now(),
+          email: credentials.email || "user@example.com",  
+          mobile: "9876543210",
+          name: credentials.email?.split('@')[0] || "Mock User",
+          role: credentials.email?.includes('admin') ? "Admin" : "User"
         };
+        
+        const mockResponse: LoginResponse = {
+          user: mockUser,
+          token: "mock_jwt_token_" + btoa(JSON.stringify(mockUser)),
+          refreshToken: "mock_refresh_token_" + Date.now()
+        };
+        
+        console.log('✅ Mock Login Success:', mockResponse);
+        return { data: mockResponse };
       },
+      invalidatesTags: ['User', 'Session'],
     }),
 
     // Mobile Login

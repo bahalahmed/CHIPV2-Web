@@ -1,7 +1,7 @@
 "use client"
 
 import { useNavigate } from "react-router-dom"
-import { Header } from "../homepage/header"
+import { HeaderWithApi } from "../homepage/header-with-api"
 import { Button } from "@/components/ui/button"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/app/store"
@@ -29,7 +29,7 @@ export default function UserDetailsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <HeaderWithApi />
 
       <main className="container mx-auto py-8 px-4">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200">
