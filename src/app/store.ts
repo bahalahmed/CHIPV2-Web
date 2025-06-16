@@ -7,6 +7,7 @@ import otpReducer from "@/features/auth/otpSlice";
 import geoDataReducer from "@/features/geoData/geoDataSlice";
 import stateReducer from "@/features/state/stateSlice";
 import { authApiSlice } from "@/features/auth/authApiSlice";
+import { geoApiSlice } from "@/features/geoData/geoApiSlice";
 
 export const store = configureStore({
   reducer: {
@@ -17,13 +18,14 @@ export const store = configureStore({
     geoData: geoDataReducer,
     state: stateReducer,
     [authApiSlice.reducerPath]: authApiSlice.reducer,
+    [geoApiSlice.reducerPath]: geoApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
-    }).concat(authApiSlice.middleware),
+    }).concat(authApiSlice.middleware, geoApiSlice.middleware),
 });
 
 //Types for useDispatch and useSelector

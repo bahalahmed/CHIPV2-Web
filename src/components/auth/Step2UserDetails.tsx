@@ -1,99 +1,169 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
-const levelOrder = ["State", "Division", "District", "Block", "PHC/CHC"]
 import type { RootState } from "@/app/store"
 import type { AppDispatch } from "@/app/store"
+import { resetGeoData } from "@/features/geoData/geoDataSlice"
 import {
-    loadStates,
-    loadDivisions,
-    loadDistricts,
-    loadBlocks,
-    loadSectors,
-    loadOrgTypesByState,
-    loadDesignations,
-    resetGeoData,
-    loadOrganizations
-} from "@/features/geoData/geoDataSlice"
+    useGetStatesQuery,
+    useGetDivisionsQuery,
+    useGetDistrictsQuery,
+    useGetBlocksQuery,
+    useGetSectorsQuery,
+    useGetOrgTypesQuery,
+    useGetOrganizationsQuery,
+    useGetDesignationsQuery,
+    handleGeoApiError
+} from "@/features/geoData/geoApiSlice"
 import { updateLevelInfo } from "@/features/registerForm/registerFormSlice"
-import { step2Schema, type Step2FormData, validateField } from "@/lib/validations"
+import { step2Schema, type Step2FormData } from "@/lib/validations"
 
-// ✅ Better type definitions
+// 🚀 Production-optimized constants
+const LEVEL_ORDER = ["State", "Division", "District", "Block", "PHC/CHC"] as const
+type LevelType = typeof LEVEL_ORDER[number]
+
+// 🚀 Production-ready type definitions
 interface GeoOption {
-    id: string
-    name: string
+    readonly id: string
+    readonly name: string
 }
 
 interface GeoField {
-    key: string
-    value: string
-    field: string
-    options: GeoOption[]
+    readonly key: LevelType
+    readonly value: string
+    readonly field: string
+    readonly options: readonly GeoOption[]
 }
 
 interface LoadingStates {
-    states: boolean
-    divisions: boolean
-    districts: boolean
-    blocks: boolean
-    sectors: boolean
-    orgTypes: boolean
-    organizations: boolean
-    designations: boolean
+    readonly states: boolean
+    readonly divisions: boolean
+    readonly districts: boolean
+    readonly blocks: boolean
+    readonly sectors: boolean
+    readonly orgTypes: boolean
+    readonly organizations: boolean
+    readonly designations: boolean
 }
 
-const Step2UserDetails = () => {
+interface FieldErrors {
+    selectedLevel?: string
+    state?: string
+    division?: string
+    district?: string
+    block?: string
+    sector?: string
+    organizationTypeId?: string
+    organizationId?: string
+    designationId?: string
+}
+
+
+// 🚀 Production-optimized memoized selectors
+const selectLevelInfo = (state: RootState) => state.registerForm.levelInfo
+
+const Step2UserDetails = React.memo(() => {
     const dispatch: AppDispatch = useDispatch()
-    const levelInfo = useSelector((state: RootState) => state.registerForm.levelInfo)
-    const geo = useSelector((state: RootState) => state.geoData)
-
-    // ✅ Loading states for each data type
-    const [loadingStates, setLoadingStates] = useState<LoadingStates>({
-        states: false,
-        divisions: false,
-        districts: false,
-        blocks: false,
-        sectors: false,
-        orgTypes: false,
-        organizations: false,
-        designations: false
+    const levelInfo = useSelector(selectLevelInfo)
+    
+    // 🚀 Optimized RTK Query hooks with proper dependency tracking
+    const { data: states = [], isLoading: statesLoading, error: statesError } = useGetStatesQuery(undefined, {
+        refetchOnMountOrArgChange: 300 // Cache for 5 minutes
     })
+    
+    const { data: divisions = [], isLoading: divisionsLoading, error: divisionsError } = useGetDivisionsQuery(
+        levelInfo.state, 
+        { skip: !levelInfo.state }
+    )
+    
+    const { data: districts = [], isLoading: districtsLoading, error: districtsError } = useGetDistrictsQuery(
+        levelInfo.division, 
+        { skip: !levelInfo.division }
+    )
+    
+    const { data: blocks = [], isLoading: blocksLoading, error: blocksError } = useGetBlocksQuery(
+        levelInfo.district, 
+        { skip: !levelInfo.district }
+    )
+    
+    const { data: sectors = [], isLoading: sectorsLoading, error: sectorsError } = useGetSectorsQuery(
+        levelInfo.block, 
+        { skip: !levelInfo.block }
+    )
+    
+    const { data: orgTypes = [], isLoading: orgTypesLoading, error: orgTypesError } = useGetOrgTypesQuery(
+        levelInfo.state, 
+        { skip: !levelInfo.state }
+    )
+    
+    const { data: organizations = [], isLoading: organizationsLoading, error: organizationsError } = useGetOrganizationsQuery(
+        levelInfo.organizationTypeId, 
+        { skip: !levelInfo.organizationTypeId }
+    )
+    
+    const { data: designations = [], isLoading: designationsLoading, error: designationsError } = useGetDesignationsQuery(
+        levelInfo.organizationId, 
+        { skip: !levelInfo.organizationId }
+    )
 
-    // ✅ Error states for inline validation
-    const [fieldErrors, setFieldErrors] = useState<{
-        selectedLevel?: string
-        state?: string
-        division?: string
-        district?: string
-        block?: string
-        sector?: string
-        organizationTypeId?: string
-        organizationId?: string
-        designationId?: string
-    }>({})
+    // 🚀 Memoized combined data objects to prevent unnecessary re-renders
+    const geo = useMemo(() => ({
+        states,
+        divisions,
+        districts,
+        blocks,
+        sectors,
+        orgTypes,
+        organizations,
+        designations
+    }), [states, divisions, districts, blocks, sectors, orgTypes, organizations, designations])
 
-    // ✅ React Hook Form with Zod validation
+    const loadingStates: LoadingStates = useMemo(() => ({
+        states: statesLoading,
+        divisions: divisionsLoading,
+        districts: districtsLoading,
+        blocks: blocksLoading,
+        sectors: sectorsLoading,
+        orgTypes: orgTypesLoading,
+        organizations: organizationsLoading,
+        designations: designationsLoading
+    }), [statesLoading, divisionsLoading, districtsLoading, blocksLoading, sectorsLoading, orgTypesLoading, organizationsLoading, designationsLoading])
+
+    // 🚀 Optimized error state management
+    const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+
+    // 🚀 Optimized React Hook Form with proper typing
     const {
-        handleSubmit,
-        formState: { errors, isValid },
         setValue,
-        trigger,
-        watch,
-        getValues
+        trigger
     } = useForm<Step2FormData>({
         resolver: zodResolver(step2Schema),
         mode: "onChange",
-        defaultValues: {
-            selectedLevel: levelInfo.selectedLevel as any || undefined,
+        defaultValues: useMemo(() => ({
+            selectedLevel: (levelInfo.selectedLevel as Step2FormData['selectedLevel']) || "",
+            state: levelInfo.state || "",
+            division: levelInfo.division || "",
+            district: levelInfo.district || "",
+            block: levelInfo.block || "",
+            sector: levelInfo.sector || "",
+            organizationTypeId: levelInfo.organizationTypeId || "",
+            organizationId: levelInfo.organizationId || "",
+            designationId: levelInfo.designationId || "",
+        }), [levelInfo])
+    })
+
+    // 🚀 Optimized form synchronization with dependency array
+    useEffect(() => {
+        const updates: Partial<Step2FormData> = {
+            selectedLevel: (levelInfo.selectedLevel as Step2FormData['selectedLevel']) || "",
             state: levelInfo.state || "",
             division: levelInfo.division || "",
             district: levelInfo.district || "",
@@ -103,111 +173,68 @@ const Step2UserDetails = () => {
             organizationId: levelInfo.organizationId || "",
             designationId: levelInfo.designationId || "",
         }
-    })
-
-    // ✅ Sync form values with Redux state
-    useEffect(() => {
-        setValue("selectedLevel", levelInfo.selectedLevel as any)
-        setValue("state", levelInfo.state || "")
-        setValue("division", levelInfo.division || "")
-        setValue("district", levelInfo.district || "")
-        setValue("block", levelInfo.block || "")
-        setValue("sector", levelInfo.sector || "")
-        setValue("organizationTypeId", levelInfo.organizationTypeId || "")
-        setValue("organizationId", levelInfo.organizationId || "")
-        setValue("designationId", levelInfo.designationId || "")
+        
+        Object.entries(updates).forEach(([key, value]) => {
+            setValue(key as keyof Step2FormData, value as string)
+        })
     }, [levelInfo, setValue])
 
-    // ✅ Update field errors
-    const updateFieldError = (fieldName: keyof typeof fieldErrors, error?: string) => {
-        setFieldErrors(prev => ({
-            ...prev,
-            [fieldName]: error
-        }))
-    }
+    // 🚀 Memoized error update function
+    const updateFieldError = useCallback((fieldName: keyof FieldErrors, error?: string) => {
+        setFieldErrors(prev => {
+            if (prev[fieldName] === error) return prev // Prevent unnecessary updates
+            return {
+                ...prev,
+                [fieldName]: error
+            }
+        })
+    }, [])
 
-    // ✅ Enhanced data loading with loading states and error handling
-    const loadDataWithState = async (
-        loadingKey: keyof LoadingStates,
-        thunkAction: any,
-        errorContext: string
-    ) => {
-        setLoadingStates(prev => ({ ...prev, [loadingKey]: true }))
-        
-        try {
-            await dispatch(thunkAction).unwrap()
-        } catch (error) {
-            console.error(`Failed to load ${errorContext}:`, error)
-            toast.error(`Failed to load ${errorContext}. Please try again.`)
-        } finally {
-            setLoadingStates(prev => ({ ...prev, [loadingKey]: false }))
-        }
-    }
-
-    // ✅ Initial load with error handling
-    useEffect(() => {
-        loadDataWithState('states', loadStates(), 'states')
-    }, [dispatch])
+    // 🚀 Optimized error handling with single effect and memoization
+    const apiErrors = useMemo(() => ({
+        states: statesError,
+        divisions: divisionsError,
+        districts: districtsError,
+        blocks: blocksError,
+        sectors: sectorsError,
+        orgTypes: orgTypesError,
+        organizations: organizationsError,
+        designations: designationsError
+    }), [statesError, divisionsError, districtsError, blocksError, sectorsError, orgTypesError, organizationsError, designationsError])
 
     useEffect(() => {
-        if (levelInfo.state) {
-            loadDataWithState('divisions', loadDivisions(levelInfo.state), 'divisions')
-            loadDataWithState('orgTypes', loadOrgTypesByState(levelInfo.state), 'organization types')
-        }
-    }, [dispatch, levelInfo.state])
+        Object.entries(apiErrors).forEach(([context, error]) => {
+            if (error) {
+                console.error(`${context} loading error:`, error)
+                toast.error(handleGeoApiError(error, context))
+            }
+        })
+    }, [apiErrors])
 
-    useEffect(() => {
-        if (levelInfo.division) {
-            loadDataWithState('districts', loadDistricts(levelInfo.division), 'districts')
-        }
-    }, [dispatch, levelInfo.division])
-
-    useEffect(() => {
-        if (levelInfo.district) {
-            loadDataWithState('blocks', loadBlocks(levelInfo.district), 'blocks')
-        }
-    }, [dispatch, levelInfo.district])
-
-    useEffect(() => {
-        if (levelInfo.block) {
-            loadDataWithState('sectors', loadSectors(levelInfo.block), 'sectors')
-        }
-    }, [dispatch, levelInfo.block])
-
-    useEffect(() => {
-        if (levelInfo.organizationTypeId) {
-            loadDataWithState('organizations', loadOrganizations(levelInfo.organizationTypeId), 'organizations')
-        }
-    }, [dispatch, levelInfo.organizationTypeId])
-    
-    useEffect(() => {
-        if (levelInfo.organizationId) {
-            loadDataWithState('designations', loadDesignations({ organizationId: levelInfo.organizationId }), 'designations')
-        }
-    }, [dispatch, levelInfo.organizationId])
-
-    // ✅ Enhanced validation for field requirements
-    const validateFieldRequirement = async (fieldName: keyof Step2FormData, value: string) => {
+    // 🚀 Memoized field validation with proper typing
+    const validateFieldRequirement = useCallback(async (fieldName: keyof Step2FormData, value: string) => {
         if (!value && fieldName !== 'selectedLevel') {
-            updateFieldError(fieldName, `${fieldName} is required`)
+            updateFieldError(fieldName as keyof FieldErrors, `${String(fieldName)} is required`)
         } else {
-            updateFieldError(fieldName, undefined)
+            updateFieldError(fieldName as keyof FieldErrors, undefined)
         }
         
-        setValue(fieldName, value as any, { shouldValidate: true })
+        setValue(fieldName, value as Step2FormData[typeof fieldName], { shouldValidate: true })
         await trigger(fieldName)
-    }
+    }, [setValue, trigger, updateFieldError])
 
-    const geoFields: GeoField[] = [
-        { key: "State", value: levelInfo.state, field: "state", options: geo.states || [] },
-        { key: "Division", value: levelInfo.division, field: "division", options: geo.divisions || [] },
-        { key: "District", value: levelInfo.district, field: "district", options: geo.districts || [] },
-        { key: "Block", value: levelInfo.block, field: "block", options: geo.blocks || [] },
-        { key: "PHC/CHC", value: levelInfo.sector, field: "sector", options: geo.sectors || [] },
-    ]
+    // 🚀 Memoized geo fields to prevent recreation on every render
+    const geoFields: readonly GeoField[] = useMemo(() => [
+        { key: "State", value: levelInfo.state, field: "state", options: geo.states },
+        { key: "Division", value: levelInfo.division, field: "division", options: geo.divisions },
+        { key: "District", value: levelInfo.district, field: "district", options: geo.districts },
+        { key: "Block", value: levelInfo.block, field: "block", options: geo.blocks },
+        { key: "PHC/CHC", value: levelInfo.sector, field: "sector", options: geo.sectors },
+    ], [levelInfo.state, levelInfo.division, levelInfo.district, levelInfo.block, levelInfo.sector, geo])
 
-    const getResetPayload = (field: string) => {
-        const resetMap: Record<string, string[]> = {
+    // 🚀 Memoized reset payload calculation
+    const getResetPayload = useCallback((field: string) => {
+        const resetMap: Record<string, readonly string[]> = {
             state: [
                 "division", "district", "block", "sector", 
                 "organizationTypeId", "organizationTypeLabel", 
@@ -223,24 +250,24 @@ const Step2UserDetails = () => {
         }
 
         return resetMap[field]?.reduce((acc, key) => ({ ...acc, [key]: "" }), {}) || {}
-    }
+    }, [])
 
-    // ✅ Enhanced level selection with validation
-    const handleLevelSelection = async (level: string) => {
+    // 🚀 Optimized level selection handler
+    const handleLevelSelection = useCallback(async (level: string) => {
         dispatch(updateLevelInfo({ selectedLevel: level }))
         await validateFieldRequirement('selectedLevel', level)
         
         // Clear errors for fields that will be hidden
-        const selectedIndex = levelOrder.indexOf(level)
+        const selectedIndex = LEVEL_ORDER.indexOf(level as LevelType)
         geoFields.forEach((field, index) => {
             if (index > selectedIndex) {
-                updateFieldError(field.field as keyof typeof fieldErrors, undefined)
+                updateFieldError(field.field as keyof FieldErrors, undefined)
             }
         })
-    }
+    }, [dispatch, validateFieldRequirement, geoFields, updateFieldError])
 
-    // ✅ Enhanced field change handlers with validation
-    const handleGeoFieldChange = async (field: string, val: string) => {
+    // 🚀 Optimized geographic field change handler
+    const handleGeoFieldChange = useCallback(async (field: string, val: string) => {
         const reset = getResetPayload(field)
         dispatch(updateLevelInfo({ [field]: val, ...reset }))
         dispatch(resetGeoData(field))
@@ -249,18 +276,17 @@ const Step2UserDetails = () => {
         
         // Clear errors for reset fields
         Object.keys(reset).forEach(resetField => {
-            updateFieldError(resetField as keyof typeof fieldErrors, undefined)
+            updateFieldError(resetField as keyof FieldErrors, undefined)
             // Also clear form values for reset fields
             if (['organizationTypeId', 'organizationId', 'designationId'].includes(resetField)) {
                 setValue(resetField as keyof Step2FormData, '', { shouldValidate: true })
             }
         })
-        
-        // Department fields are automatically reset when state changes (silent operation)
-    }
+    }, [dispatch, getResetPayload, validateFieldRequirement, updateFieldError, setValue])
 
-    const handleOrgTypeChange = async (val: string) => {
-        const selected = geo.orgTypes?.find((opt: any) => opt.id === val)
+    // 🚀 Optimized organization type change handler
+    const handleOrgTypeChange = useCallback(async (val: string) => {
+        const selected = geo.orgTypes.find((opt: GeoOption) => opt.id === val)
         dispatch(updateLevelInfo({
             organizationTypeId: val,
             organizationTypeLabel: selected?.name || "",
@@ -274,10 +300,11 @@ const Step2UserDetails = () => {
         await validateFieldRequirement('organizationTypeId', val)
         updateFieldError('organizationId', undefined)
         updateFieldError('designationId', undefined)
-    }
+    }, [dispatch, geo.orgTypes, validateFieldRequirement, updateFieldError])
 
-    const handleOrgChange = async (val: string) => {
-        const selected = geo.organizations?.find((opt: any) => opt.id === val)
+    // 🚀 Optimized organization change handler
+    const handleOrgChange = useCallback(async (val: string) => {
+        const selected = geo.organizations.find((opt: GeoOption) => opt.id === val)
         dispatch(updateLevelInfo({
             organizationId: val,
             organizationLabel: selected?.name || "",
@@ -288,54 +315,24 @@ const Step2UserDetails = () => {
         
         await validateFieldRequirement('organizationId', val)
         updateFieldError('designationId', undefined)
-    }
+    }, [dispatch, geo.organizations, validateFieldRequirement, updateFieldError])
 
-    const handleDesignationChange = async (val: string) => {
-        const selected = geo.designations?.find((opt: any) => opt.id === val)
+    // 🚀 Optimized designation change handler
+    const handleDesignationChange = useCallback(async (val: string) => {
+        const selected = geo.designations.find((opt: GeoOption) => opt.id === val)
         dispatch(updateLevelInfo({ designationId: val, designationLabel: selected?.name || "" }))
         
         await validateFieldRequirement('designationId', val)
-    }
+    }, [dispatch, geo.designations, validateFieldRequirement])
 
-    // ✅ Step validation function for parent component
-    const validateAllFields = async () => {
-        const isFormValid = await trigger()
-        
-        if (!isFormValid) {
-            const errorFields = []
-            if (errors.selectedLevel) errorFields.push("Administrative Level")
-            if (errors.state) errorFields.push("State")
-            if (errors.division) errorFields.push("Division")
-            if (errors.district) errorFields.push("District")
-            if (errors.block) errorFields.push("Block")
-            if (errors.sector) errorFields.push("PHC/CHC")
-            if (errors.organizationTypeId) errorFields.push("Organization Type")
-            if (errors.organizationId) errorFields.push("Organization")
-            if (errors.designationId) errorFields.push("Designation")
-            
-            if (errorFields.length > 0) {
-                toast.error(`Please complete: ${errorFields.join(", ")}`)
-            }
-            return false
-        }
-        
-        return true
-    }
 
-    // ✅ Check if step is complete
-    const isStepValid = () => {
-        return isValid && levelInfo.selectedLevel && levelInfo.state && 
-               levelInfo.organizationTypeId && levelInfo.organizationId && levelInfo.designationId
-    }
+    // 🚀 Memoized utility functions and styles
+    const isSelected = useCallback((level: string) => levelInfo.selectedLevel === level, [levelInfo.selectedLevel])
 
-    // If you want to expose methods to a parent, use forwardRef and useImperativeHandle there.
-    // Removed invalid useImperativeHandle call.
-
-    const isSelected = (level: string) => levelInfo.selectedLevel === level
-    const isNoneSelected = !levelInfo.selectedLevel
-
-    const baseClass = "bg-background text-muted-foreground border border-border hover:bg-secondary"
-    const selectedClass = "bg-primary text-primary-foreground hover:bg-primary/90"
+    const buttonClasses = useMemo(() => ({
+        base: "bg-background text-muted-foreground border border-border hover:bg-secondary",
+        selected: "bg-primary text-primary-foreground hover:bg-primary/90"
+    }), [])
 
     return (
         <div className="space-y-6">
@@ -344,11 +341,11 @@ const Step2UserDetails = () => {
                 <hr className="border-border" />
 
                 <div className="flex flex-wrap gap-2">
-                    {levelOrder.map((level) => (
+                    {LEVEL_ORDER.map((level) => (
                         <Button
                             key={level}
                             variant="default"
-                            className={isSelected(level) ? selectedClass : isNoneSelected ? baseClass : baseClass}
+                            className={isSelected(level) ? buttonClasses.selected : buttonClasses.base}
                             onClick={() => handleLevelSelection(level)}
                         >
                             {level}
@@ -372,17 +369,17 @@ const Step2UserDetails = () => {
                 <hr className="border-border" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {geoFields.map(({ key, value, field, options }, index) => {
-                        const selectedIndex = levelOrder.indexOf(levelInfo.selectedLevel)
+                        const selectedIndex = LEVEL_ORDER.indexOf(levelInfo.selectedLevel as LevelType)
                         if (index > selectedIndex) return null
 
                         const isDisabled = index > 0 && !levelInfo[geoFields[index - 1].field as keyof typeof levelInfo]
-                        const isLoading = loadingStates[field as keyof LoadingStates] || loadingStates[geoFields[index - 1]?.field as keyof LoadingStates]
+                        const isLoading = loadingStates[field as keyof LoadingStates] || (index > 0 && loadingStates[geoFields[index - 1]?.field as keyof LoadingStates])
                         
                         return (
                             <div key={key}>
                                 <Label className="text-sm text-muted-foreground mb-2 block">{`Select ${key}`}</Label>
                                 <Select
-                                    value={value || undefined}
+                                    value={value || ""}
                                     onValueChange={(val) => handleGeoFieldChange(field, val)}
                                     disabled={!!isDisabled}
                                 >
@@ -397,12 +394,12 @@ const Step2UserDetails = () => {
                                                     Loading...
                                                 </span>
                                             ) : (
-                                                options.find((opt: any) => opt.id === value)?.name || `Select ${key}`
+                                                options.find((opt: GeoOption) => opt.id === value)?.name || `Select ${key}`
                                             )}
                                         </SelectValue>
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {options.map((opt: any) => (
+                                        {options.map((opt: GeoOption) => (
                                             <SelectItem key={opt.id} value={opt.id}>
                                                 {opt.name}
                                             </SelectItem>
@@ -434,7 +431,7 @@ const Step2UserDetails = () => {
                     <div>
                         <Label className="text-sm text-muted-foreground mb-2 block">Type of Organisation</Label>
                         <Select
-                            value={levelInfo.organizationTypeId || undefined}
+                            value={levelInfo.organizationTypeId || ""}
                             onValueChange={handleOrgTypeChange}
                         >
                             <SelectTrigger className="w-full h-12 bg-background border border-border rounded-md px-4 py-2">
@@ -453,7 +450,7 @@ const Step2UserDetails = () => {
                                 </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
-                                {geo.orgTypes?.map((opt: any) => (
+                                {geo.orgTypes.map((opt: GeoOption) => (
                                     <SelectItem key={opt.id} value={opt.id}>
                                         {opt.name}
                                     </SelectItem>
@@ -474,7 +471,7 @@ const Step2UserDetails = () => {
                     <div>
                         <Label className="text-sm text-muted-foreground mb-2 block">Name of Organisation</Label>
                         <Select
-                            value={levelInfo.organizationId || undefined}
+                            value={levelInfo.organizationId || ""}
                             onValueChange={handleOrgChange}
                             disabled={!levelInfo.organizationTypeId}
                         >
@@ -494,7 +491,7 @@ const Step2UserDetails = () => {
                                 </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
-                                {geo.organizations?.map((opt: any) => (
+                                {geo.organizations.map((opt: GeoOption) => (
                                     <SelectItem key={opt.id} value={opt.id}>
                                         {opt.name}
                                     </SelectItem>
@@ -515,7 +512,7 @@ const Step2UserDetails = () => {
                     <div className="md:col-span-2">
                         <Label className="text-sm text-muted-foreground mb-2 block">Designation</Label>
                         <Select
-                            value={levelInfo.designationId || undefined}
+                            value={levelInfo.designationId || ""}
                             onValueChange={handleDesignationChange}
                             disabled={!levelInfo.organizationId}
                         >
@@ -535,7 +532,7 @@ const Step2UserDetails = () => {
                                 </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
-                                {geo.designations?.map((opt: any) => (
+                                {geo.designations.map((opt: GeoOption) => (
                                     <SelectItem key={opt.id} value={opt.id}>
                                         {opt.name}
                                     </SelectItem>
@@ -556,7 +553,9 @@ const Step2UserDetails = () => {
             </Card>
         </div>
     )
-}
+})
 
-const Step2UserDetailsMemo = React.memo(Step2UserDetails)
-export default Step2UserDetailsMemo
+// 🚀 Set display name for better debugging
+Step2UserDetails.displayName = 'Step2UserDetails'
+
+export default Step2UserDetails
