@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import PhoneInputField from "../shared/PhoneInputField"
 import { mobileLoginSchema, type MobileLoginData, formatPhoneNumber, isValidPhone } from "@/lib/validations"
-// import { useAppDispatch } from '@/hooks/reduxHooks'
+import { useAppDispatch } from '@/hooks/reduxHooks'
+import { useSendOtpMutation, createOtpRequest } from "@/features/auth/authApiSlice"
 
 interface MobileLoginProps {
   onOtpSent: () => void
@@ -14,7 +15,10 @@ interface MobileLoginProps {
 
 export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) {
   const [loading, setLoading] = useState(false)
-  // const dispatch = useAppDispatch()
+  const dispatch = useAppDispatch()
+  
+  // RTK Query hook - ready for API integration
+  const [sendOtp, { isLoading: isOtpLoading }] = useSendOtpMutation()
 
   // ✅ React Hook Form with Zod validation
   const {
@@ -42,35 +46,81 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
     try {
       console.log("✅ Validated mobile data:", data)
       
-      // ✅ FUTURE: Replace with actual API call
-      // const res = await axios.post("/api/auth/send-otp", { mobile: data.mobile })
-      // const { success, message } = res.data
+      // TODO: Uncomment when API is ready - Using RTK Query
+      // try {
+      //   const otpRequest = createOtpRequest('mobile', data.mobile)
+      //   const response = await sendOtp(otpRequest).unwrap()
+      //   
+      //   console.log('✅ OTP sent successfully:', response)
+      //   
+      //   // Store otpId for verification step
+      //   localStorage.setItem('otpId', response.otpId)
+      //   
+      //   setMobile(data.mobile)
+      //   toast.success(response.message || "OTP sent successfully!")
+      //   onOtpSent()
+      //   return
+      // } catch (error: any) {
+      //   console.error('Send OTP error:', error)
+      //   
+      //   // Handle specific error responses
+      //   if (error.status === 400) {
+      //     if (error.data?.code === 'MOBILE_NOT_REGISTERED') {
+      //       toast.error('Mobile number not registered. Please sign up first.')
+      //     } else {
+      //       toast.error(error.data?.message || 'Failed to send OTP.')
+      //     }
+      //   } else if (error.status === 429) {
+      //     const retryAfter = error.data?.retryAfter || 300
+      //     toast.error(`Too many OTP requests. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`)
+      //   } else if (error.status === 500) {
+      //     toast.error('Server error. Please try again later.')
+      //   } else if (error.status === 'FETCH_ERROR') {
+      //     toast.error('Network error. Please check your internet connection.')
+      //   } else {
+      //     toast.error(error.data?.message || 'Failed to send OTP. Please try again.')
+      //   }
+      //   return
+      // }
 
-      // Mock API call simulation
+      // MOCK IMPLEMENTATION - Remove when API is ready
       await new Promise(resolve => setTimeout(resolve, 1000))
 
-      const mockUser = {
-        id: "mob-67890",
-        name: "Mobile User",
-        email: "mobileuser@example.com",
-        mobile: data.mobile,
-        role: "User",
+      // Mock OTP response (Step 1: Send OTP only)
+      const mockOtpResponse = {
+        success: true,
+        message: "OTP sent successfully",
+        otpId: `mock_otp_${Date.now()}_${data.mobile}`
       }
+      
+      console.log('📱 Mock Step 1 - Send OTP Response:', mockOtpResponse)
 
-      const mockToken = "mock-mobile-jwt-token"
-
-      // ✅ Save to Redux (uncomment when ready)
-      // dispatch(setUser({ user: mockUser, token: mockToken }))
-
-      localStorage.setItem("auth", JSON.stringify({ user: mockUser, token: mockToken }))
+      // Store mock otpId for verification step (same as real API would do)
+      localStorage.setItem('otpId', mockOtpResponse.otpId)
 
       setMobile(data.mobile)
-      toast.success("OTP sent successfully!")
+      toast.success(mockOtpResponse.message)
       onOtpSent()
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Send OTP error:", error)
-      toast.error("Failed to send OTP. Please try again.")
+      
+      // Mock error handling (simulate different error scenarios for testing)
+      const mockErrorType = Math.random()
+      
+      if (mockErrorType < 0.15) {
+        // Simulate mobile not registered error
+        toast.error('Mobile number not registered. Please sign up first.')
+      } else if (mockErrorType < 0.25) {
+        // Simulate rate limiting error
+        toast.error('Too many OTP requests. Please try again in 5 minutes.')
+      } else if (mockErrorType < 0.35) {
+        // Simulate server error
+        toast.error('Server error. Please try again later.')
+      } else {
+        // Default error
+        toast.error("Failed to send OTP. Please try again.")
+      }
     } finally {
       setLoading(false)
     }
@@ -148,10 +198,10 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
         className="w-full py-5 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium rounded-xl"
         type="button"
         onClick={handleGetOtpClick}
-        disabled={loading || isSubmitting} // Only disable when loading/submitting
+        disabled={loading || isSubmitting || isOtpLoading} // Include RTK Query loading state
         aria-describedby="get-otp-button-description"
       >
-        {(loading || isSubmitting) ? (
+        {(loading || isSubmitting || isOtpLoading) ? (
           <span className="flex items-center gap-2">
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
@@ -168,12 +218,7 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
         Click to get OTP. Form will validate and show specific error messages if needed.
       </div>
 
-      {/* ✅ Help text */}
-      <div className="text-center">
-        <p className="text-xs text-muted-foreground">
-          We'll send a 6-digit OTP to verify your mobile number
-        </p>
-      </div>
+      
     </div>
   )
 }

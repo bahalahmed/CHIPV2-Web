@@ -10,6 +10,8 @@ import { setOtpSent } from "@/features/auth/loginTabSlice"
 import PhoneInputField from "../shared/PhoneInputField"
 import EmailInputField from "../shared/EmailInputField"
 import { CheckCircle } from "lucide-react"
+import { useVerifyOtpMutation, createVerifyOtpRequest } from "@/features/auth/authApiSlice"
+import { login } from "@/features/auth/authSlice"
 
 interface OtpSectionProps {
   label: string
@@ -54,16 +56,82 @@ export function OtpSection({
   const [canResend, setCanResend] = useState(false)
   const [resendTrigger, setResendTrigger] = useState(0)
   const [isVerifying, setIsVerifying] = useState(false)
+  const [attemptCount, setAttemptCount] = useState(0)
+  const [isBlocked, setIsBlocked] = useState(false)
+  const [blockTimer, setBlockTimer] = useState(0)
 
-  const handleSubmitOtp = () => {
+  // RTK Query hook - ready for API integration  
+  const [verifyOtp, { isLoading: isOtpVerifying }] = useVerifyOtpMutation()
+
+  const handleSubmitOtp = async () => {
     const fullOtp = otp.join("")
+    
+    // ✅ Check if user is blocked due to failed attempts
+    if (isBlocked) {
+      toast.error(`Too many failed attempts. Please try again in ${Math.ceil(blockTimer / 60)} minutes.`)
+      return
+    }
     
     // ✅ Only validate when we have exactly 6 digits
     if (fullOtp.length === 6 && /^\d{6}$/.test(fullOtp)) {
       setIsVerifying(true)
       
-      // ✅ Add a small delay to simulate real OTP verification
-      setTimeout(() => {
+      try {
+        // TODO: Uncomment when API is ready - Using RTK Query
+        // const otpId = localStorage.getItem('otpId') || 'stored_otp_id'
+        // const verifyRequest = createVerifyOtpRequest(otpId, fullOtp, type)
+        // const response = await verifyOtp(verifyRequest).unwrap()
+        // 
+        // console.log('✅ OTP verified successfully:', response)
+        // 
+        // // Update Redux auth state
+        // dispatch(login({
+        //   username: response.user.mobile || response.user.email,
+        //   password: 'otp_verified'
+        // }))
+        // 
+        // // Store user data from API response
+        // localStorage.setItem("auth", JSON.stringify({
+        //   user: response.user,
+        //   token: response.token,
+        //   refreshToken: response.refreshToken
+        // }))
+        // 
+        // toast.success(`${label} verified successfully!`)
+        // setVerified(true)
+
+        // MOCK IMPLEMENTATION - Remove when API is ready
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        // Mock Step 2: Verify OTP response
+        const mockVerifyOtpResponse = {
+          success: true,
+          verified: true,
+          user: {
+            id: "mob-67890",
+            mobile: value,
+            name: "John Doe",
+            role: "User"
+          },
+          token: `mock_jwt_token_${Date.now()}`,
+          refreshToken: `mock_refresh_token_${Date.now()}`
+        }
+        
+        console.log('📱 Mock Step 2 - Verify OTP Response:', mockVerifyOtpResponse)
+
+        // Update Redux auth state (same as real API would do)
+        dispatch(login({
+          username: mockVerifyOtpResponse.user.mobile || value,
+          password: 'otp_verified'
+        }))
+
+        // Store mock user data  
+        localStorage.setItem("auth", JSON.stringify({
+          user: mockVerifyOtpResponse.user,
+          token: mockVerifyOtpResponse.token,
+          refreshToken: mockVerifyOtpResponse.refreshToken
+        }))
+
         toast.success(`${label} verified successfully!`)
         setVerified(true)
         
@@ -79,8 +147,87 @@ export function OtpSection({
           navigate(redirectAfterVerify)
         }
         
+      } catch (error: any) {
+        console.error('OTP verification error:', error)
+        
+        // TODO: Uncomment when API is ready - Comprehensive error handling
+        // // Handle specific error responses
+        // if (error.status === 400) {
+        //   if (error.data?.code === 'INVALID_OTP') {
+        //     toast.error('Invalid OTP code. Please check and try again.')
+        //   } else if (error.data?.code === 'OTP_EXPIRED') {
+        //     toast.error('OTP has expired. Please request a new one.')
+        //     setShowOtpInput(false)
+        //   } else if (error.data?.code === 'OTP_ALREADY_USED') {
+        //     toast.error('OTP already used. Please request a new one.')
+        //     setShowOtpInput(false)
+        //   } else {
+        //     toast.error(error.data?.message || 'Invalid OTP format.')
+        //   }
+        // } else if (error.status === 404) {
+        //   toast.error('OTP session not found. Please request a new OTP.')
+        //   setShowOtpInput(false)
+        // } else if (error.status === 429) {
+        //   const retryAfter = error.data?.retryAfter || 300
+        //   toast.error(`Too many verification attempts. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`)
+        // } else if (error.status === 500) {
+        //   toast.error('Server error. Please try again later.')
+        // } else if (error.status === 'FETCH_ERROR') {
+        //   toast.error('Network error. Please check your internet connection.')
+        // } else {
+        //   toast.error(error.data?.message || 'OTP verification failed. Please try again.')
+        // }
+        
+        // Mock error handling with 3-attempt rate limiting
+        const mockErrorType = Math.random()
+        
+        if (mockErrorType < 0.6) {
+          // Simulate invalid OTP error (60% chance to test rate limiting)
+          const newAttemptCount = attemptCount + 1
+          setAttemptCount(newAttemptCount)
+          
+          if (newAttemptCount >= 3) {
+            // Block user after 3 failed attempts
+            setIsBlocked(true)
+            setBlockTimer(300) // 5 minutes block
+            toast.error('Too many failed attempts. You are blocked for 5 minutes.')
+            setOtp(Array(6).fill(""))
+            
+            // Start countdown timer
+            const blockInterval = setInterval(() => {
+              setBlockTimer(prev => {
+                if (prev <= 1) {
+                  clearInterval(blockInterval)
+                  setIsBlocked(false)
+                  setAttemptCount(0)
+                  return 0
+                }
+                return prev - 1
+              })
+            }, 1000)
+          } else {
+            toast.error(`Invalid OTP code. ${3 - newAttemptCount} attempts remaining.`)
+            setOtp(Array(6).fill("")) // Clear OTP on invalid
+          }
+        } else if (mockErrorType < 0.7) {
+          // Simulate expired OTP error
+          toast.error('OTP has expired. Please request a new one.')
+          setShowOtpInput(false)
+          setOtp(Array(6).fill(""))
+          setAttemptCount(0) // Reset attempts on session reset
+        } else if (mockErrorType < 0.8) {
+          // Simulate session not found error
+          toast.error('OTP session not found. Please request a new OTP.')
+          setShowOtpInput(false)
+          setOtp(Array(6).fill(""))
+          setAttemptCount(0) // Reset attempts on session reset
+        } else {
+          // Default error
+          toast.error('OTP verification failed. Please try again.')
+        }
+      } finally {
         setIsVerifying(false)
-      }, 500) // Small delay for better UX
+      }
     }
     // ✅ Don't show error for incomplete OTP (less than 6 digits)
   }
@@ -130,6 +277,9 @@ export function OtpSection({
     setTimer(60)
     setCanResend(false)
     setIsVerifying(false)
+    setAttemptCount(0) // Reset attempt count when changing number
+    setIsBlocked(false) // Remove block when changing number
+    setBlockTimer(0)
 
     if (mode === "login") {
       dispatch(setOtpSent(false))
@@ -184,7 +334,7 @@ export function OtpSection({
           }
           setOtp(otpArray)
         }}
-        disabled={isVerifying}
+        disabled={isVerifying || isOtpVerifying || isBlocked}
       >
         <InputOTPGroup>
           <InputOTPSlot index={0} />
@@ -212,7 +362,7 @@ export function OtpSection({
           <button
             className="ml-1 text-sm text-accent flex items-center gap-1 hover:underline"
             onClick={handleChangeClick}
-            disabled={isVerifying}
+            disabled={isVerifying || isOtpVerifying}
           >
             🔄 Change
           </button>
@@ -221,7 +371,16 @@ export function OtpSection({
         {renderOtpInput()}
         
         {/* ✅ Show verification status */}
-        {isVerifying && (
+        {isBlocked && (
+          <div className="flex items-center justify-center gap-2 text-sm text-destructive">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m2-5V7m0 0V5m0 2h2m-2 0H10" />
+            </svg>
+            Blocked for {Math.ceil(blockTimer / 60)} minutes due to failed attempts
+          </div>
+        )}
+        
+        {(isVerifying || isOtpVerifying) && !isBlocked && (
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
@@ -236,7 +395,7 @@ export function OtpSection({
             <button 
               onClick={handleSendOTP} 
               className="hover:underline text-accent"
-              disabled={isVerifying}
+              disabled={isVerifying || isOtpVerifying}
             >
               Resend OTP
             </button>

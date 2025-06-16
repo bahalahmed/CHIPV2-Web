@@ -216,15 +216,6 @@ export const authApiSlice = createApi({
       invalidatesTags: ['User', 'Session'],
     }),
 
-    // Mobile Login
-    loginWithMobile: builder.mutation<LoginResponse, LoginRequest>({
-      query: (credentials) => ({
-        url: '/auth/mobile-login',
-        method: 'POST',
-        body: credentials,
-      }),
-      invalidatesTags: ['User', 'Session'],
-    }),
 
     // Send OTP
     sendOtp: builder.mutation<OtpResponse, OtpRequest>({
@@ -302,7 +293,6 @@ export const authApiSlice = createApi({
 // Export hooks for use in components
 export const {
   useLoginWithEmailMutation,
-  useLoginWithMobileMutation,
   useSendOtpMutation,
   useVerifyOtpMutation,
   useForgotPasswordMutation,
