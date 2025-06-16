@@ -213,7 +213,6 @@ export default function EmailLogin({ onForgotPassword }: EmailLoginProps) {
         </p>
       </div>
       
-      {/* ✅ Submit button - ALWAYS ENABLED but validates on click */}
       <Button 
         className="w-full py-5 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium rounded-xl" 
         type="button"

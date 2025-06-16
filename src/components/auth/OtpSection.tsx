@@ -208,7 +208,7 @@ export function OtpSection({
           Login <span className="text-muted-foreground font-normal">with</span>
         </h2>
         <p className="text-sm text-muted-foreground flex justify-center items-center gap-2 flex-wrap">
-          We have sent a 6 digit OTP code to <span className="text-accent font-semibold">{value}</span>
+          We have sent a 6 digit OTP code to <span className="text-primary font-semibold">{value}</span>
           <button
             className="ml-1 text-sm text-accent flex items-center gap-1 hover:underline"
             onClick={handleChangeClick}
@@ -245,10 +245,6 @@ export function OtpSection({
           )}
         </div>
 
-        {/* ✅ Demo hint */}
-        <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
-          💡 Demo: Enter any 6-digit number to verify (e.g., 123456)
-        </div>
       </div>
     )
   }
