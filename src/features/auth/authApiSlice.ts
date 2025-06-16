@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { apiConfig, mockResponses, getErrorMessage, logApiCall } from '@/config/api';
 
 // Types for API responses
 interface LoginRequest {
@@ -55,134 +54,65 @@ interface ForgotPasswordResponse {
   message: string;
 }
 
-// Enhanced base query with secure JWT handling
+// Enhanced base query with error handling and retry logic
 const baseQueryWithRetry: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const baseQuery = fetchBaseQuery({
-    baseUrl: apiConfig.baseUrl,
-    timeout: apiConfig.timeout,
+    baseUrl: 'https://api.freeapi.app/api/v1',
     prepareHeaders: (headers, { getState }) => {
       headers.set('Content-Type', 'application/json');
       headers.set('Accept', 'application/json');
       
-      // Secure token handling
+      // Add auth token if available
       const token = (getState() as any).auth?.token;
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
       
-      // Security headers
-      headers.set('X-Requested-With', 'XMLHttpRequest');
-      headers.set('Cache-Control', 'no-cache');
-      
       return headers;
     },
-    credentials: 'omit', // Don't send cookies for security
+    // Remove credentials to fix CORS issue
+    // credentials: 'include',
   });
 
   let result = await baseQuery(args, api, extraOptions);
 
-  // Enhanced error handling with mock data fallback
-  if (result.error && apiConfig.useMockData && typeof args === 'object') {
-    const errorStatus = result.error.status;
-    const requestUrl = args.url;
-    
-    console.warn(`API Error ${errorStatus}, using mock data fallback`);
-    logApiCall(requestUrl || 'unknown', args.method || 'GET', args.body);
-    
-    // Login endpoints (handle all login URLs)
-    if (requestUrl?.includes('login')) {
-      const loginData = { ...mockResponses.login };
-      loginData.user.email = (args.body as any)?.email || loginData.user.email;
-      console.log('🎭 Using mock login data:', loginData);
-      return { data: loginData };
-    }
-    
-    // OTP endpoints
-    if (requestUrl?.includes('/auth/send-otp')) {
-      console.log('🎭 Using mock OTP send data');
-      return { data: mockResponses.sendOtp };
-    }
-    
-    if (requestUrl?.includes('/auth/verify-otp')) {
-      console.log('🎭 Using mock OTP verify data');
-      return { data: mockResponses.verifyOtp };
-    }
-    
-    if (requestUrl?.includes('/auth/forgot-password')) {
-      console.log('🎭 Using mock forgot password data');
-      return { data: mockResponses.forgotPassword };
-    }
-  }
-  
-  // Handle network errors with retry
+  // Retry logic for network errors
   if (result.error && result.error.status === 'FETCH_ERROR') {
-    console.warn('Network error detected:', getErrorMessage(result.error));
-    console.log('Retrying request...');
+    console.warn('Network error, retrying...', result.error);
+    
+    // Wait before retry
     await new Promise(resolve => setTimeout(resolve, 1000));
     result = await baseQuery(args, api, extraOptions);
+
   }
 
-  // Handle token refresh on 401 (but not for login endpoints)
+  // Handle token refresh on 401
   if (result.error && result.error.status === 401) {
-    const requestUrl = typeof args === 'object' ? args.url : args;
-    const isLoginRequest = requestUrl?.includes('/login') || requestUrl?.includes('/auth/login');
+    console.warn('Token expired, attempting refresh...');
     
-    // Don't try to refresh tokens for login requests
-    if (isLoginRequest) {
-      console.warn('Login failed with 401 - invalid credentials');
-      return result;
-    }
-    
-    console.warn('Token expired, attempting secure refresh...');
-    
-    // Get refresh token securely
-    const refreshToken = (api.getState() as any).auth?.refreshToken;
-    
-    if (!refreshToken) {
-      // No refresh token, force logout
-      console.warn('No refresh token available, logging out');
-      api.dispatch({ type: 'auth/logout' });
-      return result;
-    }
-    
-    try {
-      // Attempt secure token refresh
-      const refreshResult = await baseQuery(
-        {
-          url: '/auth/refresh',
-          method: 'POST',
-          body: { refreshToken },
+    // Attempt token refresh
+    const refreshResult = await baseQuery(
+      {
+        url: '/auth/refresh',
+        method: 'POST',
+        body: {
+          refreshToken: (api.getState() as any).auth?.refreshToken,
         },
-        api,
-        extraOptions
-      );
+      },
+      api,
+      extraOptions
+    );
 
-      if (refreshResult.data) {
-        // Update tokens in state
-        const newTokens = refreshResult.data as { token: string; refreshToken: string };
-        api.dispatch({ 
-          type: 'auth/updateTokens', 
-          payload: newTokens 
-        });
-        
-        // Retry original request with new token
-        result = await baseQuery(args, api, extraOptions);
-      } else {
-        // Refresh failed, secure logout
-        console.warn('Token refresh failed, logging out');
-        api.dispatch({ type: 'auth/logout' });
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('refreshToken');
-      }
-    } catch (refreshError) {
-      console.error('Token refresh error:', refreshError);
+    if (refreshResult.data) {
+      // Retry original request with new token
+      result = await baseQuery(args, api, extraOptions);
+    } else {
+      // Refresh failed, logout user
       api.dispatch({ type: 'auth/logout' });
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('refreshToken');
     }
   }
 
@@ -200,7 +130,7 @@ export const authApiSlice = createApi({
     // Email/Password Login
     loginWithEmail: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
-        url: '/login',  // ReqRes API endpoint
+        url: '/users/login',
         method: 'POST',
         body: credentials,
       }),

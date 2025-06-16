@@ -11,30 +11,21 @@ interface ApiConfig {
 const isDevelopment = import.meta.env.DEV;
 const isProduction = import.meta.env.PROD;
 
-// API Configuration for Backend Connection
+// API Configuration
 export const apiConfig: ApiConfig = {
-  // Backend URLs for different environments
-  baseUrl: (() => {
-    switch (import.meta.env.MODE) {
-      case 'development':
-        return import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'; // Your backend
-      case 'staging':
-        return import.meta.env.VITE_STAGING_API_URL || 'https://staging-api.chipv2.com/api/v1';
-      case 'production':
-        return import.meta.env.VITE_PROD_API_URL || 'https://api.chipv2.com/api/v1';
-      default:
-        return 'http://localhost:8000/api/v1';
-    }
-  })(),
+  // Use local API in development, external in production
+  baseUrl: isDevelopment 
+    ? 'https://localhost:3001/api/v1'  // Your local backend
+    : 'https://api.freeapi.app/api/v1', // External API
   
-  // Enable mock data when specified or when backend is unavailable
-  useMockData: import.meta.env.VITE_USE_MOCK_DATA === 'true' || isDevelopment,
+  // Enable mock data fallback in development
+  useMockData: isDevelopment,
   
-  // Connection settings
-  timeout: 15000, // 15 seconds for backend calls
+  // Timeout settings
+  timeout: 10000, // 10 seconds
   
   // Retry attempts for failed requests
-  retryAttempts: 3,
+  retryAttempts: 2,
 };
 
 // Mock data for development
