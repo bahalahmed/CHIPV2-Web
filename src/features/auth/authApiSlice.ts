@@ -55,7 +55,7 @@ interface ForgotPasswordResponse {
   message: string;
 }
 
-// Enhanced base query with error handling and retry logic
+// Enhanced base query with secure JWT handling
 const baseQueryWithRetry: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -68,78 +68,121 @@ const baseQueryWithRetry: BaseQueryFn<
       headers.set('Content-Type', 'application/json');
       headers.set('Accept', 'application/json');
       
-      // Add auth token if available
+      // Secure token handling
       const token = (getState() as any).auth?.token;
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
       
+      // Security headers
+      headers.set('X-Requested-With', 'XMLHttpRequest');
+      headers.set('Cache-Control', 'no-cache');
+      
       return headers;
     },
-    // Remove credentials to fix CORS issue with external APIs
-    // credentials: 'include',
+    credentials: 'omit', // Don't send cookies for security
   });
 
   let result = await baseQuery(args, api, extraOptions);
 
   // Enhanced error handling with mock data fallback
-  if (result.error && result.error.status === 'FETCH_ERROR') {
-    console.warn('Network error detected:', getErrorMessage(result.error));
+  if (result.error && apiConfig.useMockData && typeof args === 'object') {
+    const errorStatus = result.error.status;
+    const requestUrl = args.url;
     
-    // Use mock data in development when external API fails
-    if (apiConfig.useMockData && typeof args === 'object') {
-      logApiCall(args.url || 'unknown', args.method || 'GET', args.body);
-      
-      // Login endpoint
-      if (args.url === '/users/login') {
-        const loginData = { ...mockResponses.login };
-        loginData.user.email = (args.body as any)?.email || loginData.user.email;
-        return { data: loginData };
-      }
-      
-      // OTP endpoints
-      if (args.url?.includes('/auth/send-otp')) {
-        return { data: mockResponses.sendOtp };
-      }
-      
-      if (args.url === '/auth/verify-otp') {
-        return { data: mockResponses.verifyOtp };
-      }
-      
-      if (args.url === '/auth/forgot-password') {
-        return { data: mockResponses.forgotPassword };
-      }
+    console.warn(`API Error ${errorStatus}, using mock data fallback`);
+    logApiCall(requestUrl || 'unknown', args.method || 'GET', args.body);
+    
+    // Login endpoints (handle all login URLs)
+    if (requestUrl?.includes('login')) {
+      const loginData = { ...mockResponses.login };
+      loginData.user.email = (args.body as any)?.email || loginData.user.email;
+      console.log('🎭 Using mock login data:', loginData);
+      return { data: loginData };
     }
     
-    // In production or when mock is disabled, retry once
+    // OTP endpoints
+    if (requestUrl?.includes('/auth/send-otp')) {
+      console.log('🎭 Using mock OTP send data');
+      return { data: mockResponses.sendOtp };
+    }
+    
+    if (requestUrl?.includes('/auth/verify-otp')) {
+      console.log('🎭 Using mock OTP verify data');
+      return { data: mockResponses.verifyOtp };
+    }
+    
+    if (requestUrl?.includes('/auth/forgot-password')) {
+      console.log('🎭 Using mock forgot password data');
+      return { data: mockResponses.forgotPassword };
+    }
+  }
+  
+  // Handle network errors with retry
+  if (result.error && result.error.status === 'FETCH_ERROR') {
+    console.warn('Network error detected:', getErrorMessage(result.error));
     console.log('Retrying request...');
     await new Promise(resolve => setTimeout(resolve, 1000));
     result = await baseQuery(args, api, extraOptions);
   }
 
-  // Handle token refresh on 401
+  // Handle token refresh on 401 (but not for login endpoints)
   if (result.error && result.error.status === 401) {
-    console.warn('Token expired, attempting refresh...');
+    const requestUrl = typeof args === 'object' ? args.url : args;
+    const isLoginRequest = requestUrl?.includes('/login') || requestUrl?.includes('/auth/login');
     
-    // Attempt token refresh
-    const refreshResult = await baseQuery(
-      {
-        url: '/auth/refresh',
-        method: 'POST',
-        body: {
-          refreshToken: (api.getState() as any).auth?.refreshToken,
-        },
-      },
-      api,
-      extraOptions
-    );
-
-    if (refreshResult.data) {
-      // Retry original request with new token
-      result = await baseQuery(args, api, extraOptions);
-    } else {
-      // Refresh failed, logout user
+    // Don't try to refresh tokens for login requests
+    if (isLoginRequest) {
+      console.warn('Login failed with 401 - invalid credentials');
+      return result;
+    }
+    
+    console.warn('Token expired, attempting secure refresh...');
+    
+    // Get refresh token securely
+    const refreshToken = (api.getState() as any).auth?.refreshToken;
+    
+    if (!refreshToken) {
+      // No refresh token, force logout
+      console.warn('No refresh token available, logging out');
       api.dispatch({ type: 'auth/logout' });
+      return result;
+    }
+    
+    try {
+      // Attempt secure token refresh
+      const refreshResult = await baseQuery(
+        {
+          url: '/auth/refresh',
+          method: 'POST',
+          body: { refreshToken },
+        },
+        api,
+        extraOptions
+      );
+
+      if (refreshResult.data) {
+        // Update tokens in state
+        const newTokens = refreshResult.data as { token: string; refreshToken: string };
+        api.dispatch({ 
+          type: 'auth/updateTokens', 
+          payload: newTokens 
+        });
+        
+        // Retry original request with new token
+        result = await baseQuery(args, api, extraOptions);
+      } else {
+        // Refresh failed, secure logout
+        console.warn('Token refresh failed, logging out');
+        api.dispatch({ type: 'auth/logout' });
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+      }
+    } catch (refreshError) {
+      console.error('Token refresh error:', refreshError);
+      api.dispatch({ type: 'auth/logout' });
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
     }
   }
 
@@ -157,7 +200,7 @@ export const authApiSlice = createApi({
     // Email/Password Login
     loginWithEmail: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
-        url: '/users/login',
+        url: '/login',  // ReqRes API endpoint
         method: 'POST',
         body: credentials,
       }),

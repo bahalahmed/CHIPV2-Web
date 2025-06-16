@@ -1,28 +1,43 @@
 // src/features/auth/authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { loginUser } from './authApi';
-
+import SecureStorage from '@/utils/secureStorage';
 
 interface User {
   id: string;
   name: string;
   email: string;
+  mobile?: string;
   role?: string;
 }
 
 interface AuthState {
   user: User | null;
+  token: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
+  tokenExpiry: number | null;
 }
 
-const initialState: AuthState = {
-  user: JSON.parse(localStorage.getItem('user') || 'null'),
-  isAuthenticated: !!localStorage.getItem('user'),
-  loading: false,
-  error: null,
+// Initialize state securely
+const initializeAuthState = (): AuthState => {
+  const tokenData = SecureStorage.getTokens();
+  const isAuthenticated = SecureStorage.isAuthenticated();
+  
+  return {
+    user: tokenData ? JSON.parse(localStorage.getItem('user') || 'null') : null,
+    token: tokenData?.token || null,
+    refreshToken: tokenData?.refreshToken || null,
+    isAuthenticated,
+    loading: false,
+    error: null,
+    tokenExpiry: tokenData?.expiresAt || null,
+  };
 };
+
+const initialState: AuthState = initializeAuthState();
 
 // ✅ Thunk: login
 export const login = createAsyncThunk(
