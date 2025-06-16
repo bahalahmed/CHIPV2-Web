@@ -33,10 +33,9 @@ export const otpSchema = z.string()
 // ✅ Login schemas
 export const emailLoginSchema = z.object({
   email: emailSchema,
-  password: passwordSchema // ✅ Use full password validation for login too
+  password: passwordSchema
 })
 
-// ✅ Simple login schema (for existing users who might have weak passwords)
 export const emailLoginSimpleSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, "Password is required")
@@ -46,13 +45,13 @@ export const mobileLoginSchema = z.object({
   mobile: phoneSchema
 })
 
-// ✅ OTP verification schema
+
 export const otpVerificationSchema = z.object({
   otp: otpSchema,
   identifier: z.string().min(1, "Phone number or email is required")
 })
 
-// ✅ Forgot password schema
+
 export const forgotPasswordSchema = z.object({
   email: emailSchema
 })

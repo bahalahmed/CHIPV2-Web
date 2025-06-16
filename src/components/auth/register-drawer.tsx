@@ -2,11 +2,10 @@
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import React, { Suspense, useMemo } from "react"
+import React, { Suspense, useMemo, useRef } from "react"
 import { useEffect } from "react"
 import { populateFromLocalStorage } from "@/features/registerForm/registerFormSlice"
-
-
+import { toast } from "sonner"
 
 // Lazy-loaded step components
 const Step1Verification = React.lazy(() => import("./Step1Verification"))
@@ -14,9 +13,7 @@ const Step2UserDetails = React.lazy(() => import("./Step2UserDetails"))
 const Step3PersonalInfo = React.lazy(() => import("./Step3PersonalInfo"))
 const Step4Approval = React.lazy(() => import("./Step4Approval"))
 
-
 import { StepProgress } from "@/components/auth/StepProgress"
-
 import { ApprovalDialog } from "./ApprovalDialog"
 
 import { useDispatch, useSelector } from "react-redux"
@@ -29,13 +26,141 @@ interface RegisterDrawerProps {
   onVerified?: () => void
 }
 
+// ✅ Component ref interfaces for validation
+interface StepValidationRef {
+  validateStep: () => Promise<boolean>
+  isValid: () => boolean
+}
+
 export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
   const dispatch = useDispatch()
   const { step, contactInfo, levelInfo, personalInfo } = useSelector((state: RootState) => state.registerForm)
 
-  const handleNext = () => {
-    if (step < 4) {
-     
+  // ✅ Refs for step components to call validation methods
+  const step1Ref = useRef<StepValidationRef>(null)
+  const step2Ref = useRef<StepValidationRef>(null)
+  const step3Ref = useRef<StepValidationRef>(null)
+
+  // ✅ Enhanced validation for Step 1
+  const validateStep1 = (): boolean => {
+    const { mobileVerified, whatsappVerified, emailVerified, mobileNumber, whatsappNumber, email } = contactInfo
+    
+    // Check if all fields have values
+    if (!mobileNumber || !whatsappNumber || !email) {
+      toast.error("Please fill in all contact details (Mobile, WhatsApp, Email)")
+      return false
+    }
+    
+    // Check if all fields are verified
+    if (!mobileVerified || !whatsappVerified || !emailVerified) {
+      const unverifiedFields = []
+      if (!mobileVerified) unverifiedFields.push("Mobile number")
+      if (!whatsappVerified) unverifiedFields.push("WhatsApp number") 
+      if (!emailVerified) unverifiedFields.push("Email")
+      
+      toast.error(`Please verify: ${unverifiedFields.join(", ")}`)
+      return false
+    }
+    
+    return true
+  }
+
+  // ✅ Enhanced validation for Step 2
+  const validateStep2 = (): boolean => {
+    const { selectedLevel, state, division, district, block, sector, organizationTypeId, organizationId, designationId } = levelInfo
+    
+    // Check if level is selected
+    if (!selectedLevel) {
+      toast.error("Please select your administrative level")
+      return false
+    }
+    
+    // Check if state is selected
+    if (!state) {
+      toast.error("Please select your state")
+      return false
+    }
+    
+    // Check geographic fields based on selected level
+    const levelIndex = ["State", "Division", "District", "Block", "PHC"].indexOf(selectedLevel)
+    const missingGeoFields = []
+    
+    if (levelIndex >= 1 && !division) missingGeoFields.push("Division")
+    if (levelIndex >= 2 && !district) missingGeoFields.push("District") 
+    if (levelIndex >= 3 && !block) missingGeoFields.push("Block")
+    if (levelIndex >= 4 && !sector) missingGeoFields.push("PHC")
+    
+    if (missingGeoFields.length > 0) {
+      toast.error(`Please select: ${missingGeoFields.join(", ")}`)
+      return false
+    }
+    
+    // Check organizational fields
+    const missingOrgFields = []
+    if (!organizationTypeId) missingOrgFields.push("Organization Type")
+    if (!organizationId) missingOrgFields.push("Organization")
+    if (!designationId) missingOrgFields.push("Designation")
+    
+    if (missingOrgFields.length > 0) {
+      toast.error(`Please select: ${missingOrgFields.join(", ")}`)
+      return false
+    }
+    
+    return true
+  }
+
+  // ✅ Enhanced validation for Step 3
+  const validateStep3 = (): boolean => {
+    const { firstName, password, confirmPassword } = personalInfo
+    
+    const missingFields = []
+    if (!firstName) missingFields.push("First name")
+    if (!password) missingFields.push("Password")
+    if (!confirmPassword) missingFields.push("Confirm password")
+    
+    if (missingFields.length > 0) {
+      toast.error(`Please fill in: ${missingFields.join(", ")}`)
+      return false
+    }
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match")
+      return false
+    }
+    
+    // Check password requirements
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/
+    if (!passwordRegex.test(password)) {
+      toast.error("Password must contain at least one uppercase letter, one lowercase letter, and one number (minimum 6 characters)")
+      return false
+    }
+    
+    return true
+  }
+
+  // ✅ Enhanced handleNext with proper validation
+  const handleNext = async () => {
+    if (step >= 4) return
+    
+    let isValid = false
+    
+    // Validate current step
+    switch (step) {
+      case 1:
+        isValid = validateStep1()
+        break
+      case 2:
+        isValid = validateStep2()
+        break
+      case 3:
+        isValid = validateStep3()
+        break
+      default:
+        isValid = true
+    }
+    
+    // Only proceed if validation passes
+    if (isValid) {
       const reviewInfo = {
         ...contactInfo,
         ...levelInfo,
@@ -43,49 +168,42 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
         organizationType: levelInfo.organizationTypeId || "",
         organization: levelInfo.organizationId || "",
         designation: levelInfo.designationId || "",
-
         organizationTypeLabel: levelInfo.organizationTypeLabel || "",
         organizationLabel: levelInfo.organizationLabel || "",
         designationLabel: levelInfo.designationLabel || "",
-      };
+      }
   
-      localStorage.setItem("userRegistrationData", JSON.stringify(reviewInfo));
-  
-      dispatch(setStep(step + 1));
+      localStorage.setItem("userRegistrationData", JSON.stringify(reviewInfo))
+      dispatch(setStep(step + 1))
+      
+      // Success feedback
+      toast.success(`Step ${step} completed successfully!`)
     }
-  };
-  
+  }
 
   const handleBack = () => {
     if (step > 1) dispatch(setStep(step - 1))
   }
+
   const handleApprovalSubmit = () => {
-    console.log("✅ Submitting registration:", reviewInfo);
-
-
-    localStorage.setItem("userRegistrationData", JSON.stringify(reviewInfo));
-
+    console.log("✅ Submitting registration:", reviewInfo)
+    localStorage.setItem("userRegistrationData", JSON.stringify(reviewInfo))
 
     setTimeout(() => {
-      dispatch(resetForm());
-      localStorage.removeItem("userRegistrationData");
-      console.log("🧼 Form reset completed. LocalStorage cleared.");
-      onOpenChange(false); // Close drawer
-    }, 300);
-  };
-
-
+      dispatch(resetForm())
+      localStorage.removeItem("userRegistrationData")
+      console.log("🧼 Form reset completed. LocalStorage cleared.")
+      onOpenChange(false)
+    }, 300)
+  }
 
   useEffect(() => {
-    const savedData = localStorage.getItem("userRegistrationData");
+    const savedData = localStorage.getItem("userRegistrationData")
     if (savedData) {
-      const parsed = JSON.parse(savedData);
-      dispatch(populateFromLocalStorage(parsed));
+      const parsed = JSON.parse(savedData)
+      dispatch(populateFromLocalStorage(parsed))
     }
-  }, [dispatch]);
-
-
-
+  }, [dispatch])
 
   const reviewInfo = useMemo(() => ({
     ...contactInfo,
@@ -96,8 +214,30 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
     designation: levelInfo.designationId || "",
   }), [contactInfo, levelInfo, personalInfo])
 
-
-
+  // ✅ Check if current step can proceed
+  const canProceedFromCurrentStep = (): boolean => {
+    switch (step) {
+      case 1:
+        return contactInfo.mobileVerified && contactInfo.whatsappVerified && contactInfo.emailVerified &&
+               contactInfo.mobileNumber && contactInfo.whatsappNumber && contactInfo.email
+      case 2:
+        const { selectedLevel, state, organizationTypeId, organizationId, designationId } = levelInfo
+        const levelIndex = ["State", "Division", "District", "Block", "PHC"].indexOf(selectedLevel)
+        
+        let hasRequiredGeoFields = !!state
+        if (levelIndex >= 1) hasRequiredGeoFields = hasRequiredGeoFields && !!levelInfo.division
+        if (levelIndex >= 2) hasRequiredGeoFields = hasRequiredGeoFields && !!levelInfo.district  
+        if (levelIndex >= 3) hasRequiredGeoFields = hasRequiredGeoFields && !!levelInfo.block
+        if (levelIndex >= 4) hasRequiredGeoFields = hasRequiredGeoFields && !!levelInfo.sector
+        
+        return !!selectedLevel && hasRequiredGeoFields && !!organizationTypeId && !!organizationId && !!designationId
+      case 3:
+        return !!personalInfo.firstName && !!personalInfo.password && !!personalInfo.confirmPassword &&
+               personalInfo.password === personalInfo.confirmPassword
+      default:
+        return true
+    }
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -110,7 +250,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
             <div>
               <SheetTitle className="text-xl text-primary sm:text-2xl font-bold">User Registration</SheetTitle>
             </div>
-            <SheetClose className="rounded-full  hover:bg-secondary"></SheetClose>
+            <SheetClose className="rounded-full hover:bg-secondary"></SheetClose>
           </div>
         </SheetHeader>
 
@@ -118,6 +258,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
           <StepProgress currentStep={step} />
         </div>
 
+        {/* ✅ Development step validation status */}
         <div className="">
           <Suspense
             fallback={
@@ -126,9 +267,9 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
               </div>
             }
           >
-            {step === 1 && <Step1Verification />}
-            {step === 2 && <Step2UserDetails />}
-            {step === 3 && <Step3PersonalInfo />}
+            {step === 1 && <Step1Verification ref={step1Ref} />}
+            {step === 2 && <Step2UserDetails ref={step2Ref} />}
+            {step === 3 && <Step3PersonalInfo ref={step3Ref} />}
             {step === 4 && (
               <Step4Approval reviewInfo={reviewInfo} />
             )}
@@ -149,10 +290,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
             <Button
               className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto order-1 sm:order-2"
               onClick={handleNext}
-              disabled={
-                step === 1 &&
-                (!contactInfo.mobileVerified || !contactInfo.whatsappVerified || !contactInfo.emailVerified)
-              }
+              // ✅ Button is always enabled but validates on click
             >
               Next
             </Button>
