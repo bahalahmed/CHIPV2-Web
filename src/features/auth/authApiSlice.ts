@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import { apiConfig, mockResponses, getErrorMessage, logApiCall } from '@/config/api';
 
 // Types for API responses
 interface LoginRequest {
@@ -61,7 +62,8 @@ const baseQueryWithRetry: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const baseQuery = fetchBaseQuery({
-    baseUrl: 'https://api.freeapi.app/api/v1',
+    baseUrl: apiConfig.baseUrl,
+    timeout: apiConfig.timeout,
     prepareHeaders: (headers, { getState }) => {
       headers.set('Content-Type', 'application/json');
       headers.set('Accept', 'application/json');
@@ -74,16 +76,43 @@ const baseQueryWithRetry: BaseQueryFn<
       
       return headers;
     },
-    credentials: 'include',
+    // Remove credentials to fix CORS issue with external APIs
+    // credentials: 'include',
   });
 
   let result = await baseQuery(args, api, extraOptions);
 
-  // Retry logic for network errors
+  // Enhanced error handling with mock data fallback
   if (result.error && result.error.status === 'FETCH_ERROR') {
-    console.warn('Network error, retrying...', result.error);
+    console.warn('Network error detected:', getErrorMessage(result.error));
     
-    // Wait before retry
+    // Use mock data in development when external API fails
+    if (apiConfig.useMockData && typeof args === 'object') {
+      logApiCall(args.url || 'unknown', args.method || 'GET', args.body);
+      
+      // Login endpoint
+      if (args.url === '/users/login') {
+        const loginData = { ...mockResponses.login };
+        loginData.user.email = (args.body as any)?.email || loginData.user.email;
+        return { data: loginData };
+      }
+      
+      // OTP endpoints
+      if (args.url?.includes('/auth/send-otp')) {
+        return { data: mockResponses.sendOtp };
+      }
+      
+      if (args.url === '/auth/verify-otp') {
+        return { data: mockResponses.verifyOtp };
+      }
+      
+      if (args.url === '/auth/forgot-password') {
+        return { data: mockResponses.forgotPassword };
+      }
+    }
+    
+    // In production or when mock is disabled, retry once
+    console.log('Retrying request...');
     await new Promise(resolve => setTimeout(resolve, 1000));
     result = await baseQuery(args, api, extraOptions);
   }

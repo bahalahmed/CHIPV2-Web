@@ -43,15 +43,21 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
   // Optimized submission handler
   const onSubmit = useCallback(async (data: EmailLoginForm) => {
     try {
-      await loginWithEmail({
+      const response = await loginWithEmail({
         email: data.email,
         password: data.password,
       }).unwrap()
 
-      // Update Redux state
+      // Update Redux state with proper structure
       dispatch(login({
         username: data.email,
         password: data.password,
+      }))
+
+      // Store user data in localStorage for persistence
+      localStorage.setItem("auth", JSON.stringify({
+        user: response.user,
+        token: response.token,
       }))
 
       // Navigate to dashboard

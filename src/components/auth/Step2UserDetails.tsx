@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
-const levelOrder = ["State", "Division", "District", "Block", "PHC"]
+const levelOrder = ["State", "Division", "District", "Block", "PHC/CHC"]
 import type { RootState } from "@/app/store"
 import type { AppDispatch } from "@/app/store"
 import {
@@ -203,18 +203,23 @@ const Step2UserDetails = () => {
         { key: "Division", value: levelInfo.division, field: "division", options: geo.divisions || [] },
         { key: "District", value: levelInfo.district, field: "district", options: geo.districts || [] },
         { key: "Block", value: levelInfo.block, field: "block", options: geo.blocks || [] },
-        { key: "PHC", value: levelInfo.sector, field: "sector", options: geo.sectors || [] },
+        { key: "PHC/CHC", value: levelInfo.sector, field: "sector", options: geo.sectors || [] },
     ]
 
     const getResetPayload = (field: string) => {
         const resetMap: Record<string, string[]> = {
-            state: ["division", "district", "block", "sector", "organizationType", "organization", "designation"],
+            state: [
+                "division", "district", "block", "sector", 
+                "organizationTypeId", "organizationTypeLabel", 
+                "organizationId", "organizationLabel", 
+                "designationId", "designationLabel"
+            ],
             division: ["district", "block", "sector"],
             district: ["block", "sector"],
             block: ["sector"],
             sector: [],
-            organizationType: ["organization", "designation"],
-            organization: ["designation"]
+            organizationTypeId: ["organizationId", "organizationLabel", "designationId", "designationLabel"],
+            organizationId: ["designationId", "designationLabel"]
         }
 
         return resetMap[field]?.reduce((acc, key) => ({ ...acc, [key]: "" }), {}) || {}
@@ -245,7 +250,13 @@ const Step2UserDetails = () => {
         // Clear errors for reset fields
         Object.keys(reset).forEach(resetField => {
             updateFieldError(resetField as keyof typeof fieldErrors, undefined)
+            // Also clear form values for reset fields
+            if (['organizationTypeId', 'organizationId', 'designationId'].includes(resetField)) {
+                setValue(resetField as keyof Step2FormData, '', { shouldValidate: true })
+            }
         })
+        
+        // Department fields are automatically reset when state changes (silent operation)
     }
 
     const handleOrgTypeChange = async (val: string) => {
@@ -297,7 +308,7 @@ const Step2UserDetails = () => {
             if (errors.division) errorFields.push("Division")
             if (errors.district) errorFields.push("District")
             if (errors.block) errorFields.push("Block")
-            if (errors.sector) errorFields.push("PHC")
+            if (errors.sector) errorFields.push("PHC/CHC")
             if (errors.organizationTypeId) errorFields.push("Organization Type")
             if (errors.organizationId) errorFields.push("Organization")
             if (errors.designationId) errorFields.push("Designation")
