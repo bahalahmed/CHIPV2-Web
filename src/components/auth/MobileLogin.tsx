@@ -85,9 +85,9 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
     
     // Check if mobile is empty
     if (!currentValues.mobile) {
-      toast.error("Please enter your mobile number")
+      (toast as any).error("Please enter your mobile number")
       // Focus on mobile field if possible
-      document.querySelector('input[type="tel"]')?.focus()
+      (document.querySelector('input[type="tel"]') as HTMLInputElement | null)?.focus()
       return
     }
     
@@ -120,13 +120,6 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
   }
 
   // ✅ Get mobile number display format (with formatting)
-  const getDisplayNumber = () => {
-    if (!mobileValue) return ""
-    const digits = mobileValue.replace(/\D/g, "")
-    if (digits.length <= 5) return digits
-    if (digits.length <= 10) return `${digits.slice(0, 5)} ${digits.slice(5)}`
-    return `${digits.slice(0, 5)} ${digits.slice(5, 10)}`
-  }
 
   return (
     <div className="space-y-6">

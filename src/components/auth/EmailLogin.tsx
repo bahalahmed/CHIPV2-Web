@@ -193,7 +193,10 @@ export default function EmailLogin({ onForgotPassword }: EmailLoginProps) {
           <p id="password-error" className="text-xs text-destructive mt-1 ml-1" role="alert">
             {errors.password.message}
           </p>
-        )}       
+        )}
+
+
+       
       </div>
 
       {/* ✅ Forgot password link */}
