@@ -109,7 +109,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
     return true
   }
 
-  // ✅ Enhanced validation for Step 3
+  // ✅ Enhanced validation for Step 3 - Note: passwords are hashed in Redux
   const validateStep3 = (): boolean => {
     const { firstName, password, confirmPassword } = personalInfo
     
@@ -123,15 +123,9 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
       return false
     }
     
+    // Note: Both passwords are hashed in Redux, so they should match if same plain text was entered
     if (password !== confirmPassword) {
       toast.error("Passwords do not match")
-      return false
-    }
-    
-    // Check password requirements
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/
-    if (!passwordRegex.test(password)) {
-      toast.error("Password must contain at least one uppercase letter, one lowercase letter, and one number (minimum 6 characters)")
       return false
     }
     
@@ -271,7 +265,7 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
             {step === 2 && <Step2UserDetails ref={step2Ref} />}
             {step === 3 && <Step3PersonalInfo ref={step3Ref} />}
             {step === 4 && (
-              <Step4Approval reviewInfo={reviewInfo} />
+              <Step4Approval />
             )}
           </Suspense>
         </div>

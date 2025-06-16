@@ -10,12 +10,17 @@ import type { RootState } from "@/app/store"
 import { updatePersonalInfo } from "@/features/registerForm/registerFormSlice"
 import PasswordInputField from "../shared/PasswordInputField"
 import { validateField, passwordSchema, nameSchema } from "@/lib/validations"
+import PasswordSecurity from "@/utils/passwordSecurity"
 
 const Step3PersonalInfoComponent = () => {
   const dispatch = useDispatch()
-  const { firstName, lastName, password, confirmPassword } = useSelector(
+  const { firstName, lastName } = useSelector(
     (state: RootState) => state.registerForm.personalInfo,
   )
+
+  // Local state for plain text passwords for validation and display
+  const [plainPassword, setPlainPassword] = useState('')
+  const [plainConfirmPassword, setPlainConfirmPassword] = useState('')
 
   // ✅ State for inline validation errors
   const [fieldErrors, setFieldErrors] = useState<{
@@ -103,26 +108,36 @@ const Step3PersonalInfoComponent = () => {
   }
 
   const handlePasswordChange = (value: string) => {
-    dispatch(updatePersonalInfo({ password: value }))
-    validatePassword(value)
+    // Store plain text for validation and display
+    setPlainPassword(value)
     
-    // Re-validate confirm password if it exists
-    if (confirmPassword) {
-      validateConfirmPassword(confirmPassword, value)
+    // Hash password before storing in Redux state
+    const hashedPassword = value ? PasswordSecurity.hashPassword(value) : value
+    dispatch(updatePersonalInfo({ password: hashedPassword }))
+    validatePassword(value) // Validate the plain text password
+    
+    // Re-validate confirm password if it exists (compare with plain text)
+    if (plainConfirmPassword) {
+      validateConfirmPassword(plainConfirmPassword, value)
     }
   }
 
   const handleConfirmPasswordChange = (value: string) => {
-    dispatch(updatePersonalInfo({ confirmPassword: value }))
-    validateConfirmPassword(value, password)
+    // Store plain text for validation and display
+    setPlainConfirmPassword(value)
+    
+    // Hash confirm password before storing in Redux state
+    const hashedConfirmPassword = value ? PasswordSecurity.hashPassword(value) : value
+    dispatch(updatePersonalInfo({ confirmPassword: hashedConfirmPassword }))
+    validateConfirmPassword(value, plainPassword) // Validate with plain text values
   }
 
   // ✅ Validate on initial load if fields have values
   useEffect(() => {
     if (firstName) validateFirstName(firstName)
     if (lastName) validateLastName(lastName)
-    if (password) validatePassword(password)
-    if (confirmPassword) validateConfirmPassword(confirmPassword, password)
+    if (plainPassword) validatePassword(plainPassword)
+    if (plainConfirmPassword) validateConfirmPassword(plainConfirmPassword, plainPassword)
   }, [])
 
   return (
@@ -200,7 +215,7 @@ const Step3PersonalInfoComponent = () => {
           <div className="relative">
             <Label className="block text-sm text-muted-foreground mb-2">Enter Password</Label>
             <PasswordInputField
-              value={password}
+              value={plainPassword}
               onChange={handlePasswordChange}
               className={fieldErrors.password ? "border-destructive" : ""}
             />
@@ -209,7 +224,7 @@ const Step3PersonalInfoComponent = () => {
                 {fieldErrors.password}
               </p>
             )}
-            {password && !fieldErrors.password && (
+            {plainPassword && !fieldErrors.password && (
               <p className="text-xs text-muted-foreground mt-1 ml-1">
                 Strong password
               </p>
@@ -219,7 +234,7 @@ const Step3PersonalInfoComponent = () => {
           <div className="relative">
             <Label className="block text-sm text-muted-foreground mb-2">Re-enter Password</Label>
             <PasswordInputField
-              value={confirmPassword}
+              value={plainConfirmPassword}
               onChange={handleConfirmPasswordChange}
               placeholder="Confirm your password"
               className={fieldErrors.confirmPassword ? "border-destructive" : ""}
@@ -229,7 +244,7 @@ const Step3PersonalInfoComponent = () => {
                 {fieldErrors.confirmPassword}
               </p>
             )}
-            {confirmPassword && !fieldErrors.confirmPassword && password === confirmPassword && (
+            {plainConfirmPassword && !fieldErrors.confirmPassword && plainPassword === plainConfirmPassword && (
               <p className="text-xs text-muted-foreground mt-1 ml-1">
                 Passwords match
               </p>
