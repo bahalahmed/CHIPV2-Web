@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import EmailInputField from "../shared/EmailInputField"
 import { forgotPasswordSchema, type ForgotPasswordData } from "@/lib/validations"
+import { useForgotPasswordMutation } from "@/features/auth/authApiSlice"
 
 interface ForgotPasswordFormProps {
   onBack: () => void;
@@ -13,6 +14,9 @@ interface ForgotPasswordFormProps {
 export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  
+  // RTK Query hook - ready for API integration
+  const [forgotPassword, { isLoading: isForgotPasswordLoading }] = useForgotPasswordMutation()
 
   // ✅ React Hook Form with Zod validation
   const {
@@ -40,19 +44,68 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
     try {
       console.log("✅ Validated forgot password data:", data)
       
-      // ✅ FUTURE: Replace with actual API call
-      // const res = await axios.post("/api/auth/forgot-password", { email: data.email })
-      // const { success, message } = res.data
+      // TODO: Uncomment when API is ready - Using RTK Query
+      // try {
+      //   const response = await forgotPassword({ email: data.email }).unwrap()
+      //   
+      //   console.log('✅ Password reset sent:', response)
+      //   setIsSubmitted(true)
+      //   toast.success(response.message || "Password reset link sent to your email.")
+      //   return
+      // } catch (error: any) {
+      //   console.error('Forgot password error:', error)
+      //   
+      //   // Handle specific error responses
+      //   if (error.status === 404) {
+      //     toast.error('Email address not found. Please check and try again.')
+      //   } else if (error.status === 429) {
+      //     const retryAfter = error.data?.retryAfter || 300
+      //     toast.error(`Too many reset requests. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`)
+      //   } else if (error.status === 400) {
+      //     toast.error(error.data?.message || 'Invalid email address format.')
+      //   } else if (error.status === 500) {
+      //     toast.error('Server error. Please try again later.')
+      //   } else if (error.status === 'FETCH_ERROR') {
+      //     toast.error('Network error. Please check your internet connection.')
+      //   } else {
+      //     toast.error(error.data?.message || 'Failed to send reset link. Please try again.')
+      //   }
+      //   return
+      // }
 
-      // Mock API call simulation
+      // MOCK IMPLEMENTATION - Remove when API is ready
       await new Promise((resolve) => setTimeout(resolve, 1500))
       
-      setIsSubmitted(true)
-      toast.success("Password reset link sent to your email.")
+      // Mock forgot password response
+      const mockForgotPasswordResponse = {
+        success: true,
+        message: "Password reset link sent to your email"
+      }
       
-    } catch (error) {
+      console.log('📧 Mock Forgot Password Response:', mockForgotPasswordResponse)
+      
+      setIsSubmitted(true)
+      toast.success(mockForgotPasswordResponse.message)
+      
+    } catch (error: any) {
       console.error("Forgot password error:", error)
-      toast.error("Failed to send reset link. Please try again.")
+      
+      // Mock error handling (simulate different error scenarios for testing)
+      const mockErrorType = Math.random()
+      
+      if (mockErrorType < 0.2) {
+        // Simulate email not found error
+        toast.error('Email address not found. Please check and try again.')
+      } else if (mockErrorType < 0.3) {
+        // Simulate rate limiting error
+        toast.error('Too many reset requests. Please try again in 5 minutes.')
+      } else if (mockErrorType < 0.4) {
+        // Simulate server error
+        toast.error('Server error. Please try again later.')
+      } else {
+        // Default error
+        toast.error("Failed to send reset link. Please try again.")
+      }
     } finally {
       setIsLoading(false)
     }
@@ -148,11 +201,11 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
         <Button
           type="button"
           onClick={handleResetPasswordClick}
-          disabled={isLoading || isSubmitting}
+          disabled={isLoading || isSubmitting || isForgotPasswordLoading}
           className="w-full py-5 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium rounded-xl"
           aria-describedby="reset-button-description"
         >
-          {(isLoading || isSubmitting) ? (
+          {(isLoading || isSubmitting || isForgotPasswordLoading) ? (
             <span className="flex items-center gap-2">
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
