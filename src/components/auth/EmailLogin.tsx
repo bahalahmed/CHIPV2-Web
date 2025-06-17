@@ -9,6 +9,7 @@ import { useLoginFormValidation } from "@/hooks/useFormValidation"
 import { emailLoginSchema, type EmailLoginForm } from "@/lib/validationSchemas"
 import { useLoginWithEmailMutation } from "@/features/auth/authApiSlice"
 import { handleApiError } from "@/lib/errorHandling"
+import PasswordSecurity from "@/utils/passwordSecurity"
 
 interface EmailLoginProps {
   onForgotPassword: () => void
@@ -40,9 +41,12 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
   // Optimized submission handler
   const onSubmit = useCallback(async (data: EmailLoginForm) => {
     try {
+      // Hash password before sending over network for security
+      const hashedPassword = PasswordSecurity.hashPassword(data.password)
+      
       await loginWithEmail({
         email: data.email,
-        password: data.password,
+        password: hashedPassword,
       }).unwrap()
 
       // RTK Query automatically handles Redux state via authSlice matchers
