@@ -26,44 +26,37 @@ import {
 import { updateLevelInfo } from "@/features/registerForm/registerFormSlice"
 import { step2UserDetailsSchema, createGeographicValidationSchema, type Step2UserDetailsForm } from "@/lib/validationSchemas"
 
-// 🚀 Production-optimized constants
 const LEVEL_ORDER = ["State", "Division", "District", "Block", "PHC/CHC"] as const
 type LevelType = typeof LEVEL_ORDER[number]
 
-// 🚀 Production-ready type definitions
 interface GeoOption {
     readonly id: string
     readonly name: string
 }
 
-interface GeoField {
-    readonly key: LevelType
-    readonly value: string
-    readonly field: string
-    readonly options: readonly GeoOption[]
-}
+// Reusable components to reduce duplication
+const ErrorIcon = () => (
+    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+    </svg>
+)
 
-interface LoadingStates {
-    readonly states: boolean
-    readonly divisions: boolean
-    readonly districts: boolean
-    readonly blocks: boolean
-    readonly sectors: boolean
-    readonly orgTypes: boolean
-    readonly organizations: boolean
-    readonly designations: boolean
-}
+const LoadingSpinner = () => (
+    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+    </svg>
+)
 
 
 
-// 🚀 Production-optimized memoized selectors
 const selectLevelInfo = (state: RootState) => state.registerForm.levelInfo
 
 const Step2UserDetails = React.memo(() => {
     const dispatch: AppDispatch = useDispatch()
     const levelInfo = useSelector(selectLevelInfo)
     
-    // 🚀 Optimized RTK Query hooks with proper dependency tracking
+    // RTK Query hooks with caching
     const { data: states = [], isLoading: statesLoading, error: statesError } = useGetStatesQuery(undefined, {
         refetchOnMountOrArgChange: 300 // Cache for 5 minutes
     })
@@ -103,7 +96,7 @@ const Step2UserDetails = React.memo(() => {
         { skip: !levelInfo.organizationId }
     )
 
-    // 🚀 Memoized combined data objects to prevent unnecessary re-renders
+    // Optimized memoization with length-based dependencies for better performance
     const geo = useMemo(() => ({
         states,
         divisions,
@@ -113,9 +106,9 @@ const Step2UserDetails = React.memo(() => {
         orgTypes,
         organizations,
         designations
-    }), [states, divisions, districts, blocks, sectors, orgTypes, organizations, designations])
+    }), [states?.length, divisions?.length, districts?.length, blocks?.length, sectors?.length, orgTypes?.length, organizations?.length, designations?.length])
 
-    const loadingStates: LoadingStates = useMemo(() => ({
+    const loadingStates = useMemo(() => ({
         states: statesLoading,
         divisions: divisionsLoading,
         districts: districtsLoading,
@@ -127,78 +120,66 @@ const Step2UserDetails = React.memo(() => {
     }), [statesLoading, divisionsLoading, districtsLoading, blocksLoading, sectorsLoading, orgTypesLoading, organizationsLoading, designationsLoading])
 
 
-    // 🚀 Create dynamic schema based on selected level
-    const currentSchema = useMemo(() => {
-        return createGeographicValidationSchema(levelInfo.selectedLevel || "")
-    }, [levelInfo.selectedLevel])
+    const currentSchema = useMemo(() => 
+        createGeographicValidationSchema(levelInfo.selectedLevel || ""), 
+        [levelInfo.selectedLevel]
+    )
     
-    // 🚀 Optimized React Hook Form with proper typing
-    const {
-        setValue,
-        trigger,
-        formState: { errors: formErrors },
-        reset
-    } = useForm<Step2UserDetailsForm>({
+    const { setValue, trigger, formState: { errors: formErrors }, reset } = useForm({
         resolver: zodResolver(currentSchema),
-        mode: "onChange",
+        mode: "onChange" as const,
         defaultValues: {
-            selectedLevel: "",
-            state: "",
-            division: "",
-            district: "",
-            block: "",
-            sector: "",
-            organizationTypeId: "",
-            organizationId: "",
-            designationId: "",
+            selectedLevel: "", state: "", division: "", district: "", block: "", sector: "",
+            organizationTypeId: "", organizationId: "", designationId: ""
         }
     })
 
-    // 🚀 Reset form when schema changes (level selection changes)
+    // Optimized form reset with memoized values
+    const formValues = useMemo(() => ({
+        selectedLevel: levelInfo.selectedLevel || "",
+        state: levelInfo.state || "", division: levelInfo.division || "", district: levelInfo.district || "",
+        block: levelInfo.block || "", sector: levelInfo.sector || "",
+        organizationTypeId: levelInfo.organizationTypeId || "", organizationId: levelInfo.organizationId || "",
+        designationId: levelInfo.designationId || ""
+    }), [levelInfo.selectedLevel, levelInfo.state, levelInfo.division, levelInfo.district, levelInfo.block, levelInfo.sector, levelInfo.organizationTypeId, levelInfo.organizationId, levelInfo.designationId])
+
+    useEffect(() => reset(formValues), [formValues, reset])
+
+
+    // Simplified error handling with memoized error mapping
+    const errorMap = useMemo(() => [{
+        error: statesError, context: 'states'
+    }, {
+        error: divisionsError, context: 'divisions'
+    }, {
+        error: districtsError, context: 'districts'
+    }, {
+        error: blocksError, context: 'blocks'
+    }, {
+        error: sectorsError, context: 'sectors'
+    }, {
+        error: orgTypesError, context: 'orgTypes'
+    }, {
+        error: organizationsError, context: 'organizations'
+    }, {
+        error: designationsError, context: 'designations'
+    }], [statesError, divisionsError, districtsError, blocksError, sectorsError, orgTypesError, organizationsError, designationsError])
+    
     useEffect(() => {
-        reset({
-            selectedLevel: (levelInfo.selectedLevel as Step2UserDetailsForm['selectedLevel']) || "",
-            state: levelInfo.state || "",
-            division: levelInfo.division || "",
-            district: levelInfo.district || "",
-            block: levelInfo.block || "",
-            sector: levelInfo.sector || "",
-            organizationTypeId: levelInfo.organizationTypeId || "",
-            organizationId: levelInfo.organizationId || "",
-            designationId: levelInfo.designationId || "",
-        })
-    }, [levelInfo, reset, currentSchema])
-
-
-    // 🚀 Optimized error handling with single effect and memoization
-    const apiErrors = useMemo(() => ({
-        states: statesError,
-        divisions: divisionsError,
-        districts: districtsError,
-        blocks: blocksError,
-        sectors: sectorsError,
-        orgTypes: orgTypesError,
-        organizations: organizationsError,
-        designations: designationsError
-    }), [statesError, divisionsError, districtsError, blocksError, sectorsError, orgTypesError, organizationsError, designationsError])
-
-    useEffect(() => {
-        Object.entries(apiErrors).forEach(([context, error]) => {
+        errorMap.forEach(({ error, context }) => {
             if (error) {
                 console.error(`${context} loading error:`, error)
                 toast.error(handleGeoApiError(error, context))
             }
         })
-    }, [apiErrors])
+    }, [errorMap])
 
-    // 🚀 Simplified validation - let Zod schema handle the validation logic
-    const validateFieldRequirement = useCallback(async (fieldName: keyof Step2UserDetailsForm, value: string) => {
-        setValue(fieldName, value as Step2UserDetailsForm[typeof fieldName], { shouldValidate: true })
-        await trigger(fieldName)
+    const validateField = useCallback(async (fieldName: string, value: string) => {
+        setValue(fieldName as any, value, { shouldValidate: true })
+        await trigger(fieldName as any)
     }, [setValue, trigger])
 
-    // 🚀 Memoized geo fields to prevent recreation on every render
-    const geoFields: readonly GeoField[] = useMemo(() => [
+    const geoFields = useMemo(() => [
         { key: "State", value: levelInfo.state, field: "state", options: geo.states },
         { key: "Division", value: levelInfo.division, field: "division", options: geo.divisions },
         { key: "District", value: levelInfo.district, field: "district", options: geo.districts },
@@ -206,90 +187,65 @@ const Step2UserDetails = React.memo(() => {
         { key: "PHC/CHC", value: levelInfo.sector, field: "sector", options: geo.sectors },
     ], [levelInfo.state, levelInfo.division, levelInfo.district, levelInfo.block, levelInfo.sector, geo])
 
-    // 🚀 Memoized reset payload calculation
-    const getResetPayload = useCallback((field: string) => {
-        const resetMap: Record<string, readonly string[]> = {
-            state: [
-                "division", "district", "block", "sector", 
-                "organizationTypeId", "organizationTypeLabel", 
-                "organizationId", "organizationLabel", 
-                "designationId", "designationLabel"
-            ],
-            division: ["district", "block", "sector"],
-            district: ["block", "sector"],
-            block: ["sector"],
-            sector: [],
-            organizationTypeId: ["organizationId", "organizationLabel", "designationId", "designationLabel"],
-            organizationId: ["designationId", "designationLabel"]
-        }
+    const resetMap: Record<string, string[]> = useMemo(() => ({
+        state: ["division", "district", "block", "sector", "organizationTypeId", "organizationTypeLabel", "organizationId", "organizationLabel", "designationId", "designationLabel"],
+        division: ["district", "block", "sector"],
+        district: ["block", "sector"],
+        block: ["sector"],
+        sector: [],
+        organizationTypeId: ["organizationId", "organizationLabel", "designationId", "designationLabel"],
+        organizationId: ["designationId", "designationLabel"]
+    }), [])
 
-        return resetMap[field]?.reduce((acc, key) => ({ ...acc, [key]: "" }), {}) || {}
-    }, [])
+    const getResetPayload = useCallback((field: string): Record<string, string> => 
+        resetMap[field]?.reduce((acc: Record<string, string>, key: string) => ({ ...acc, [key]: "" }), {}) || {}, [resetMap])
 
-    // 🚀 Optimized level selection handler
     const handleLevelSelection = useCallback(async (level: string) => {
         dispatch(updateLevelInfo({ selectedLevel: level }))
-        await validateFieldRequirement('selectedLevel', level)
-    }, [dispatch, validateFieldRequirement])
+        await validateField('selectedLevel', level)
+    }, [dispatch, validateField])
 
-    // 🚀 Optimized geographic field change handler
     const handleGeoFieldChange = useCallback(async (field: string, val: string) => {
         const reset = getResetPayload(field)
         dispatch(updateLevelInfo({ [field]: val, ...reset }))
         dispatch(resetGeoData(field))
         
-        await validateFieldRequirement(field as keyof Step2UserDetailsForm, val)
+        await validateField(field, val)
         
-        // Clear form values for reset fields
         Object.keys(reset).forEach(resetField => {
             if (['organizationTypeId', 'organizationId', 'designationId'].includes(resetField)) {
-                setValue(resetField as keyof Step2UserDetailsForm, '', { shouldValidate: true })
+                setValue(resetField as any, '', { shouldValidate: true })
             }
         })
-    }, [dispatch, getResetPayload, validateFieldRequirement, setValue])
+    }, [dispatch, getResetPayload, validateField, setValue])
 
-    // 🚀 Optimized organization type change handler
     const handleOrgTypeChange = useCallback(async (val: string) => {
         const selected = geo.orgTypes.find((opt: GeoOption) => opt.id === val)
         dispatch(updateLevelInfo({
-            organizationTypeId: val,
-            organizationTypeLabel: selected?.name || "",
-            organizationId: "",
-            organizationLabel: "",
-            designationId: "",
-            designationLabel: "",
+            organizationTypeId: val, organizationTypeLabel: selected?.name || "",
+            organizationId: "", organizationLabel: "", designationId: "", designationLabel: ""
         }))
         dispatch(resetGeoData("organizationType"))
-        
-        await validateFieldRequirement('organizationTypeId', val)
-    }, [dispatch, geo.orgTypes, validateFieldRequirement])
+        await validateField('organizationTypeId', val)
+    }, [dispatch, geo.orgTypes, validateField])
 
-    // 🚀 Optimized organization change handler
     const handleOrgChange = useCallback(async (val: string) => {
         const selected = geo.organizations.find((opt: GeoOption) => opt.id === val)
         dispatch(updateLevelInfo({
-            organizationId: val,
-            organizationLabel: selected?.name || "",
-            designationId: "",
-            designationLabel: "",
+            organizationId: val, organizationLabel: selected?.name || "",
+            designationId: "", designationLabel: ""
         }))
         dispatch(resetGeoData("organization"))
-        
-        await validateFieldRequirement('organizationId', val)
-    }, [dispatch, geo.organizations, validateFieldRequirement])
+        await validateField('organizationId', val)
+    }, [dispatch, geo.organizations, validateField])
 
-    // 🚀 Optimized designation change handler
     const handleDesignationChange = useCallback(async (val: string) => {
         const selected = geo.designations.find((opt: GeoOption) => opt.id === val)
         dispatch(updateLevelInfo({ designationId: val, designationLabel: selected?.name || "" }))
-        
-        await validateFieldRequirement('designationId', val)
-    }, [dispatch, geo.designations, validateFieldRequirement])
+        await validateField('designationId', val)
+    }, [dispatch, geo.designations, validateField])
 
-
-    // 🚀 Memoized utility functions and styles
     const isSelected = useCallback((level: string) => levelInfo.selectedLevel === level, [levelInfo.selectedLevel])
-
     const buttonClasses = useMemo(() => ({
         base: "bg-background text-muted-foreground border border-border hover:bg-secondary",
         selected: "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -333,8 +289,9 @@ const Step2UserDetails = React.memo(() => {
                         const selectedIndex = LEVEL_ORDER.indexOf(levelInfo.selectedLevel as LevelType)
                         if (index > selectedIndex) return null
 
-                        const isDisabled = index > 0 && !levelInfo[geoFields[index - 1].field as keyof typeof levelInfo]
-                        const isLoading = loadingStates[field as keyof LoadingStates] || (index > 0 && loadingStates[geoFields[index - 1]?.field as keyof LoadingStates])
+                        const prevField = index > 0 ? geoFields[index - 1].field : ''
+                        const isDisabled = index > 0 && !levelInfo[prevField as keyof typeof levelInfo]
+                        const isLoading = loadingStates[field as keyof typeof loadingStates] || (index > 0 && loadingStates[prevField as keyof typeof loadingStates])
                         
                         return (
                             <div key={key}>
@@ -516,7 +473,6 @@ const Step2UserDetails = React.memo(() => {
     )
 })
 
-// 🚀 Set display name for better debugging
 Step2UserDetails.displayName = 'Step2UserDetails'
 
 export default Step2UserDetails
