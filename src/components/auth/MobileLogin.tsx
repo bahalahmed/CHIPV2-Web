@@ -4,9 +4,8 @@ import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import PhoneInputField from "../shared/PhoneInputField"
-import { mobileLoginSchema, type MobileLoginData, formatPhoneNumber, isValidPhone } from "@/lib/validations"
-import { useAppDispatch } from '@/hooks/reduxHooks'
-import { useSendOtpMutation, createOtpRequest } from "@/features/auth/authApiSlice"
+import { mobileLoginSchema, type MobileLoginData, formatPhoneNumber } from "@/lib/validations"
+import { useSendOtpMutation } from "@/features/auth/authApiSlice"
 
 interface MobileLoginProps {
   onOtpSent: () => void
@@ -15,10 +14,9 @@ interface MobileLoginProps {
 
 export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) {
   const [loading, setLoading] = useState(false)
-  const dispatch = useAppDispatch()
   
   // RTK Query hook - ready for API integration
-  const [sendOtp, { isLoading: isOtpLoading }] = useSendOtpMutation()
+  const [, { isLoading: isOtpLoading }] = useSendOtpMutation()
 
   // ✅ React Hook Form with Zod validation
   const {

@@ -6,16 +6,25 @@ interface TokenData {
   issuedAt: number;
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  mobile?: string;
+  role?: string;
+}
+
 class SecureStorage {
   private static readonly TOKEN_KEY = 'chipv2_auth_tokens';
-  private static readonly ENCRYPTION_KEY = 'chipv2_secure_key';
+  private static readonly USER_KEY = 'chipv2_user_data';
+  
   // Store tokens securely
-  static setTokens(tokens: { token: string; refreshToken: string }): void {
+  static setTokens(token: string, refreshToken: string, expiresAt?: number): void {
     try {
       const tokenData: TokenData = {
-        token: tokens.token,
-        refreshToken: tokens.refreshToken,
-        expiresAt: Date.now() + (60 * 60 * 1000), // 1 hour
+        token,
+        refreshToken,
+        expiresAt: expiresAt || Date.now() + (60 * 60 * 1000), // 1 hour
         issuedAt: Date.now()
       };
 
@@ -53,12 +62,46 @@ class SecureStorage {
     }
   }
 
+  // Store user data securely
+  static setUser(user: User): void {
+    try {
+      const encryptedData = this.encrypt(JSON.stringify(user));
+      localStorage.setItem(this.USER_KEY, encryptedData);
+    } catch (error) {
+      console.error('Failed to store user data:', error);
+    }
+  }
+
+  // Retrieve user data securely
+  static getUser(): User | null {
+    try {
+      const encryptedData = localStorage.getItem(this.USER_KEY);
+      if (!encryptedData) return null;
+
+      const decryptedData = this.decrypt(encryptedData);
+      return JSON.parse(decryptedData) as User;
+    } catch (error) {
+      console.error('Failed to retrieve user data:', error);
+      return null;
+    }
+  }
+
   // Clear all tokens
   static clearTokens(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem('auth_session');
     
     // Clear any other auth-related data
+    localStorage.removeItem('chipv2_registration');
+    
+    console.log('All authentication data cleared');
+  }
+
+  // Clear all authentication data
+  static clearAuth(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    sessionStorage.removeItem('auth_session');
     localStorage.removeItem('chipv2_registration');
     
     console.log('All authentication data cleared');

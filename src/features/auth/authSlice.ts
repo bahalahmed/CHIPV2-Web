@@ -1,6 +1,6 @@
 // src/features/auth/authSlice.ts
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { loginUser } from './authApi';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { authApiSlice } from './authApiSlice';
 import SecureStorage from '@/utils/secureStorage';
 
 interface User {
@@ -16,107 +16,97 @@ interface AuthState {
   token: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
-  loading: boolean;
-  error: string | null;
   tokenExpiry: number | null;
 }
 
-// Initialize state securely
+// Initialize state securely from SecureStorage only
 const initializeAuthState = (): AuthState => {
   const tokenData = SecureStorage.getTokens();
   const isAuthenticated = SecureStorage.isAuthenticated();
+  const userData = SecureStorage.getUser();
   
   return {
-    user: tokenData ? JSON.parse(localStorage.getItem('user') || 'null') : null,
+    user: userData,
     token: tokenData?.token || null,
     refreshToken: tokenData?.refreshToken || null,
     isAuthenticated,
-    loading: false,
-    error: null,
     tokenExpiry: tokenData?.expiresAt || null,
   };
 };
 
 const initialState: AuthState = initializeAuthState();
 
-// ✅ Thunk: login
-export const login = createAsyncThunk(
-  'auth/login',
-  async (
-    { username, password }: { username: string; password: string },
-    { rejectWithValue }
-  ) => {
-    try {
-      console.log("logging in with", username, password);
-      await loginUser(username, password);
-      
-
-      // ✅ You may receive a token or rely on httpOnly cookie
-      const user = {
-        id: '1',
-        name: username,
-        email: `${username}@example.com`,
-      };
-
-      return { user };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Login failed. Please check credentials.'
-      );
-    }
-  }
-);
-
-// ✅ Thunk: logout
-export const logout = createAsyncThunk('auth/logout', async () => {
-  logoutUser();
-});
-
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    resetAuth(state) {
-      state.user = null;
-      state.isAuthenticated = false;
-      state.loading = false;
-      state.error = null;
-      localStorage.removeItem('user');
+    setUser(state, action: PayloadAction<User>) {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+      SecureStorage.setUser(action.payload);
     },
-    setError(state, action: PayloadAction<string | null>) {
-      state.error = action.payload;
+    setTokens(state, action: PayloadAction<{ token: string; refreshToken: string; expiresAt?: number }>) {
+      state.token = action.payload.token;
+      state.refreshToken = action.payload.refreshToken;
+      state.tokenExpiry = action.payload.expiresAt || null;
+      SecureStorage.setTokens(action.payload.token, action.payload.refreshToken, action.payload.expiresAt);
+    },
+    logout(state) {
+      state.user = null;
+      state.token = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+      state.tokenExpiry = null;
+      SecureStorage.clearAuth();
+    },
+    refreshAuthState(state) {
+      const tokenData = SecureStorage.getTokens();
+      const isAuthenticated = SecureStorage.isAuthenticated();
+      const userData = SecureStorage.getUser();
+      
+      state.user = userData;
+      state.token = tokenData?.token || null;
+      state.refreshToken = tokenData?.refreshToken || null;
+      state.isAuthenticated = isAuthenticated;
+      state.tokenExpiry = tokenData?.expiresAt || null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(login.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(login.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.user;
-        state.isAuthenticated = true;
-
-        // ✅ Save only user to localStorage (not token)
-        localStorage.setItem('user', JSON.stringify(action.payload.user));
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      .addCase(logout.fulfilled, (state) => {
-        state.user = null;
-        state.isAuthenticated = false;
-        localStorage.removeItem('user');
-      });
+      .addMatcher(
+        authApiSlice.endpoints.loginWithEmail.matchFulfilled,
+        (state, action) => {
+          const { user, token, refreshToken } = action.payload;
+          state.user = user;
+          state.token = token;
+          state.refreshToken = refreshToken;
+          state.isAuthenticated = true;
+          
+          // Store securely
+          SecureStorage.setUser(user);
+          SecureStorage.setTokens(token, refreshToken);
+        }
+      )
+      .addMatcher(
+        authApiSlice.endpoints.logout.matchFulfilled,
+        (state) => {
+          state.user = null;
+          state.token = null;
+          state.refreshToken = null;
+          state.isAuthenticated = false;
+          state.tokenExpiry = null;
+          SecureStorage.clearAuth();
+        }
+      );
   },
 });
 
-export const { resetAuth, setError } = authSlice.actions;
+export const { setUser, setTokens, logout, refreshAuthState } = authSlice.actions;
 export default authSlice.reducer;
-function logoutUser() {
-  throw new Error('Function not implemented.');
-}
+
+// Selectors
+export const selectAuth = (state: { auth: AuthState }) => state.auth;
+export const selectIsAuthenticated = (state: { auth: AuthState }) => state.auth.isAuthenticated;
+export const selectUser = (state: { auth: AuthState }) => state.auth.user;
+export const selectToken = (state: { auth: AuthState }) => state.auth.token;
 

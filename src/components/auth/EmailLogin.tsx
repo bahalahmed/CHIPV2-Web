@@ -9,8 +9,6 @@ import { useLoginFormValidation } from "@/hooks/useFormValidation"
 import { emailLoginSchema, type EmailLoginForm } from "@/lib/validationSchemas"
 import { useLoginWithEmailMutation } from "@/features/auth/authApiSlice"
 import { handleApiError } from "@/lib/errorHandling"
-import { useAppDispatch } from "@/hooks/reduxHooks"
-import { login } from "@/features/auth/authSlice"
 
 interface EmailLoginProps {
   onForgotPassword: () => void
@@ -18,7 +16,6 @@ interface EmailLoginProps {
 
 const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProps) {
   const navigate = useNavigate()
-  const dispatch = useAppDispatch()
   
   // RTK Query mutation for login
   const [loginWithEmail, { isLoading }] = useLoginWithEmailMutation()
@@ -43,30 +40,19 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
   // Optimized submission handler
   const onSubmit = useCallback(async (data: EmailLoginForm) => {
     try {
-      const response = await loginWithEmail({
+      await loginWithEmail({
         email: data.email,
         password: data.password,
       }).unwrap()
 
-      // Update Redux state with proper structure
-      dispatch(login({
-        username: data.email,
-        password: data.password,
-      }))
-
-      // Store user data in localStorage for persistence
-      localStorage.setItem("auth", JSON.stringify({
-        user: response.user,
-        token: response.token,
-      }))
-
+      // RTK Query automatically handles Redux state via authSlice matchers
       // Navigate to dashboard
       navigate("/dashboard")
       
     } catch (error) {
       handleApiError(error, 'login')
     }
-  }, [loginWithEmail, dispatch, navigate])
+  }, [loginWithEmail, navigate])
 
   // Memoized field change handlers
   const handleEmailChange = useCallback(

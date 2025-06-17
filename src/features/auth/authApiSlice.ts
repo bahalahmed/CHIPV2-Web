@@ -225,7 +225,7 @@ export const authApiSlice = createApi({
         body: data,
       }),
       // Optimistic updates for better UX
-      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+      onQueryStarted: async (arg, { queryFulfilled }) => {
         try {
           const { data } = await queryFulfilled;
           console.log(`OTP sent successfully to ${arg.type}:`, data.message);
