@@ -177,33 +177,46 @@ export const createConditionalSchema = <T extends Record<string, any>>(
 
 // Geographic validation for Step 2
 export const createGeographicValidationSchema = (selectedLevel: string) => {
-  const levelIndex = ["State", "Division", "District", "Block", "PHC"].indexOf(selectedLevel);
+  const levelIndex = ["State", "Division", "District", "Block", "PHC/CHC"].indexOf(selectedLevel);
   
-  let schema = step2UserDetailsSchema;
+  // Build dynamic schema based on selected level
+  const baseFields = {
+    selectedLevel: z.string().min(1, 'Please select your administrative level'),
+    state: z.string().min(1, 'State is required'),
+    organizationTypeId: z.string().optional(),
+    organizationId: z.string().optional(),
+    designationId: z.string().optional(),
+  };
+
+  // Add conditional geographic fields based on level
+  const conditionalFields: Record<string, any> = {};
   
   if (levelIndex >= 1) {
-    schema = schema.extend({
-      division: z.string().min(1, 'Division is required for this level'),
-    });
+    conditionalFields.division = z.string().min(1, 'Division is required for this level');
+  } else {
+    conditionalFields.division = z.string().optional();
   }
   
   if (levelIndex >= 2) {
-    schema = schema.extend({
-      district: z.string().min(1, 'District is required for this level'),
-    });
+    conditionalFields.district = z.string().min(1, 'District is required for this level');
+  } else {
+    conditionalFields.district = z.string().optional();
   }
   
   if (levelIndex >= 3) {
-    schema = schema.extend({
-      block: z.string().min(1, 'Block is required for this level'),
-    });
+    conditionalFields.block = z.string().min(1, 'Block is required for this level');
+  } else {
+    conditionalFields.block = z.string().optional();
   }
   
   if (levelIndex >= 4) {
-    schema = schema.extend({
-      sector: z.string().min(1, 'PHC is required for this level'),
-    });
+    conditionalFields.sector = z.string().min(1, 'PHC/CHC is required for this level');
+  } else {
+    conditionalFields.sector = z.string().optional();
   }
   
-  return schema;
+  return z.object({
+    ...baseFields,
+    ...conditionalFields
+  });
 };

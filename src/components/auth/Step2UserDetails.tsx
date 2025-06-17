@@ -24,7 +24,7 @@ import {
     handleGeoApiError
 } from "@/features/geoData/geoApiSlice"
 import { updateLevelInfo } from "@/features/registerForm/registerFormSlice"
-import { step2Schema, type Step2FormData } from "@/lib/validations"
+import { step2UserDetailsSchema, createGeographicValidationSchema, type Step2UserDetailsForm } from "@/lib/validationSchemas"
 
 // 🚀 Production-optimized constants
 const LEVEL_ORDER = ["State", "Division", "District", "Block", "PHC/CHC"] as const
@@ -54,17 +54,6 @@ interface LoadingStates {
     readonly designations: boolean
 }
 
-interface FieldErrors {
-    selectedLevel?: string
-    state?: string
-    division?: string
-    district?: string
-    block?: string
-    sector?: string
-    organizationTypeId?: string
-    organizationId?: string
-    designationId?: string
-}
 
 
 // 🚀 Production-optimized memoized selectors
@@ -137,33 +126,38 @@ const Step2UserDetails = React.memo(() => {
         designations: designationsLoading
     }), [statesLoading, divisionsLoading, districtsLoading, blocksLoading, sectorsLoading, orgTypesLoading, organizationsLoading, designationsLoading])
 
-    // 🚀 Optimized error state management
-    const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
 
+    // 🚀 Create dynamic schema based on selected level
+    const currentSchema = useMemo(() => {
+        return createGeographicValidationSchema(levelInfo.selectedLevel || "")
+    }, [levelInfo.selectedLevel])
+    
     // 🚀 Optimized React Hook Form with proper typing
     const {
         setValue,
-        trigger
-    } = useForm<Step2FormData>({
-        resolver: zodResolver(step2Schema),
+        trigger,
+        formState: { errors: formErrors },
+        reset
+    } = useForm<Step2UserDetailsForm>({
+        resolver: zodResolver(currentSchema),
         mode: "onChange",
-        defaultValues: useMemo(() => ({
-            selectedLevel: (levelInfo.selectedLevel as Step2FormData['selectedLevel']) || "",
-            state: levelInfo.state || "",
-            division: levelInfo.division || "",
-            district: levelInfo.district || "",
-            block: levelInfo.block || "",
-            sector: levelInfo.sector || "",
-            organizationTypeId: levelInfo.organizationTypeId || "",
-            organizationId: levelInfo.organizationId || "",
-            designationId: levelInfo.designationId || "",
-        }), [levelInfo])
+        defaultValues: {
+            selectedLevel: "",
+            state: "",
+            division: "",
+            district: "",
+            block: "",
+            sector: "",
+            organizationTypeId: "",
+            organizationId: "",
+            designationId: "",
+        }
     })
 
-    // 🚀 Optimized form synchronization with dependency array
+    // 🚀 Reset form when schema changes (level selection changes)
     useEffect(() => {
-        const updates: Partial<Step2FormData> = {
-            selectedLevel: (levelInfo.selectedLevel as Step2FormData['selectedLevel']) || "",
+        reset({
+            selectedLevel: (levelInfo.selectedLevel as Step2UserDetailsForm['selectedLevel']) || "",
             state: levelInfo.state || "",
             division: levelInfo.division || "",
             district: levelInfo.district || "",
@@ -172,23 +166,9 @@ const Step2UserDetails = React.memo(() => {
             organizationTypeId: levelInfo.organizationTypeId || "",
             organizationId: levelInfo.organizationId || "",
             designationId: levelInfo.designationId || "",
-        }
-        
-        Object.entries(updates).forEach(([key, value]) => {
-            setValue(key as keyof Step2FormData, value as string)
         })
-    }, [levelInfo, setValue])
+    }, [levelInfo, reset, currentSchema])
 
-    // 🚀 Memoized error update function
-    const updateFieldError = useCallback((fieldName: keyof FieldErrors, error?: string) => {
-        setFieldErrors(prev => {
-            if (prev[fieldName] === error) return prev // Prevent unnecessary updates
-            return {
-                ...prev,
-                [fieldName]: error
-            }
-        })
-    }, [])
 
     // 🚀 Optimized error handling with single effect and memoization
     const apiErrors = useMemo(() => ({
@@ -211,17 +191,11 @@ const Step2UserDetails = React.memo(() => {
         })
     }, [apiErrors])
 
-    // 🚀 Memoized field validation with proper typing
-    const validateFieldRequirement = useCallback(async (fieldName: keyof Step2FormData, value: string) => {
-        if (!value && fieldName !== 'selectedLevel') {
-            updateFieldError(fieldName as keyof FieldErrors, `${String(fieldName)} is required`)
-        } else {
-            updateFieldError(fieldName as keyof FieldErrors, undefined)
-        }
-        
-        setValue(fieldName, value as Step2FormData[typeof fieldName], { shouldValidate: true })
+    // 🚀 Simplified validation - let Zod schema handle the validation logic
+    const validateFieldRequirement = useCallback(async (fieldName: keyof Step2UserDetailsForm, value: string) => {
+        setValue(fieldName, value as Step2UserDetailsForm[typeof fieldName], { shouldValidate: true })
         await trigger(fieldName)
-    }, [setValue, trigger, updateFieldError])
+    }, [setValue, trigger])
 
     // 🚀 Memoized geo fields to prevent recreation on every render
     const geoFields: readonly GeoField[] = useMemo(() => [
@@ -256,15 +230,7 @@ const Step2UserDetails = React.memo(() => {
     const handleLevelSelection = useCallback(async (level: string) => {
         dispatch(updateLevelInfo({ selectedLevel: level }))
         await validateFieldRequirement('selectedLevel', level)
-        
-        // Clear errors for fields that will be hidden
-        const selectedIndex = LEVEL_ORDER.indexOf(level as LevelType)
-        geoFields.forEach((field, index) => {
-            if (index > selectedIndex) {
-                updateFieldError(field.field as keyof FieldErrors, undefined)
-            }
-        })
-    }, [dispatch, validateFieldRequirement, geoFields, updateFieldError])
+    }, [dispatch, validateFieldRequirement])
 
     // 🚀 Optimized geographic field change handler
     const handleGeoFieldChange = useCallback(async (field: string, val: string) => {
@@ -272,17 +238,15 @@ const Step2UserDetails = React.memo(() => {
         dispatch(updateLevelInfo({ [field]: val, ...reset }))
         dispatch(resetGeoData(field))
         
-        await validateFieldRequirement(field as keyof Step2FormData, val)
+        await validateFieldRequirement(field as keyof Step2UserDetailsForm, val)
         
-        // Clear errors for reset fields
+        // Clear form values for reset fields
         Object.keys(reset).forEach(resetField => {
-            updateFieldError(resetField as keyof FieldErrors, undefined)
-            // Also clear form values for reset fields
             if (['organizationTypeId', 'organizationId', 'designationId'].includes(resetField)) {
-                setValue(resetField as keyof Step2FormData, '', { shouldValidate: true })
+                setValue(resetField as keyof Step2UserDetailsForm, '', { shouldValidate: true })
             }
         })
-    }, [dispatch, getResetPayload, validateFieldRequirement, updateFieldError, setValue])
+    }, [dispatch, getResetPayload, validateFieldRequirement, setValue])
 
     // 🚀 Optimized organization type change handler
     const handleOrgTypeChange = useCallback(async (val: string) => {
@@ -298,9 +262,7 @@ const Step2UserDetails = React.memo(() => {
         dispatch(resetGeoData("organizationType"))
         
         await validateFieldRequirement('organizationTypeId', val)
-        updateFieldError('organizationId', undefined)
-        updateFieldError('designationId', undefined)
-    }, [dispatch, geo.orgTypes, validateFieldRequirement, updateFieldError])
+    }, [dispatch, geo.orgTypes, validateFieldRequirement])
 
     // 🚀 Optimized organization change handler
     const handleOrgChange = useCallback(async (val: string) => {
@@ -314,8 +276,7 @@ const Step2UserDetails = React.memo(() => {
         dispatch(resetGeoData("organization"))
         
         await validateFieldRequirement('organizationId', val)
-        updateFieldError('designationId', undefined)
-    }, [dispatch, geo.organizations, validateFieldRequirement, updateFieldError])
+    }, [dispatch, geo.organizations, validateFieldRequirement])
 
     // 🚀 Optimized designation change handler
     const handleDesignationChange = useCallback(async (val: string) => {
@@ -354,12 +315,12 @@ const Step2UserDetails = React.memo(() => {
                 </div>
                 
                 {/* ✅ Inline error for level selection */}
-                {fieldErrors.selectedLevel && (
+                {formErrors.selectedLevel && (
                     <p className="text-xs text-destructive mt-2 ml-1 flex items-center gap-1" role="alert">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        {fieldErrors.selectedLevel}
+                        {formErrors.selectedLevel?.message}
                     </p>
                 )}
             </Card>
@@ -408,12 +369,12 @@ const Step2UserDetails = React.memo(() => {
                                 </Select>
                                 
                                 {/* ✅ Inline error for geo fields */}
-                                {fieldErrors[field as keyof typeof fieldErrors] && (
+                                {formErrors[field as keyof Step2UserDetailsForm] && (
                                     <p className="text-xs text-destructive mt-1 ml-1 flex items-center gap-1" role="alert">
                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                         </svg>
-                                        {fieldErrors[field as keyof typeof fieldErrors]}
+                                        {formErrors[field as keyof Step2UserDetailsForm]?.message}
                                     </p>
                                 )}
                                 
@@ -458,12 +419,12 @@ const Step2UserDetails = React.memo(() => {
                             </SelectContent>
                         </Select>
                         
-                        {fieldErrors.organizationTypeId && (
+                        {formErrors.organizationTypeId && (
                             <p className="text-xs text-destructive mt-1 ml-1 flex items-center gap-1" role="alert">
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                 </svg>
-                                {fieldErrors.organizationTypeId}
+                                {formErrors.organizationTypeId?.message}
                             </p>
                         )}
                     </div>
@@ -499,12 +460,12 @@ const Step2UserDetails = React.memo(() => {
                             </SelectContent>
                         </Select>
                         
-                        {fieldErrors.organizationId && (
+                        {formErrors.organizationId && (
                             <p className="text-xs text-destructive mt-1 ml-1 flex items-center gap-1" role="alert">
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                 </svg>
-                                {fieldErrors.organizationId}
+                                {formErrors.organizationId?.message}
                             </p>
                         )}
                     </div>
@@ -540,12 +501,12 @@ const Step2UserDetails = React.memo(() => {
                             </SelectContent>
                         </Select>
                         
-                        {fieldErrors.designationId && (
+                        {formErrors.designationId && (
                             <p className="text-xs text-destructive mt-1 ml-1 flex items-center gap-1" role="alert">
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                 </svg>
-                                {fieldErrors.designationId}
+                                {formErrors.designationId?.message}
                             </p>
                         )}
                     </div>

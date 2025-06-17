@@ -82,13 +82,13 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
     }
     
     // Check geographic fields based on selected level
-    const levelIndex = ["State", "Division", "District", "Block", "PHC"].indexOf(selectedLevel)
+    const levelIndex = ["State", "Division", "District", "Block", "PHC/CHC"].indexOf(selectedLevel)
     const missingGeoFields = []
     
     if (levelIndex >= 1 && !division) missingGeoFields.push("Division")
     if (levelIndex >= 2 && !district) missingGeoFields.push("District") 
     if (levelIndex >= 3 && !block) missingGeoFields.push("Block")
-    if (levelIndex >= 4 && !sector) missingGeoFields.push("PHC")
+    if (levelIndex >= 4 && !sector) missingGeoFields.push("PHC/CHC")
     
     if (missingGeoFields.length > 0) {
       toast.error(`Please select: ${missingGeoFields.join(", ")}`)
