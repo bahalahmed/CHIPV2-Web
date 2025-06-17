@@ -34,8 +34,8 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
   })
 
   // Memoized form values
-  const emailValue = watch("email")
-  const passwordValue = watch("password")
+  const { email: emailValue, password: passwordValue } = watch()
+
 
   // Optimized submission handler
   const onSubmit = useCallback(async (data: EmailLoginForm) => {

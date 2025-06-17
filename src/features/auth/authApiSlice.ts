@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import PasswordSecurity from '@/utils/passwordSecurity';
 
 // Types for API responses
 interface LoginRequest {
@@ -155,11 +154,8 @@ export const authApiSlice = createApi({
       
       // MOCK IMPLEMENTATION - Remove when API is ready
       queryFn: async (credentials) => {
-        // Hash password like the real API would
-        const hashedPassword = PasswordSecurity.hashPassword(credentials.password);
-        
-        console.log('🔄 Mock Login - Original Password:', credentials.password);
-        console.log('🔒 Mock Login - Hashed Password:', hashedPassword);
+        // Password should already be hashed from frontend
+        console.log('🔒 Mock Login - Received Hashed Password:', credentials.password);
         console.log('🔄 Mock Login - Email:', credentials.email);
         
         // Simulate API delay
