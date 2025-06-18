@@ -6,6 +6,7 @@ import React, { Suspense, useMemo, useRef } from "react"
 import { useEffect } from "react"
 import { populateFromLocalStorage } from "@/features/registerForm/registerFormSlice"
 import { toast } from "sonner"
+import PasswordSecurity from "@/utils/passwordSecurity"
 
 // Lazy-loaded step components
 const Step1Verification = React.lazy(() => import("./Step1Verification"))
@@ -180,8 +181,15 @@ export function RegisterDrawer({ open, onOpenChange }: RegisterDrawerProps) {
   }
 
   const handleApprovalSubmit = () => {
-    console.log("✅ Submitting registration:", reviewInfo)
-    localStorage.setItem("userRegistrationData", JSON.stringify(reviewInfo))
+    // Hash passwords before submission
+    const secureReviewInfo = {
+      ...reviewInfo,
+      password: reviewInfo.password ? PasswordSecurity.hashPassword(reviewInfo.password) : reviewInfo.password,
+      confirmPassword: reviewInfo.confirmPassword ? PasswordSecurity.hashPassword(reviewInfo.confirmPassword) : reviewInfo.confirmPassword
+    }
+    
+    console.log("✅ Submitting registration:", secureReviewInfo)
+    localStorage.setItem("userRegistrationData", JSON.stringify(secureReviewInfo))
 
     setTimeout(() => {
       dispatch(resetForm())

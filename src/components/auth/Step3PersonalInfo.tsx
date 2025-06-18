@@ -10,17 +10,16 @@ import type { RootState } from "@/app/store"
 import { updatePersonalInfo } from "@/features/registerForm/registerFormSlice"
 import PasswordInputField from "../shared/PasswordInputField"
 import { validateField, passwordSchema, nameSchema } from "@/lib/validations"
-import PasswordSecurity from "@/utils/passwordSecurity"
 
 const Step3PersonalInfoComponent = () => {
   const dispatch = useDispatch()
-  const { firstName, lastName } = useSelector(
+  const { firstName, lastName, password, confirmPassword } = useSelector(
     (state: RootState) => state.registerForm.personalInfo,
   )
 
-  // Local state for plain text passwords for validation and display
-  const [plainPassword, setPlainPassword] = useState('')
-  const [plainConfirmPassword, setPlainConfirmPassword] = useState('')
+  // Initialize local state from Redux on component mount
+  const [plainPassword, setPlainPassword] = useState(password || '')
+  const [plainConfirmPassword, setPlainConfirmPassword] = useState(confirmPassword || '')
 
   // ✅ State for inline validation errors
   const [fieldErrors, setFieldErrors] = useState<{
@@ -111,9 +110,8 @@ const Step3PersonalInfoComponent = () => {
     // Store plain text for validation and display
     setPlainPassword(value)
     
-    // Hash password before storing in Redux state
-    const hashedPassword = value ? PasswordSecurity.hashPassword(value) : value
-    dispatch(updatePersonalInfo({ password: hashedPassword }))
+    // Store plain password in Redux (will be hashed during final submission)
+    dispatch(updatePersonalInfo({ password: value }))
     validatePassword(value) // Validate the plain text password
     
     // Re-validate confirm password if it exists (compare with plain text)
@@ -126,11 +124,16 @@ const Step3PersonalInfoComponent = () => {
     // Store plain text for validation and display
     setPlainConfirmPassword(value)
     
-    // Hash confirm password before storing in Redux state
-    const hashedConfirmPassword = value ? PasswordSecurity.hashPassword(value) : value
-    dispatch(updatePersonalInfo({ confirmPassword: hashedConfirmPassword }))
+    // Store plain password in Redux (will be hashed during final submission)
+    dispatch(updatePersonalInfo({ confirmPassword: value }))
     validateConfirmPassword(value, plainPassword) // Validate with plain text values
   }
+
+  // ✅ Sync local state with Redux when Redux values change
+  useEffect(() => {
+    setPlainPassword(password || '')
+    setPlainConfirmPassword(confirmPassword || '')
+  }, [password, confirmPassword])
 
   // ✅ Validate on initial load if fields have values
   useEffect(() => {
