@@ -77,45 +77,71 @@ export function OtpSection({
       setIsVerifying(true)
       
       try {
+        // Context-based OTP verification
+        const otpId = localStorage.getItem('otpId') || 'stored_otp_id'
+        const context = mode === "login" ? "login" : "registration"
+        
         // TODO: Uncomment when API is ready - Using RTK Query
-        // const otpId = localStorage.getItem('otpId') || 'stored_otp_id'
-        // const verifyRequest = createVerifyOtpRequest(otpId, fullOtp, type)
+        // const verifyRequest = { otpId, otp: fullOtp, type, context }
         // const response = await verifyOtp(verifyRequest).unwrap()
         // 
         // console.log('✅ OTP verified successfully:', response)
-        // // RTK Query automatically handles Redux state via authSlice matchers
+        // if (response.token && mode === "login") {
+        //   // Handle login authentication
+        //   localStorage.setItem('token', response.token)
+        //   localStorage.setItem('refreshToken', response.refreshToken)
+        // }
         // toast.success(`${label} verified successfully!`)
         // setVerified(true)
 
         // MOCK IMPLEMENTATION - Remove when API is ready
         await new Promise(resolve => setTimeout(resolve, 500))
 
-        // Mock Step 2: Verify OTP response
-        const mockVerifyOtpResponse = {
-          success: true,
-          verified: true,
-          user: {
-            id: "mob-67890",
-            mobile: value,
-            name: "John Doe",
-            role: "User"
-          },
-          token: `mock_jwt_token_${Date.now()}`,
-          refreshToken: `mock_refresh_token_${Date.now()}`
-        }
+        // Context-based mock responses
+        let mockVerifyOtpResponse
         
-        console.log('📱 Mock Step 2 - Verify OTP Response:', mockVerifyOtpResponse)
-
-        // RTK Query would automatically handle Redux state via authSlice matchers
-        // For mock, we'll simulate this by dispatching to trigger the matcher
-        console.log('Mock: RTK Query would handle auth state automatically')
+        if (context === "login") {
+          // Login: Return authentication data
+          mockVerifyOtpResponse = {
+            success: true,
+            verified: true,
+            user: {
+              id: "mob-67890",
+              mobile: value,
+              name: "John Doe",
+              role: "User"
+            },
+            token: `mock_jwt_token_${Date.now()}`,
+            refreshToken: `mock_refresh_token_${Date.now()}`
+          }
+          
+          // Store tokens for login context
+          localStorage.setItem('token', mockVerifyOtpResponse.token)
+          localStorage.setItem('refreshToken', mockVerifyOtpResponse.refreshToken)
+          
+          console.log('🔐 Mock Login OTP Response:', mockVerifyOtpResponse)
+        } else {
+          // Registration: Return only verification status
+          mockVerifyOtpResponse = {
+            success: true,
+            verified: true,
+            message: `${label} verified successfully`
+          }
+          
+          console.log('✅ Mock Registration OTP Response:', mockVerifyOtpResponse)
+        }
 
         toast.success(`${label} verified successfully!`)
         setVerified(true)
         
-        // ✅ Reset OTP state after successful verification
+        // Context-specific post-verification actions
         if (mode === "login") {
           dispatch(setOtpSent(false))
+          // Additional login-specific actions
+          console.log('Login verified - user authenticated')
+        } else {
+          // Registration-specific actions
+          console.log('Registration verification complete - no authentication')
         }
         
         onVerified?.()
@@ -232,7 +258,7 @@ export function OtpSection({
     return () => clearInterval(countdown)
   }, [resendTrigger])
 
-  const handleSendOTP = () => {
+  const handleSendOTP = async () => {
     if (type === "email") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(value)) return toast.error("Please enter a valid email.")
@@ -242,10 +268,40 @@ export function OtpSection({
         return toast.error(`Enter a valid 10-digit ${label.toLowerCase()}`)
       }
     }
-    setShowOtpInput(true)
-    setOtp(Array(6).fill(""))
-    setResendTrigger((prev) => prev + 1)
-    toast.success("OTP sent successfully!")
+
+    try {
+      // Context-based OTP sending
+      const context = mode === "login" ? "login" : "registration"
+      
+      // TODO: Uncomment when API is ready
+      // const otpRequest = createOtpRequest(type, value)
+      // const response = await sendOtp(otpRequest).unwrap()
+      // localStorage.setItem('otpId', response.otpId)
+      // console.log('✅ Send OTP Response:', response)
+
+      // MOCK IMPLEMENTATION - Remove when API is ready
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      const mockSendOtpResponse = {
+        success: true,
+        message: "OTP sent successfully",
+        otpId: `mock_otp_${Date.now()}_${value}`
+      }
+      
+      // Store mock otpId for verification
+      localStorage.setItem('otpId', mockSendOtpResponse.otpId)
+      
+      console.log(`📤 Mock ${context.charAt(0).toUpperCase() + context.slice(1)} Send OTP Response:`, mockSendOtpResponse)
+      
+      setShowOtpInput(true)
+      setOtp(Array(6).fill(""))
+      setResendTrigger((prev) => prev + 1)
+      toast.success("OTP sent successfully!")
+      
+    } catch (error) {
+      console.error('Send OTP error:', error)
+      toast.error("Failed to send OTP. Please try again.")
+    }
   }
 
   const handleChangeClick = () => {

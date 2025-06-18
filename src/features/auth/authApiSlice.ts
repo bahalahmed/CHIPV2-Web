@@ -37,12 +37,23 @@ interface VerifyOtpRequest {
   otpId: string;
   otp: string;
   type: 'mobile' | 'email' | 'whatsapp';
+  context: 'registration' | 'login' | 'forgot-password';
 }
 
 interface VerifyOtpResponse {
   success: boolean;
   verified: boolean;
   message: string;
+  // Login context fields (only present when context = 'login')
+  user?: {
+    id: string;
+    mobile: string;
+    email?: string;
+    name: string;
+    role: string;
+  };
+  token?: string;
+  refreshToken?: string;
 }
 
 interface ForgotPasswordRequest {
@@ -238,11 +249,15 @@ export const authApiSlice = createApi({
         method: 'POST',
         body: data,
       }),
-      // Transform response for consistent handling
+      // Transform response based on context
       transformResponse: (response: any) => ({
         success: response.success || false,
         verified: response.verified || false,
         message: response.message || 'Verification completed',
+        // Include authentication data only for login context
+        ...(response.user && { user: response.user }),
+        ...(response.token && { token: response.token }),
+        ...(response.refreshToken && { refreshToken: response.refreshToken }),
       }),
     }),
 
@@ -319,9 +334,11 @@ export const createOtpRequest = (
 export const createVerifyOtpRequest = (
   otpId: string,
   otp: string,
-  type: 'mobile' | 'email' | 'whatsapp'
+  type: 'mobile' | 'email' | 'whatsapp',
+  context: 'registration' | 'login' | 'forgot-password' = 'registration'
 ): VerifyOtpRequest => ({
   otpId,
   otp,
   type,
+  context,
 });
