@@ -29,6 +29,7 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
     handleValidatedSubmit,
     getFieldError,
     isFieldValid,
+    
     isSubmitting,
   } = useLoginFormValidation<EmailLoginForm>(emailLoginSchema, {
     email: "",

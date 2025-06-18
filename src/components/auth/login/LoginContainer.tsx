@@ -49,16 +49,15 @@ export default function LoginContainer() {
           onChange={(val) => {
             setMobile(val)
             dispatch(setOtpSent(false))
-          }}
+          } }
           verified={false}
-          setVerified={() => { }}
+          setVerified={() => { } }
           showOtpInput={true}
-          setShowOtpInput={() => { }}
-          otp={otp}
-          setOtp={setOtp}
+          setShowOtpInput={() => { } }
           mode="login"
-          redirectAfterVerify="/dashboard"
-        />
+          redirectAfterVerify="/dashboard" otp={[]} setOtp={function (val: string[]): void {
+            throw new Error("Function not implemented.")
+          } }        />
       </div>
     )
   }

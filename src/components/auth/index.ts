@@ -1,7 +1,4 @@
-// Main auth components export file
-// This makes imports cleaner throughout the app
 
-// Common components
 export { default as AuthGuard, withAuthGuard, useAuthStatus } from './common/AuthGuard';
 export { default as LogoutButton } from './common/LogoutButton';
 
