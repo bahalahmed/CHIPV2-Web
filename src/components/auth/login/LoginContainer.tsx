@@ -55,9 +55,10 @@ export default function LoginContainer() {
           showOtpInput={true}
           setShowOtpInput={() => { } }
           mode="login"
-          redirectAfterVerify="/dashboard" otp={[]} setOtp={function (val: string[]): void {
-            throw new Error("Function not implemented.")
-          } }        />
+          redirectAfterVerify="/dashboard"
+          otp={otp}
+          setOtp={setOtp}
+        />
       </div>
     )
   }
