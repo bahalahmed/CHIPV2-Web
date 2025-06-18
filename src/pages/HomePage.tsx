@@ -1,6 +1,6 @@
 import { Footer } from "@/components/homepage/footer"
 import { HeaderWithApi } from "@/components/homepage/header-with-api"
-import LoginWrapper from "@/components/auth/LoginWrapper"
+import LoginContainer from "@/components/auth/login/LoginContainer"
 import { MapSection } from "@/components/homepage/map-section"
 
 export default function HomePage() {
@@ -14,7 +14,7 @@ export default function HomePage() {
         </div>
 
         <div className="w-full md:w-[55%] lg:w-[45%] xl:w-[35%] flex justify-center">
-          <LoginWrapper />
+          <LoginContainer />
         </div>
       </main>
 

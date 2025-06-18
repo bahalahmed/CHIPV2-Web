@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input"
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp"
 import { useAppDispatch } from "@/hooks/reduxHooks"
 import { setOtpSent } from "@/features/auth/loginTabSlice"
-import PhoneInputField from "../shared/PhoneInputField"
-import EmailInputField from "../shared/EmailInputField"
+
 import { CheckCircle } from "lucide-react"
 import { useVerifyOtpMutation } from "@/features/auth/authApiSlice"
+import EmailInputField from "@/components/shared/EmailInputField"
+import PhoneInputField from "@/components/shared/PhoneInputField"
 
 interface OtpSectionProps {
   label: string

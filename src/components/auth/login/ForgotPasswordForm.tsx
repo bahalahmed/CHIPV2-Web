@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import EmailInputField from "../shared/EmailInputField"
+
 import { forgotPasswordSchema, type ForgotPasswordData } from "@/lib/validations"
 import { useForgotPasswordMutation } from "@/features/auth/authApiSlice"
+import EmailInputField from "@/components/shared/EmailInputField"
 
 interface ForgotPasswordFormProps {
   onBack: () => void;

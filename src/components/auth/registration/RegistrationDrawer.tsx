@@ -9,13 +9,13 @@ import { toast } from "sonner"
 import PasswordSecurity from "@/utils/passwordSecurity"
 
 // Lazy-loaded step components
-const Step1Verification = React.lazy(() => import("./Step1Verification"))
-const Step2UserDetails = React.lazy(() => import("./Step2UserDetails"))
-const Step3PersonalInfo = React.lazy(() => import("./Step3PersonalInfo"))
-const Step4Approval = React.lazy(() => import("./Step4Approval"))
+const Step1Verification = React.lazy(() => import("./steps/VerificationStep"))
+const Step2UserDetails = React.lazy(() => import("./steps/UserDetailsStep"))
+const Step3PersonalInfo = React.lazy(() => import("./steps/PersonalInfoStep"))
+const Step4Approval = React.lazy(() => import("./steps/ApprovalStep"))
 
-import { StepProgress } from "@/components/auth/StepProgress"
-import { ApprovalDialog } from "./ApprovalDialog"
+import { StepProgress } from "@/components/auth/registration/RegistrationProgress"
+import { ApprovalDialog } from "@/components/auth/dialogs/ApprovalDialog"
 
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "@/app/store"

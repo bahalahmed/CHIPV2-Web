@@ -8,8 +8,9 @@ import React, { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "@/app/store"
 import { updatePersonalInfo } from "@/features/registerForm/registerFormSlice"
-import PasswordInputField from "../shared/PasswordInputField"
+
 import { validateField, passwordSchema, nameSchema } from "@/lib/validations"
+import PasswordInputField from "@/components/shared/PasswordInputField"
 
 const Step3PersonalInfoComponent = () => {
   const dispatch = useDispatch()

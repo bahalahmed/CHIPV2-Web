@@ -3,9 +3,10 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import PhoneInputField from "../shared/PhoneInputField"
+
 import { mobileLoginSchema, type MobileLoginData, formatPhoneNumber } from "@/lib/validations"
 import { useSendOtpMutation } from "@/features/auth/authApiSlice"
+import PhoneInputField from "@/components/shared/PhoneInputField"
 
 interface MobileLoginProps {
   onOtpSent: () => void

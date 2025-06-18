@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
 import SecureStorage from '@/utils/secureStorage';
 import { useRefreshTokenMutation } from '@/features/auth/authApiSlice';
+import { AUTH_CONFIG } from '@/config/auth.config';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ interface RootState {
 const AuthGuard: React.FC<AuthGuardProps> = ({ 
   children, 
   requireAuth = true, 
-  redirectTo = '/login' 
+  redirectTo = AUTH_CONFIG.ROUTES.LOGIN 
 }) => {
   const { isAuthenticated, token } = useSelector((state: RootState) => state.auth);
   const [refreshToken] = useRefreshTokenMutation();
@@ -51,11 +52,11 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
         return;
       }
 
-      // Check if token is about to expire (refresh if < 5 minutes left)
+      // Check if token is about to expire (refresh if < threshold left)
       const tokenExpiry = SecureStorage.getTokenExpiry(tokenData.token);
-      const fiveMinutesFromNow = Date.now() + (5 * 60 * 1000);
+      const refreshThreshold = Date.now() + AUTH_CONFIG.TOKEN.REFRESH_THRESHOLD;
       
-      if (tokenExpiry && tokenExpiry < fiveMinutesFromNow) {
+      if (tokenExpiry && tokenExpiry < refreshThreshold) {
         try {
           await refreshToken({ refreshToken: tokenData.refreshToken }).unwrap();
           console.log('Token refreshed successfully');
@@ -93,8 +94,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
 
   // If already authenticated and trying to access login/register, redirect to dashboard
   if (!requireAuth && isAuthenticated && 
-      (location.pathname === '/login' || location.pathname === '/register')) {
-    return <Navigate to="/dashboard" replace />;
+      (location.pathname === AUTH_CONFIG.ROUTES.LOGIN || location.pathname === AUTH_CONFIG.ROUTES.REGISTER)) {
+    return <Navigate to={AUTH_CONFIG.ROUTES.DASHBOARD} replace />;
   }
 
   return <>{children}</>;

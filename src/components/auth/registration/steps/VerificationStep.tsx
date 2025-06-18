@@ -1,6 +1,6 @@
 "use client"
 
-import { OtpSection } from "@/components/auth/OtpSection"
+import { OtpSection } from "@/components/auth/otp/OtpSection"
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "@/app/store"

@@ -7,11 +7,11 @@ import { switchToEmail, switchToMobile, setOtpSent } from "@/features/auth/login
 import EmailLogin from "./EmailLogin"
 import MobileLogin from "./MobileLogin"
 import { useCallback, useState, useEffect } from "react"
-import { RegisterDrawer } from "../auth/register-drawer"
-import { OtpSection } from "@/components/auth/OtpSection"
+import { RegisterDrawer } from "@/components/auth/registration/RegistrationDrawer"
+import { OtpSection } from "@/components/auth/otp/OtpSection"
 import ForgotPasswordForm from "./ForgotPasswordForm"
 
-export default function LoginWrapper() {
+export default function LoginContainer() {
   const dispatch = useDispatch()
   const { method, otpSent } = useSelector((state: RootState) => state.loginTab)
   const [mobile, setMobile] = useState("")

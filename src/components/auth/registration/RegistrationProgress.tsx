@@ -1,5 +1,6 @@
 // src/components/StepProgress.tsx
 import React from 'react';
+import { AUTH_CONFIG } from '@/config/auth.config';
 
 interface StepProgressProps {
   currentStep: number;
@@ -11,12 +12,7 @@ interface Step {
   iconType: string;
 }
 
-const steps: Step[] = [
-  { step: 1, label: "Verification", iconType: "verification" },
-  { step: 2, label: "User Details", iconType: "geo" },
-  { step: 3, label: "Personal Info", iconType: "pi" },
-  { step: 4, label: "Approval", iconType: "approval" },
-];
+const steps: Step[] = AUTH_CONFIG.REGISTRATION_STEPS;
 
 export const StepProgress: React.FC<StepProgressProps> = ({ currentStep }) => {
   // Function to get the appropriate icon based on step status and type
