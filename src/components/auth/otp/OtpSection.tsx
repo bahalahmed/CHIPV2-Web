@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
@@ -60,8 +60,25 @@ export function OtpSection({
   const [isBlocked, setIsBlocked] = useState(false)
   const [blockTimer, setBlockTimer] = useState(0)
 
+  // Ref for OTP input focus management
+  const otpInputRef = useRef<HTMLInputElement>(null)
+  
+  // Ref for block timer interval cleanup
+  const blockIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
   // RTK Query hook - ready for API integration  
-  const [, { isLoading: isOtpVerifying }] = useVerifyOtpMutation()
+  const [verifyOtp, { isLoading: isOtpVerifying }] = useVerifyOtpMutation()
+
+  // Helper function to clear OTP and refocus input
+  const clearOtpAndRefocus = () => {
+    setOtp(Array(6).fill(""))
+    // Focus the first input after clearing
+    setTimeout(() => {
+      if (otpInputRef.current) {
+        otpInputRef.current.focus()
+      }
+    }, 100)
+  }
 
   const handleSubmitOtp = async () => {
     const fullOtp = otp.join("")
@@ -81,153 +98,113 @@ export function OtpSection({
         const otpId = localStorage.getItem('otpId') || 'stored_otp_id'
         const context = mode === "login" ? "login" : "registration"
         
-        // TODO: Uncomment when API is ready - Using RTK Query
-        // const verifyRequest = { otpId, otp: fullOtp, type, context }
-        // const response = await verifyOtp(verifyRequest).unwrap()
-        // 
-        // console.log('✅ OTP verified successfully:', response)
-        // if (response.token && mode === "login") {
-        //   // Handle login authentication
-        //   localStorage.setItem('token', response.token)
-        //   localStorage.setItem('refreshToken', response.refreshToken)
-        // }
-        // toast.success(`${label} verified successfully!`)
-        // setVerified(true)
-
-        // MOCK IMPLEMENTATION - Remove when API is ready
-        await new Promise(resolve => setTimeout(resolve, 500))
-
-        // Context-based mock responses
-        let mockVerifyOtpResponse
-        
-        if (context === "login") {
-          // Login: Return authentication data
-          mockVerifyOtpResponse = {
-            success: true,
-            verified: true,
-            user: {
-              id: "mob-67890",
-              mobile: value,
-              name: "John Doe",
-              role: "User"
-            },
-            token: `mock_jwt_token_${Date.now()}`,
-            refreshToken: `mock_refresh_token_${Date.now()}`
-          }
-          
-          // Store tokens for login context
-          localStorage.setItem('token', mockVerifyOtpResponse.token)
-          localStorage.setItem('refreshToken', mockVerifyOtpResponse.refreshToken)
-          
-          console.log('🔐 Mock Login OTP Response:', mockVerifyOtpResponse)
-        } else {
-          // Registration: Return only verification status
-          mockVerifyOtpResponse = {
-            success: true,
-            verified: true,
-            message: `${label} verified successfully`
-          }
-          
-          console.log('✅ Mock Registration OTP Response:', mockVerifyOtpResponse)
+        // Using RTK Query with Rate Limiting Support
+        const verifyRequest = { 
+          otpId, 
+          otp: fullOtp, 
+          type, 
+          context: context as 'registration' | 'login' | 'forgot-password'
         }
-
+        
+        const response = await verifyOtp(verifyRequest).unwrap()
+        
+        console.log('✅ OTP verified successfully:', response)
+        
+        // Handle successful verification
+        if (response.token && response.refreshToken && mode === "login") {
+          // Handle login authentication
+          localStorage.setItem('token', response.token)
+          localStorage.setItem('refreshToken', response.refreshToken)
+        }
+        
         toast.success(`${label} verified successfully!`)
         setVerified(true)
+        
+        // Reset attempt count on success
+        setAttemptCount(0)
         
         // Context-specific post-verification actions
         if (mode === "login") {
           dispatch(setOtpSent(false))
-          // Additional login-specific actions
           console.log('Login verified - user authenticated')
         } else {
-          // Registration-specific actions
-          console.log('Registration verification complete - no authentication')
+          console.log('Registration verification complete')
         }
         
         onVerified?.()
         
         if (redirectAfterVerify) {
-          // ✅ Use normal navigation (not replace) so back button works properly
           navigate(redirectAfterVerify)
         }
         
       } catch (error: any) {
         console.error('OTP verification error:', error)
         
-        // TODO: Uncomment when API is ready - Comprehensive error handling
-        // // Handle specific error responses
-        // if (error.status === 400) {
-        //   if (error.data?.code === 'INVALID_OTP') {
-        //     toast.error('Invalid OTP code. Please check and try again.')
-        //   } else if (error.data?.code === 'OTP_EXPIRED') {
-        //     toast.error('OTP has expired. Please request a new one.')
-        //     setShowOtpInput(false)
-        //   } else if (error.data?.code === 'OTP_ALREADY_USED') {
-        //     toast.error('OTP already used. Please request a new one.')
-        //     setShowOtpInput(false)
-        //   } else {
-        //     toast.error(error.data?.message || 'Invalid OTP format.')
-        //   }
-        // } else if (error.status === 404) {
-        //   toast.error('OTP session not found. Please request a new OTP.')
-        //   setShowOtpInput(false)
-        // } else if (error.status === 429) {
-        //   const retryAfter = error.data?.retryAfter || 300
-        //   toast.error(`Too many verification attempts. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`)
-        // } else if (error.status === 500) {
-        //   toast.error('Server error. Please try again later.')
-        // } else if (error.status === 'FETCH_ERROR') {
-        //   toast.error('Network error. Please check your internet connection.')
-        // } else {
-        //   toast.error(error.data?.message || 'OTP verification failed. Please try again.')
-        // }
-        
-        // Mock error handling with 3-attempt rate limiting
-        const mockErrorType = Math.random()
-        
-        if (mockErrorType < 0.6) {
-          // Simulate invalid OTP error (60% chance to test rate limiting)
-          const newAttemptCount = attemptCount + 1
-          setAttemptCount(newAttemptCount)
+        // Comprehensive error handling with Rate Limiting Support
+        if (error.status === 401) {
+          // Invalid OTP with attempt tracking
+          const attemptsRemaining = error.data?.attemptsRemaining ?? 0
+          const maxAttempts = error.data?.maxAttempts ?? 3
           
-          if (newAttemptCount >= 3) {
-            // Block user after 3 failed attempts
-            setIsBlocked(true)
-            setBlockTimer(300) // 5 minutes block
-            toast.error('Too many failed attempts. You are blocked for 5 minutes.')
-            setOtp(Array(6).fill(""))
-            
-            // Start countdown timer
-            const blockInterval = setInterval(() => {
-              setBlockTimer(prev => {
-                if (prev <= 1) {
-                  clearInterval(blockInterval)
-                  setIsBlocked(false)
-                  setAttemptCount(0)
-                  return 0
-                }
-                return prev - 1
-              })
-            }, 1000)
+          setAttemptCount(maxAttempts - attemptsRemaining)
+          
+          if (attemptsRemaining > 0) {
+            toast.error(error.data?.message || `Invalid OTP. ${attemptsRemaining} attempts remaining.`)
           } else {
-            toast.error(`Invalid OTP code. ${3 - newAttemptCount} attempts remaining.`)
-            setOtp(Array(6).fill("")) // Clear OTP on invalid
+            toast.error('Invalid OTP. No attempts remaining.')
           }
-        } else if (mockErrorType < 0.7) {
-          // Simulate expired OTP error
-          toast.error('OTP has expired. Please request a new one.')
+          
+          clearOtpAndRefocus()
+        } else if (error.status === 423) {
+          // Session locked due to too many attempts
+          const waitTimeSeconds = error.data?.waitTimeSeconds || 300
+          const waitMinutes = Math.ceil(waitTimeSeconds / 60)
+          
+          setIsBlocked(true)
+          setBlockTimer(waitTimeSeconds)
+          toast.error(`Too many failed attempts. You are blocked for ${waitMinutes} minutes.`)
+          clearOtpAndRefocus()
+          
+          // Clear any existing block timer
+          if (blockIntervalRef.current) {
+            clearInterval(blockIntervalRef.current)
+          }
+          
+          // Start countdown timer
+          blockIntervalRef.current = setInterval(() => {
+            setBlockTimer(prev => {
+              if (prev <= 1) {
+                if (blockIntervalRef.current) {
+                  clearInterval(blockIntervalRef.current)
+                  blockIntervalRef.current = null
+                }
+                setIsBlocked(false)
+                setAttemptCount(0)
+                setCanResend(true) // Enable resend button after block ends
+                return 0
+              }
+              return prev - 1
+            })
+          }, 1000)
+        } else if (error.status === 429) {
+          // Rate limited - too many attempts
+          const retryAfter = error.data?.retryAfter || 300
+          const waitMinutes = Math.ceil(retryAfter / 60)
+          
+          setIsBlocked(true)
+          setBlockTimer(retryAfter)
+          toast.error(`Too many failed attempts. OTP session expired. Please request a new OTP after ${waitMinutes} minutes.`)
           setShowOtpInput(false)
-          setOtp(Array(6).fill(""))
-          setAttemptCount(0) // Reset attempts on session reset
-        } else if (mockErrorType < 0.8) {
-          // Simulate session not found error
+          clearOtpAndRefocus()
+        } else if (error.status === 404) {
           toast.error('OTP session not found. Please request a new OTP.')
           setShowOtpInput(false)
-          setOtp(Array(6).fill(""))
-          setAttemptCount(0) // Reset attempts on session reset
+        } else if (error.status === 500) {
+          toast.error('Server error. Please try again later.')
+        } else if (error.status === 'FETCH_ERROR') {
+          toast.error('Network error. Please check your internet connection.')
         } else {
-          // Default error
-          toast.error('OTP verification failed. Please try again.')
+          toast.error(error.data?.message || 'OTP verification failed. Please try again.')
         }
       } finally {
         setIsVerifying(false)
@@ -257,6 +234,16 @@ export function OtpSection({
     }, 1000)
     return () => clearInterval(countdown)
   }, [resendTrigger])
+
+  // Cleanup block timer on component unmount
+  useEffect(() => {
+    return () => {
+      if (blockIntervalRef.current) {
+        clearInterval(blockIntervalRef.current)
+        blockIntervalRef.current = null
+      }
+    }
+  }, [])
 
   const handleSendOTP = async () => {
     if (type === "email") {
@@ -357,6 +344,7 @@ export function OtpSection({
   const renderOtpInput = () => (
     <div className="flex justify-center">
       <InputOTP
+        ref={otpInputRef}
         maxLength={6}
         value={otp.join("")}
         onChange={(val) => {
@@ -428,8 +416,8 @@ export function OtpSection({
           {canResend ? (
             <button 
               onClick={handleSendOTP} 
-              className="hover:underline text-accent"
-              disabled={isVerifying || isOtpVerifying}
+              className={`hover:underline ${isBlocked ? 'text-muted-foreground cursor-not-allowed' : 'text-accent'}`}
+              disabled={isVerifying || isOtpVerifying || isBlocked}
             >
               Resend OTP
             </button>

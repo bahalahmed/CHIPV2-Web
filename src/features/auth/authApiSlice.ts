@@ -54,6 +54,13 @@ interface VerifyOtpResponse {
   };
   token?: string;
   refreshToken?: string;
+  // Rate limiting fields
+  attemptsRemaining?: number;
+  maxAttempts?: number;
+  error?: string;
+  retryAfter?: number;
+  lockExpiresAt?: string;
+  waitTimeSeconds?: number;
 }
 
 interface ForgotPasswordRequest {
@@ -172,31 +179,17 @@ export const authApiSlice = createApi({
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Mock validation - accept any email with "admin" or valid format
-        const isValidEmail = credentials.email?.includes('@') || false;
-        const isValidPassword = credentials.password && credentials.password.length > 0;
+        // Mock credentials check - since frontend Zod validation handles format validation
+        // Only simulate actual credential validation (email/password mismatch)
+        const mockValidCredentials = credentials.email && credentials.password;
         
-        if (!isValidEmail) {
+        if (!mockValidCredentials) {
           return {
             error: {
-              status: 422,
+              status: 401,
               data: {
                 success: false,
-                message: 'Please enter a valid email address',
-                errors: [{ field: 'email', message: 'Invalid email format' }]
-              }
-            }
-          };
-        }
-        
-        if (!isValidPassword) {
-          return {
-            error: {
-              status: 422,
-              data: {
-                success: false,
-                message: 'Password is required',
-                errors: [{ field: 'password', message: 'Password cannot be empty' }]
+                message: 'Invalid email or password'
               }
             }
           };
@@ -244,21 +237,155 @@ export const authApiSlice = createApi({
 
     // Verify OTP
     verifyOtp: builder.mutation<VerifyOtpResponse, VerifyOtpRequest>({
-      query: (data) => ({
-        url: `/auth/verify-otp`,
-        method: 'POST',
-        body: data,
-      }),
-      // Transform response based on context
-      transformResponse: (response: any) => ({
-        success: response.success || false,
-        verified: response.verified || false,
-        message: response.message || 'Verification completed',
-        // Include authentication data only for login context
-        ...(response.user && { user: response.user }),
-        ...(response.token && { token: response.token }),
-        ...(response.refreshToken && { refreshToken: response.refreshToken }),
-      }),
+      // TODO: Uncomment this when API is ready
+      // query: (data) => ({
+      //   url: `/auth/verify-otp`,
+      //   method: 'POST',
+      //   body: data,
+      // }),
+      // transformResponse: (response: any) => ({
+      //   success: response.success || false,
+      //   verified: response.verified || false,
+      //   message: response.message || 'Verification completed',
+      //   // Include authentication data only for login context
+      //   ...(response.user && { user: response.user }),
+      //   ...(response.token && { token: response.token }),
+      //   ...(response.refreshToken && { refreshToken: response.refreshToken }),
+      //   // Rate limiting fields
+      //   ...(response.attemptsRemaining !== undefined && { attemptsRemaining: response.attemptsRemaining }),
+      //   ...(response.maxAttempts && { maxAttempts: response.maxAttempts }),
+      //   ...(response.error && { error: response.error }),
+      //   ...(response.retryAfter && { retryAfter: response.retryAfter }),
+      //   ...(response.lockExpiresAt && { lockExpiresAt: response.lockExpiresAt }),
+      //   ...(response.waitTimeSeconds && { waitTimeSeconds: response.waitTimeSeconds }),
+      // }),
+
+      // MOCK IMPLEMENTATION with Rate Limiting - Remove when API is ready
+      queryFn: async (data) => {
+        console.log('🔐 Mock OTP Verification - Request:', data);
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Mock OTP attempt tracking (in real app, this would be server-side)
+        const otpSessionKey = `otp_attempts_${data.otpId}`;
+        const storedAttempts = JSON.parse(localStorage.getItem(otpSessionKey) || '{"attempts": 0, "lockedUntil": null}');
+        
+        // Check if session is locked
+        if (storedAttempts.lockedUntil && new Date() < new Date(storedAttempts.lockedUntil)) {
+          const waitTimeSeconds = Math.ceil((new Date(storedAttempts.lockedUntil).getTime() - new Date().getTime()) / 1000);
+          console.log('🚫 Mock OTP - Session Locked:', { waitTimeSeconds });
+          
+          return {
+            error: {
+              status: 423,
+              data: {
+                success: false,
+                verified: false,
+                message: `Too many failed attempts. You are blocked for ${Math.ceil(waitTimeSeconds / 60)} minutes.`,
+                error: 'OTP_SESSION_LOCKED',
+                lockExpiresAt: storedAttempts.lockedUntil,
+                waitTimeSeconds,
+                attemptsRemaining: 0,
+                maxAttempts: 3
+              }
+            }
+          };
+        }
+
+        // Mock OTP validation (accept "123456" as valid)
+        const isValidOtp = data.otp === '123456';
+        
+        if (!isValidOtp) {
+          const newAttempts = storedAttempts.attempts + 1;
+          const maxAttempts = 3;
+          const attemptsRemaining = maxAttempts - newAttempts;
+          
+          console.log('❌ Mock OTP - Invalid OTP:', { attempts: newAttempts, remaining: attemptsRemaining });
+          
+          if (newAttempts >= maxAttempts) {
+            // Lock the session for 5 minutes
+            const lockExpiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+            localStorage.setItem(otpSessionKey, JSON.stringify({
+              attempts: newAttempts,
+              lockedUntil: lockExpiresAt
+            }));
+            
+            return {
+              error: {
+                status: 429,
+                data: {
+                  success: false,
+                  verified: false,
+                  message: 'Too many failed attempts. OTP session expired. Please request a new OTP.',
+                  error: 'OTP_ATTEMPTS_EXCEEDED',
+                  attemptsRemaining: 0,
+                  maxAttempts,
+                  retryAfter: 300,
+                  lockExpiresAt
+                }
+              }
+            };
+          } else {
+            // Update attempt count
+            localStorage.setItem(otpSessionKey, JSON.stringify({
+              attempts: newAttempts,
+              lockedUntil: null
+            }));
+            
+            const message = attemptsRemaining === 1 
+              ? `Invalid OTP. ${attemptsRemaining} attempt remaining.`
+              : `Invalid OTP. ${attemptsRemaining} attempts remaining.`;
+            
+            return {
+              error: {
+                status: 401,
+                data: {
+                  success: false,
+                  verified: false,
+                  message,
+                  attemptsRemaining,
+                  maxAttempts
+                }
+              }
+            };
+          }
+        }
+        
+        // Clear attempts on successful verification
+        localStorage.removeItem(otpSessionKey);
+        
+        // Mock successful verification response
+        let mockResponse: VerifyOtpResponse = {
+          success: true,
+          verified: true,
+          message: `${data.type.charAt(0).toUpperCase() + data.type.slice(1)} verification successful`
+        };
+        
+        // Add login context data if context is 'login'
+        if (data.context === 'login') {
+          const mockUser = {
+            id: "mock_user_" + Date.now(),
+            mobile: data.type === 'mobile' ? "9876543210" : "",
+            email: data.type === 'email' ? "user@example.com" : undefined,
+            name: "Mock User",
+            role: "User"
+          };
+          
+          mockResponse = {
+            ...mockResponse,
+            user: mockUser,
+            token: "mock_jwt_token_" + btoa(JSON.stringify(mockUser)),
+            refreshToken: "mock_refresh_token_" + Date.now()
+          };
+        }
+        
+        console.log('✅ Mock OTP Verification Success:', mockResponse);
+        return { data: mockResponse };
+      },
+      
+      invalidatesTags: (_result, error, arg) => 
+        arg.context === 'login' && !error ? ['User', 'Session'] : [],
     }),
 
     // Forgot Password
