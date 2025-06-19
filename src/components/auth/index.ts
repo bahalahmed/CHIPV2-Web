@@ -9,7 +9,7 @@ export { default as MobileLogin } from './login/MobileLogin';
 export { default as ForgotPasswordForm } from './login/ForgotPasswordForm';
 
 // Registration components
-export { RegisterDrawer } from './registration/RegistrationDrawer';
+export { default as RegisterDrawer } from './registration/OptimizedRegistrationDrawer';
 export { StepProgress } from './registration/RegistrationProgress';
 
 // Registration steps

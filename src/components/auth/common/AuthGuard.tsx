@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
 import SecureStorage from '@/components/auth/utils/secureStorage';
@@ -19,22 +19,21 @@ interface RootState {
   };
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ 
+const AuthGuard: React.FC<AuthGuardProps> = memo(({ 
   children, 
   requireAuth = true, 
   redirectTo = AUTH_CONFIG.ROUTES.LOGIN 
 }) => {
-  const { isAuthenticated, token } = useSelector((state: RootState) => state.auth);
+  const authState = useSelector((state: RootState) => ({
+    isAuthenticated: state.auth.isAuthenticated,
+    token: state.auth.token
+  }));
   const [refreshToken] = useRefreshTokenMutation();
   const [isValidating, setIsValidating] = useState(true);
   const location = useLocation();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    validateAuthentication();
-  }, []);
-
-  const validateAuthentication = async () => {
+  const validateAuthentication = useCallback(async () => {
     try {
       // Check if we have stored tokens
       const tokenData = SecureStorage.getTokens();
@@ -74,32 +73,38 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
       dispatch({ type: 'auth/logout' });
       setIsValidating(false);
     }
-  };
+  }, [refreshToken, dispatch]);
+
+  useEffect(() => {
+    validateAuthentication();
+  }, [validateAuthentication]);
+
+  const loadingComponent = useMemo(() => (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <span className="ml-3 text-gray-600">Validating session...</span>
+    </div>
+  ), []);
 
   // Show loading while validating
   if (isValidating) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600">Validating session...</span>
-      </div>
-    );
+    return loadingComponent;
   }
 
   // Handle authentication requirements
-  if (requireAuth && !isAuthenticated) {
+  if (requireAuth && !authState.isAuthenticated) {
     // Redirect to login, preserving the intended destination
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
   // If already authenticated and trying to access login/register, redirect to dashboard
-  if (!requireAuth && isAuthenticated && 
+  if (!requireAuth && authState.isAuthenticated && 
       (location.pathname === AUTH_CONFIG.ROUTES.LOGIN || location.pathname === AUTH_CONFIG.ROUTES.REGISTER)) {
     return <Navigate to={AUTH_CONFIG.ROUTES.DASHBOARD} replace />;
   }
 
   return <>{children}</>;
-};
+});
 
 export default AuthGuard;
 
@@ -117,13 +122,13 @@ export const withAuthGuard = (
 
 // Hook for checking auth status
 export const useAuthStatus = () => {
-  const { isAuthenticated, user, token } = useSelector((state: RootState) => state.auth);
+  const authState = useSelector((state: RootState) => state.auth);
   
-  return {
-    isAuthenticated,
-    user,
-    token,
-    isTokenValid: token ? SecureStorage.isValidTokenFormat(token) : false,
-    tokenExpiry: token ? SecureStorage.getTokenExpiry(token) : null,
-  };
+  return useMemo(() => ({
+    isAuthenticated: authState.isAuthenticated,
+    user: authState.user,
+    token: authState.token,
+    isTokenValid: authState.token ? SecureStorage.isValidTokenFormat(authState.token) : false,
+    tokenExpiry: authState.token ? SecureStorage.getTokenExpiry(authState.token) : null,
+  }), [authState]);
 };

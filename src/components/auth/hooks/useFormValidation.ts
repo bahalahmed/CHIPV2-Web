@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import type { FieldValues, Path, UseFormReturn, DefaultValues } from 'react-hook-form';
 import type { z } from 'zod';
 
@@ -25,6 +25,7 @@ interface UseFormValidationReturn<T extends FieldValues> extends Omit<UseFormRet
   isFieldValid: (field: Path<T>) => boolean;
   hasErrors: boolean;
   isSubmitting: boolean;
+  debouncedValidateField: (field: Path<T>, value: string) => void;
 }
 
 export function useFormValidation<T extends FieldValues>(
@@ -32,7 +33,7 @@ export function useFormValidation<T extends FieldValues>(
   messages?: ValidationMessages<T>
 ): UseFormValidationReturn<T> {
   const form = useForm<T>({
-    resolver: zodResolver(config.schema),
+    resolver: zodResolver(config.schema as any),
     defaultValues: config.defaultValues,
     mode: config.mode || 'onChange',
     reValidateMode: 'onChange',
@@ -46,6 +47,9 @@ export function useFormValidation<T extends FieldValues>(
     getValues,
     formState: { errors, isSubmitting },
   } = form;
+
+  // Debounce timer ref
+  const debounceTimerRef = useRef<Record<string, NodeJS.Timeout>>({});
 
   // Memoized validation helper
   const validateField = useCallback(
@@ -62,6 +66,28 @@ export function useFormValidation<T extends FieldValues>(
       return isFieldValid;
     },
     [trigger, errors, messages]
+  );
+
+  // Debounced validation function
+  const debouncedValidateField = useCallback(
+    (field: Path<T>, value: string): void => {
+      const fieldKey = String(field);
+      
+      // Clear existing timer for this field
+      if (debounceTimerRef.current[fieldKey]) {
+        clearTimeout(debounceTimerRef.current[fieldKey]);
+      }
+      
+      // Set new timer
+      debounceTimerRef.current[fieldKey] = setTimeout(() => {
+        setValue(field, value as T[Path<T>], { 
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+        validateField(field, false);
+      }, 300); // 300ms debounce delay
+    },
+    [setValue, validateField]
   );
 
   // Optimized field change handler with debouncing capability
@@ -164,6 +190,7 @@ export function useFormValidation<T extends FieldValues>(
     isFieldValid,
     hasErrors,
     isSubmitting,
+    debouncedValidateField,
   };
 }
 
