@@ -1,6 +1,6 @@
 // src/features/auth/authApi.ts
 import axios from 'axios';
-import PasswordSecurity from '@/utils/passwordSecurity';
+import PasswordSecurity from '@/components/auth/utils/passwordSecurity';
 
 const API_URL = 'https://api.freeapi.app/api/v1/users';
 

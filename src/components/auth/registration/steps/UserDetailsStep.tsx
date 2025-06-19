@@ -24,7 +24,7 @@ import {
     handleGeoApiError
 } from "@/features/geoData/geoApiSlice"
 import { updateLevelInfo } from "@/features/registerForm/registerFormSlice"
-import { step2UserDetailsSchema, createGeographicValidationSchema, type Step2UserDetailsForm } from "@/lib/validationSchemas"
+import { step2UserDetailsSchema, createGeographicValidationSchema, type Step2UserDetailsForm } from "@/components/auth/schemas/validationSchemas"
 
 // 🚀 Production-optimized constants
 const LEVEL_ORDER = ["State", "Division", "District", "Block", "PHC/CHC"] as const

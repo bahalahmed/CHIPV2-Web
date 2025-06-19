@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
-import SecureStorage from '@/utils/secureStorage';
+import SecureStorage from '@/components/auth/utils/secureStorage';
 import { useRefreshTokenMutation } from '@/features/auth/authApiSlice';
-import { AUTH_CONFIG } from '@/config/auth.config';
+import { AUTH_CONFIG } from '@/components/auth/config/auth.config';
 
 interface AuthGuardProps {
   children: React.ReactNode;

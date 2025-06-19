@@ -1,6 +1,6 @@
 // src/components/StepProgress.tsx
 import React from 'react';
-import { AUTH_CONFIG } from '@/config/auth.config';
+import { AUTH_CONFIG } from '@/components/auth/config/auth.config';
 
 interface StepProgressProps {
   currentStep: number;

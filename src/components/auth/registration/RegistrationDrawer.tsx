@@ -6,7 +6,7 @@ import React, { Suspense, useMemo, useRef } from "react"
 import { useEffect } from "react"
 import { populateFromLocalStorage } from "@/features/registerForm/registerFormSlice"
 import { toast } from "sonner"
-import PasswordSecurity from "@/utils/passwordSecurity"
+import PasswordSecurity from "@/components/auth/utils/passwordSecurity"
 
 // Lazy-loaded step components
 const Step1Verification = React.lazy(() => import("./steps/VerificationStep"))

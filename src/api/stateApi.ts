@@ -1,5 +1,5 @@
 import { StateConfig } from '../types/state';
-import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { fetchWithAuth } from '../components/auth/utils/fetchWithAuth';
 
 export interface StateApiResponse {
   success: boolean;

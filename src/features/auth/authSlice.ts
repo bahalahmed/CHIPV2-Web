@@ -1,7 +1,7 @@
 // src/features/auth/authSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { authApiSlice } from './authApiSlice';
-import SecureStorage from '@/utils/secureStorage';
+import SecureStorage from '@/components/auth/utils/secureStorage';
 
 interface User {
   id: string;
