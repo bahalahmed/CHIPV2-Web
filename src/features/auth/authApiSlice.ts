@@ -25,12 +25,29 @@ interface OtpRequest {
   email?: string;
   whatsapp?: string;
   type: 'mobile' | 'email' | 'whatsapp';
+  context?: 'login' | 'registration' | 'forgot-password';
 }
 
 interface OtpResponse {
   success: boolean;
   message: string;
   otpId: string;
+  // Optional fields that server might send
+  expiryTime?: number;      // OTP expiry time in seconds
+  resendCooldown?: number;  // Time before user can request new OTP
+  timestamp?: string;       // Response timestamp
+}
+
+// Error Response Interface for SendOTP
+interface SendOtpErrorResponse {
+  success: false;
+  message: string;
+  error: string;
+  code?: string;           // For MOBILE_NOT_REGISTERED, etc.
+  retryAfter?: number;     // For rate limiting (seconds)
+  maxAttempts?: number;    // Maximum attempts allowed
+  waitTimeSeconds?: number; // How long to wait
+  timestamp: string;       // Error timestamp
 }
 
 interface VerifyOtpRequest {
@@ -217,20 +234,49 @@ export const authApiSlice = createApi({
     }),
 
 
-    // Send OTP
+    // Send OTP - Enhanced with comprehensive error handling
     sendOtp: builder.mutation<OtpResponse, OtpRequest>({
-      query: ({ type, ...data }) => ({
-        url: `/auth/send-otp/${type}`,
+      query: ({ type, context, ...data }) => ({
+        url: '/auth/send-otp',  // Single endpoint as per your spec
         method: 'POST',
-        body: data,
+        body: { type, ...data, ...(context && { context }) },
       }),
-      // Optimistic updates for better UX
+      
+      // ENHANCED: Transform server errors with proper handling
+      transformErrorResponse: (response: FetchBaseQueryError) => {
+        const serverData = (response.data as any) || {};
+        const status = response.status;
+        
+        console.error('SendOTP API Error:', { status, serverData });
+        
+        return {
+          status,
+          data: {
+            success: false,
+            message: serverData.message || getDefaultSendOtpErrorMessage(status),
+            error: serverData.error || getDefaultSendOtpErrorCode(status),
+            
+            // Pass through specific error fields
+            ...(serverData.code && { code: serverData.code }),
+            ...(serverData.retryAfter && { retryAfter: serverData.retryAfter }),
+            ...(serverData.maxAttempts && { maxAttempts: serverData.maxAttempts }),
+            ...(serverData.waitTimeSeconds && { waitTimeSeconds: serverData.waitTimeSeconds }),
+            
+            timestamp: new Date().toISOString(),
+          }
+        };
+      },
+      
+      // Enhanced logging with context
       onQueryStarted: async (arg, { queryFulfilled }) => {
+        const context = arg.context || 'unknown';
+        console.log(`🚀 Sending ${context.toUpperCase()} OTP to ${arg.type}:`, arg[arg.type]);
+        
         try {
           const { data } = await queryFulfilled;
-          console.log(`OTP sent successfully to ${arg.type}:`, data.message);
-        } catch (error) {
-          console.error(`Failed to send OTP to ${arg.type}:`, error);
+          console.log(`✅ ${context.toUpperCase()} OTP sent successfully:`, data);
+        } catch (error: any) {
+          console.error(`❌ ${context.toUpperCase()} SendOTP failed:`, error.data);
         }
       },
     }),
@@ -469,3 +515,42 @@ export const createVerifyOtpRequest = (
   type,
   context,
 });
+
+// Helper functions for SendOTP error handling
+const getDefaultSendOtpErrorMessage = (status: number | string): string => {
+  switch (status) {
+    case 400:
+      return 'Invalid request. Please check your mobile number.';
+    case 429:
+      return 'Too many OTP requests. Please try again later.';
+    case 500:
+      return 'Server error. Please try again later.';
+    case 'FETCH_ERROR':
+      return 'Network error. Please check your internet connection.';
+    case 'PARSING_ERROR':
+      return 'Invalid server response. Please try again.';
+    case 'TIMEOUT_ERROR':
+      return 'Request timeout. Please try again.';
+    default:
+      return 'Failed to send OTP. Please try again.';
+  }
+};
+
+const getDefaultSendOtpErrorCode = (status: number | string): string => {
+  switch (status) {
+    case 400:
+      return 'INVALID_REQUEST';
+    case 429:
+      return 'RATE_LIMITED';
+    case 500:
+      return 'SERVER_ERROR';
+    case 'FETCH_ERROR':
+      return 'NETWORK_ERROR';
+    case 'PARSING_ERROR':
+      return 'PARSING_ERROR';
+    case 'TIMEOUT_ERROR':
+      return 'TIMEOUT_ERROR';
+    default:
+      return 'UNKNOWN_ERROR';
+  }
+};
