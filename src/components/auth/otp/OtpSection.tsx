@@ -59,12 +59,17 @@ export function OtpSection({
   const [attemptCount, setAttemptCount] = useState(0)
   const [isBlocked, setIsBlocked] = useState(false)
   const [blockTimer, setBlockTimer] = useState(0)
+  const [isRateLimited, setIsRateLimited] = useState(false)
+  const [rateLimitTimer, setRateLimitTimer] = useState(0)
 
   // Ref for OTP input focus management
   const otpInputRef = useRef<HTMLInputElement>(null)
   
   // Ref for block timer interval cleanup
   const blockIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Ref for rate limit timer interval cleanup
+  const rateLimitIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // RTK Query hooks - ready for API integration  
   const [verifyOtp, { isLoading: isOtpVerifying }] = useVerifyOtpMutation()
@@ -197,6 +202,11 @@ export function OtpSection({
           toast.error(`Too many failed attempts. OTP session expired. Please request a new OTP after ${waitMinutes} minutes.`)
           setShowOtpInput(false)
           clearOtpAndRefocus()
+        } else if (error.status === 410) {
+          // OTP Expired
+          toast.error(error.data?.message || 'OTP has expired. Please request a new one.')
+          setShowOtpInput(false) // Return to Send OTP view
+          clearOtpAndRefocus()
         } else if (error.status === 404) {
           toast.error('OTP session not found. Please request a new OTP.')
           setShowOtpInput(false)
@@ -222,6 +232,11 @@ export function OtpSection({
   }, [otp])
 
   useEffect(() => {
+    // Don't start resend timer if user is blocked or rate limited
+    if (isBlocked || isRateLimited) {
+      return
+    }
+    
     setTimer(60)
     setCanResend(false)
     const countdown = setInterval(() => {
@@ -234,14 +249,56 @@ export function OtpSection({
       })
     }, 1000)
     return () => clearInterval(countdown)
-  }, [resendTrigger])
+  }, [resendTrigger, isBlocked, isRateLimited])
 
-  // Cleanup block timer on component unmount
+  // Check for existing rate limit on component mount
+  useEffect(() => {
+    const context = mode === "login" ? "login" : "registration"
+    const storedLimit = localStorage.getItem(`otpRateLimit_${type}_${context}`)
+    
+    if (storedLimit) {
+      try {
+        const { expiryTime } = JSON.parse(storedLimit)
+        const remaining = Math.max(0, Math.ceil((expiryTime - Date.now()) / 1000))
+        
+        if (remaining > 0) {
+          setIsRateLimited(true)
+          setRateLimitTimer(remaining)
+          
+          // Start countdown timer
+          rateLimitIntervalRef.current = setInterval(() => {
+            setRateLimitTimer(prev => {
+              if (prev <= 1) {
+                if (rateLimitIntervalRef.current) {
+                  clearInterval(rateLimitIntervalRef.current)
+                  rateLimitIntervalRef.current = null
+                }
+                setIsRateLimited(false)
+                localStorage.removeItem(`otpRateLimit_${type}_${context}`)
+                return 0
+              }
+              return prev - 1
+            })
+          }, 1000)
+        } else {
+          localStorage.removeItem(`otpRateLimit_${type}_${context}`)
+        }
+      } catch (error) {
+        localStorage.removeItem(`otpRateLimit_${type}_${context}`)
+      }
+    }
+  }, [type, mode])
+
+  // Cleanup timers on component unmount
   useEffect(() => {
     return () => {
       if (blockIntervalRef.current) {
         clearInterval(blockIntervalRef.current)
         blockIntervalRef.current = null
+      }
+      if (rateLimitIntervalRef.current) {
+        clearInterval(rateLimitIntervalRef.current)
+        rateLimitIntervalRef.current = null
       }
     }
   }, [])
@@ -301,8 +358,42 @@ export function OtpSection({
           toast.error(error.data?.message || `Failed to send ${context} OTP.`)
         }
       } else if (error.status === 429) {
-        const retryAfter = error.data?.retryAfter || 300
-        toast.error(`Too many ${context} OTP requests. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`)
+        const retryAfter = error.data?.retryAfter || 300  // seconds
+        const retryMinutes = Math.ceil(retryAfter / 60)
+        
+        // Set rate limit state
+        setIsRateLimited(true)
+        setRateLimitTimer(retryAfter)
+        
+        toast.error(`Too many ${context} OTP requests. Please try again in ${retryMinutes} minutes.`)
+        
+        // Store rate limit in localStorage for persistence
+        const expiryTime = Date.now() + (retryAfter * 1000)
+        localStorage.setItem(`otpRateLimit_${type}_${context}`, JSON.stringify({
+          expiryTime,
+          retryAfter
+        }))
+        
+        // Clear any existing rate limit timer
+        if (rateLimitIntervalRef.current) {
+          clearInterval(rateLimitIntervalRef.current)
+        }
+        
+        // Start countdown timer
+        rateLimitIntervalRef.current = setInterval(() => {
+          setRateLimitTimer(prev => {
+            if (prev <= 1) {
+              if (rateLimitIntervalRef.current) {
+                clearInterval(rateLimitIntervalRef.current)
+                rateLimitIntervalRef.current = null
+              }
+              setIsRateLimited(false)
+              localStorage.removeItem(`otpRateLimit_${type}_${context}`)
+              return 0
+            }
+            return prev - 1
+          })
+        }, 1000)
       } else {
         toast.error(error.data?.message || `Failed to send ${context} OTP. Please try again.`)
       }
@@ -431,11 +522,20 @@ export function OtpSection({
         )}
         
         <div className="text-sm font-medium">
-          {canResend ? (
+          {isRateLimited ? (
+            <span className="text-muted-foreground">
+              {`Try again in ${Math.ceil(rateLimitTimer / 60)}:${(rateLimitTimer % 60).toString().padStart(2, '0')}`}
+            </span>
+          ) : isBlocked ? (
+            <span className="text-muted-foreground">
+              {/* Blocked message is shown above, just show disabled state here */}
+              Resend temporarily disabled
+            </span>
+          ) : canResend ? (
             <button 
               onClick={handleSendOTP} 
-              className={`hover:underline ${isBlocked ? 'text-muted-foreground cursor-not-allowed' : 'text-accent'}`}
-              disabled={isVerifying || isOtpVerifying || isBlocked}
+              className="hover:underline text-accent"
+              disabled={isVerifying || isOtpVerifying || isSendingOtp}
             >
               Resend OTP
             </button>
@@ -471,8 +571,20 @@ export function OtpSection({
           </p>
           {renderOtpInput()}
           <div className="text-sm font-medium">
-            {canResend ? (
-              <button onClick={handleSendOTP} className="hover:underline text-accent">
+            {isRateLimited ? (
+              <span className="text-muted-foreground">
+                {`Try again in ${Math.ceil(rateLimitTimer / 60)}:${(rateLimitTimer % 60).toString().padStart(2, '0')}`}
+              </span>
+            ) : isBlocked ? (
+              <span className="text-muted-foreground">
+                Resend temporarily disabled
+              </span>
+            ) : canResend ? (
+              <button 
+                onClick={handleSendOTP} 
+                disabled={isSendingOtp}
+                className="hover:underline text-accent"
+              >
                 Resend OTP
               </button>
             ) : (
@@ -488,9 +600,20 @@ export function OtpSection({
               <div className="flex-1">{renderInputField()}</div>
               <button
                 onClick={handleSendOTP}
-                className="bg-primary hover:bg-primary/90 text-background font-medium rounded-lg h-10 px-6 min-w-[120px] whitespace-nowrap"
+                disabled={isSendingOtp || isRateLimited}
+                className={`font-medium rounded-lg h-10 px-6 min-w-[120px] whitespace-nowrap ${
+                  (isSendingOtp || isRateLimited) 
+                    ? 'bg-muted text-muted-foreground cursor-not-allowed' 
+                    : 'bg-primary hover:bg-primary/90 text-background'
+                }`}
               >
-                Send OTP
+                {isRateLimited ? (
+                  `Try again in ${Math.ceil(rateLimitTimer / 60)}:${(rateLimitTimer % 60).toString().padStart(2, '0')}`
+                ) : isSendingOtp ? (
+                  "Sending..."
+                ) : (
+                  "Send OTP"
+                )}
               </button>
             </div>
           </div>

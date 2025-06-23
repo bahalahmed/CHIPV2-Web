@@ -25,6 +25,7 @@ interface OtpRequest {
   email?: string;
   whatsapp?: string;
   type: 'mobile' | 'email' | 'whatsapp';
+  context?: 'registration' | 'login' | 'forgot-password';
 }
 
 interface OtpResponse {
@@ -77,6 +78,8 @@ interface VerifyOtpResponse {
   retryAfter?: number;
   lockExpiresAt?: string;
   waitTimeSeconds?: number;
+  // 410 OTP Expired fields
+  expiryTime?: number;
 }
 
 interface ForgotPasswordRequest {
@@ -303,6 +306,8 @@ export const authApiSlice = createApi({
       //   ...(response.retryAfter && { retryAfter: response.retryAfter }),
       //   ...(response.lockExpiresAt && { lockExpiresAt: response.lockExpiresAt }),
       //   ...(response.waitTimeSeconds && { waitTimeSeconds: response.waitTimeSeconds }),
+      //   // 410 OTP Expired fields
+      //   ...(response.expiryTime && { expiryTime: response.expiryTime }),
       // }),
 
       // MOCK IMPLEMENTATION with Rate Limiting - Remove when API is ready
@@ -497,10 +502,12 @@ export const selectIsLoading = (state: any) => {
 // Utility functions for common operations
 export const createOtpRequest = (
   type: 'mobile' | 'email' | 'whatsapp',
-  value: string
+  value: string,
+  context?: 'registration' | 'login' | 'forgot-password'
 ): OtpRequest => ({
   type,
   [type]: value,
+  ...(context && { context }),
 });
 
 export const createVerifyOtpRequest = (

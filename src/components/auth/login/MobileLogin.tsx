@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -15,9 +15,14 @@ interface MobileLoginProps {
 
 export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) {
   const [loading, setLoading] = useState(false)
+  const [isRateLimited, setIsRateLimited] = useState(false)
+  const [rateLimitTimer, setRateLimitTimer] = useState(0)
   
   // RTK Query hook - ready for API integration
   const [sendOtp, { isLoading: isOtpLoading }] = useSendOtpMutation()
+  
+  // Ref for rate limit timer interval cleanup
+  const rateLimitIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // ✅ React Hook Form with Zod validation
   const {
@@ -37,6 +42,53 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
 
   // Watch mobile value for custom input component
   const mobileValue = watch("mobile")
+
+  // Check for existing rate limit on component mount
+  useEffect(() => {
+    const storedLimit = localStorage.getItem('otpRateLimit_mobile_login')
+    
+    if (storedLimit) {
+      try {
+        const { expiryTime } = JSON.parse(storedLimit)
+        const remaining = Math.max(0, Math.ceil((expiryTime - Date.now()) / 1000))
+        
+        if (remaining > 0) {
+          setIsRateLimited(true)
+          setRateLimitTimer(remaining)
+          
+          // Start countdown timer
+          rateLimitIntervalRef.current = setInterval(() => {
+            setRateLimitTimer(prev => {
+              if (prev <= 1) {
+                if (rateLimitIntervalRef.current) {
+                  clearInterval(rateLimitIntervalRef.current)
+                  rateLimitIntervalRef.current = null
+                }
+                setIsRateLimited(false)
+                localStorage.removeItem('otpRateLimit_mobile_login')
+                return 0
+              }
+              return prev - 1
+            })
+          }, 1000)
+        } else {
+          localStorage.removeItem('otpRateLimit_mobile_login')
+        }
+      } catch (error) {
+        localStorage.removeItem('otpRateLimit_mobile_login')
+      }
+    }
+  }, [])
+
+  // Cleanup timer on component unmount
+  useEffect(() => {
+    return () => {
+      if (rateLimitIntervalRef.current) {
+        clearInterval(rateLimitIntervalRef.current)
+        rateLimitIntervalRef.current = null
+      }
+    }
+  }, [])
 
   // ✅ Handle form submission with proper validation
   const onSubmit = async (data: MobileLoginData) => {
@@ -70,8 +122,42 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
       //       toast.error(error.data?.message || 'Invalid mobile number for login.')
       //     }
       //   } else if (error.status === 429) {
-      //     const retryAfter = error.data?.retryAfter || 300
-      //     toast.error(`Too many login OTP requests. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`)
+      //     const retryAfter = error.data?.retryAfter || 300  // seconds
+      //     const retryMinutes = Math.ceil(retryAfter / 60)
+      //     
+      //     // Set rate limit state
+      //     setIsRateLimited(true)
+      //     setRateLimitTimer(retryAfter)
+      //     
+      //     toast.error(`Too many login OTP requests. Please try again in ${retryMinutes} minutes.`)
+      //     
+      //     // Store rate limit in localStorage for persistence
+      //     const expiryTime = Date.now() + (retryAfter * 1000)
+      //     localStorage.setItem('otpRateLimit_mobile_login', JSON.stringify({
+      //       expiryTime,
+      //       retryAfter
+      //     }))
+      //     
+      //     // Clear any existing rate limit timer
+      //     if (rateLimitIntervalRef.current) {
+      //       clearInterval(rateLimitIntervalRef.current)
+      //     }
+      //     
+      //     // Start countdown timer
+      //     rateLimitIntervalRef.current = setInterval(() => {
+      //       setRateLimitTimer(prev => {
+      //         if (prev <= 1) {
+      //           if (rateLimitIntervalRef.current) {
+      //             clearInterval(rateLimitIntervalRef.current)
+      //             rateLimitIntervalRef.current = null
+      //           }
+      //           setIsRateLimited(false)
+      //           localStorage.removeItem('otpRateLimit_mobile_login')
+      //           return 0
+      //         }
+      //         return prev - 1
+      //       })
+      //     }, 1000)
       //   } else if (error.status === 500) {
       //     toast.error('Server error. Please try again later.')
       //   } else if (error.status === 'FETCH_ERROR') {
@@ -197,10 +283,12 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
         className="w-full py-5 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium rounded-xl"
         type="button"
         onClick={handleGetOtpClick}
-        disabled={loading || isSubmitting || isOtpLoading} // Include RTK Query loading state
+        disabled={loading || isSubmitting || isOtpLoading || isRateLimited} // Include RTK Query loading state and rate limiting
         aria-describedby="get-otp-button-description"
       >
-        {(loading || isSubmitting || isOtpLoading) ? (
+        {isRateLimited ? (
+          `Try again in ${Math.ceil(rateLimitTimer / 60)}:${(rateLimitTimer % 60).toString().padStart(2, '0')}`
+        ) : (loading || isSubmitting || isOtpLoading) ? (
           <span className="flex items-center gap-2">
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
