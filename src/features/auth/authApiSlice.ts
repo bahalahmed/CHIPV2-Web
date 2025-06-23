@@ -498,10 +498,12 @@ export const selectIsLoading = (state: any) => {
 // Utility functions for common operations
 export const createOtpRequest = (
   type: 'mobile' | 'email' | 'whatsapp',
-  value: string
+  value: string,
+  context?: 'login' | 'registration' | 'forgot-password'
 ): OtpRequest => ({
   type,
   [type]: value,
+  ...(context && { context }),
 });
 
 export const createVerifyOtpRequest = (

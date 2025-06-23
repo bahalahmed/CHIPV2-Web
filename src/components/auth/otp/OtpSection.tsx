@@ -9,7 +9,7 @@ import { useAppDispatch } from "@/hooks/reduxHooks"
 import { setOtpSent } from "@/features/auth/loginTabSlice"
 
 import { CheckCircle } from "lucide-react"
-import { useVerifyOtpMutation } from "@/features/auth/authApiSlice"
+import { useVerifyOtpMutation, useSendOtpMutation, createOtpRequest } from "@/features/auth/authApiSlice"
 import EmailInputField from "@/components/shared/EmailInputField"
 import PhoneInputField from "@/components/shared/PhoneInputField"
 
@@ -66,8 +66,9 @@ export function OtpSection({
   // Ref for block timer interval cleanup
   const blockIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // RTK Query hook - ready for API integration  
+  // RTK Query hooks - ready for API integration  
   const [verifyOtp, { isLoading: isOtpVerifying }] = useVerifyOtpMutation()
+  const [sendOtp, { isLoading: isSendingOtp }] = useSendOtpMutation()
 
   // Helper function to clear OTP and refocus input
   const clearOtpAndRefocus = () => {
@@ -257,11 +258,11 @@ export function OtpSection({
     }
 
     try {
-      // Context-based OTP sending
+      // ✅ Context-based OTP sending with context included
       const context = mode === "login" ? "login" : "registration"
       
       // TODO: Uncomment when API is ready
-      // const otpRequest = createOtpRequest(type, value)
+      // const otpRequest = createOtpRequest(type, value, context)
       // const response = await sendOtp(otpRequest).unwrap()
       // localStorage.setItem('otpId', response.otpId)
       // console.log('✅ Send OTP Response:', response)
@@ -271,8 +272,8 @@ export function OtpSection({
       
       const mockSendOtpResponse = {
         success: true,
-        message: "OTP sent successfully",
-        otpId: `mock_otp_${Date.now()}_${value}`
+        message: `${context.charAt(0).toUpperCase() + context.slice(1)} OTP sent successfully`,
+        otpId: `mock_${context}_otp_${Date.now()}_${value}`
       }
       
       // Store mock otpId for verification
@@ -283,11 +284,28 @@ export function OtpSection({
       setShowOtpInput(true)
       setOtp(Array(6).fill(""))
       setResendTrigger((prev) => prev + 1)
-      toast.success("OTP sent successfully!")
+      toast.success(mockSendOtpResponse.message)
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Send OTP error:', error)
-      toast.error("Failed to send OTP. Please try again.")
+      
+      // Context-specific error handling
+      const context = mode === "login" ? "login" : "registration"
+      
+      if (error.status === 400) {
+        if (context === 'login' && error.data?.code === 'MOBILE_NOT_REGISTERED') {
+          toast.error('Mobile number not registered. Please sign up first.')
+        } else if (context === 'registration' && error.data?.code === 'MOBILE_ALREADY_REGISTERED') {
+          toast.error('Mobile number already registered. Please login instead.')
+        } else {
+          toast.error(error.data?.message || `Failed to send ${context} OTP.`)
+        }
+      } else if (error.status === 429) {
+        const retryAfter = error.data?.retryAfter || 300
+        toast.error(`Too many ${context} OTP requests. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`)
+      } else {
+        toast.error(error.data?.message || `Failed to send ${context} OTP. Please try again.`)
+      }
     }
   }
 

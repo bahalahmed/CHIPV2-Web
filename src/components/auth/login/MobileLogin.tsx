@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { mobileLoginSchema, type MobileLoginData, formatPhoneNumber } from "@/lib/validations"
-import { useSendOtpMutation } from "@/features/auth/authApiSlice"
+import { useSendOtpMutation, createOtpRequest } from "@/features/auth/authApiSlice"
 import PhoneInputField from "@/components/shared/PhoneInputField"
 
 interface MobileLoginProps {
@@ -17,7 +17,7 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
   const [loading, setLoading] = useState(false)
   
   // RTK Query hook - ready for API integration
-  const [, { isLoading: isOtpLoading }] = useSendOtpMutation()
+  const [sendOtp, { isLoading: isOtpLoading }] = useSendOtpMutation()
 
   // ✅ React Hook Form with Zod validation
   const {
@@ -45,39 +45,39 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
     try {
       console.log("✅ Validated mobile data:", data)
       
-      // TODO: Uncomment when API is ready - Using RTK Query
+      // TODO: Uncomment when API is ready - Using RTK Query with LOGIN context
       // try {
-      //   const otpRequest = createOtpRequest('mobile', data.mobile)
+      //   const otpRequest = createOtpRequest('mobile', data.mobile, 'login')
       //   const response = await sendOtp(otpRequest).unwrap()
       //   
-      //   console.log('✅ OTP sent successfully:', response)
+      //   console.log('✅ Login OTP sent successfully:', response)
       //   
       //   // Store otpId for verification step
       //   localStorage.setItem('otpId', response.otpId)
       //   
       //   setMobile(data.mobile)
-      //   toast.success(response.message || "OTP sent successfully!")
+      //   toast.success(response.message || "Login OTP sent successfully!")
       //   onOtpSent()
       //   return
       // } catch (error: any) {
-      //   console.error('Send OTP error:', error)
+      //   console.error('Send Login OTP error:', error)
       //   
-      //   // Handle specific error responses
+      //   // Handle login-specific error responses
       //   if (error.status === 400) {
       //     if (error.data?.code === 'MOBILE_NOT_REGISTERED') {
       //       toast.error('Mobile number not registered. Please sign up first.')
       //     } else {
-      //       toast.error(error.data?.message || 'Failed to send OTP.')
+      //       toast.error(error.data?.message || 'Invalid mobile number for login.')
       //     }
       //   } else if (error.status === 429) {
       //     const retryAfter = error.data?.retryAfter || 300
-      //     toast.error(`Too many OTP requests. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`)
+      //     toast.error(`Too many login OTP requests. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`)
       //   } else if (error.status === 500) {
       //     toast.error('Server error. Please try again later.')
       //   } else if (error.status === 'FETCH_ERROR') {
       //     toast.error('Network error. Please check your internet connection.')
       //   } else {
-      //     toast.error(error.data?.message || 'Failed to send OTP. Please try again.')
+      //     toast.error(error.data?.message || 'Failed to send login OTP. Please try again.')
       //   }
       //   return
       // }
@@ -85,14 +85,14 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
       // MOCK IMPLEMENTATION - Remove when API is ready
       await new Promise(resolve => setTimeout(resolve, 1000))
 
-      // Mock OTP response (Step 1: Send OTP only)
+      // Mock OTP response for LOGIN context
       const mockOtpResponse = {
         success: true,
-        message: "OTP sent successfully",
-        otpId: `mock_otp_${Date.now()}_${data.mobile}`
+        message: "Login OTP sent successfully",
+        otpId: `mock_login_otp_${Date.now()}_${data.mobile}`
       }
       
-      console.log('📱 Mock Step 1 - Send OTP Response:', mockOtpResponse)
+      console.log('📱 Mock LOGIN OTP Response:', mockOtpResponse)
 
       // Store mock otpId for verification step (same as real API would do)
       localStorage.setItem('otpId', mockOtpResponse.otpId)
@@ -102,23 +102,23 @@ export default function MobileLogin({ onOtpSent, setMobile }: MobileLoginProps) 
       onOtpSent()
 
     } catch (error: any) {
-      console.error("Send OTP error:", error)
+      console.error("Send Login OTP error:", error)
       
-      // Mock error handling (simulate different error scenarios for testing)
+      // Mock error handling for LOGIN context (simulate different error scenarios)
       const mockErrorType = Math.random()
       
       if (mockErrorType < 0.15) {
-        // Simulate mobile not registered error
+        // Simulate mobile not registered error (login-specific)
         toast.error('Mobile number not registered. Please sign up first.')
       } else if (mockErrorType < 0.25) {
-        // Simulate rate limiting error
-        toast.error('Too many OTP requests. Please try again in 5 minutes.')
+        // Simulate rate limiting error for login
+        toast.error('Too many login OTP requests. Please try again in 5 minutes.')
       } else if (mockErrorType < 0.35) {
         // Simulate server error
         toast.error('Server error. Please try again later.')
       } else {
-        // Default error
-        toast.error("Failed to send OTP. Please try again.")
+        // Default error for login
+        toast.error("Failed to send login OTP. Please try again.")
       }
     } finally {
       setLoading(false)
