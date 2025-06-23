@@ -1,9 +1,10 @@
 import { FooterProps } from '../../types/state';
-import { getStateConfig } from '../../config/stateConfigs';
+import { useStateConfig } from '../../hooks/useStateConfig';
 
 export function Footer({ stateConfig }: FooterProps = {}) {
-  // Use provided stateConfig or default to Rajasthan
-  const currentStateConfig = stateConfig || getStateConfig('KA');
+  // Use prop stateConfig if provided, otherwise fetch from API
+  const { stateConfig: apiStateConfig } = useStateConfig();
+  const currentStateConfig = stateConfig || apiStateConfig;
   return (
     <footer className="bg-white border-t border-[rgba(2,2,2,0.15)] overflow-x-hidden">
       {/* Desktop layout - matches Figma exactly */}

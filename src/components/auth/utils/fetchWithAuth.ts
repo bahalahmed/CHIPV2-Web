@@ -1,17 +1,23 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
-export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+interface FetchWithAuthOptions extends RequestInit {
+  baseUrl?: string;
+}
+
+export const fetchWithAuth = async (url: string, options: FetchWithAuthOptions = {}) => {
   const token = localStorage.getItem('token');
-  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+  const { baseUrl, ...fetchOptions } = options;
+  const apiBaseUrl = baseUrl || API_BASE_URL;
+  const fullUrl = url.startsWith('http') ? url : `${apiBaseUrl}${url}`;
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-    ...options.headers
+    ...fetchOptions.headers
   };
 
   const response = await fetch(fullUrl, {
-    ...options,
+    ...fetchOptions,
     headers,
   });
 

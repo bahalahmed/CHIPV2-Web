@@ -6,8 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "build:ka": "vite build --mode ka",
+    "build:mh": "vite build --mode mh", 
+    "build:rj": "vite build --mode rj",
     "preview": "vite preview",
+    "preview:ka": "vite preview --mode ka",
+    "preview:mh": "vite preview --mode mh",
+    "preview:rj": "vite preview --mode rj",
+    "lint": "eslint .",
     "mock-api": "json-server --watch db.json --port 3002"
   },
   "dependencies": {

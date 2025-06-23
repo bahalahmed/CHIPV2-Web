@@ -1,8 +1,20 @@
 // src/components/MapSection.tsx
-import { getStateConfig } from '../../config/stateConfigs';
+import { useStateConfig } from '../../hooks/useStateConfig';
 
 export function MapSection() {
-  const stateConfig = getStateConfig('KA');
+  const { stateConfig, loading, error } = useStateConfig();
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-xl flex items-center justify-center h-[400px]">
+        <div className="animate-pulse text-gray-500">Loading map...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.warn('Failed to load state config:', error);
+  }
   
   return (
     <div className="w-full max-w-xl">
