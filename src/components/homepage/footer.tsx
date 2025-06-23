@@ -1,10 +1,25 @@
 import { FooterProps } from '../../types/state';
 import { useStateConfig } from '../../hooks/useStateConfig';
 
-export function Footer({ stateConfig }: FooterProps = {}) {
+export function Footer({ stateConfig: propStateConfig }: FooterProps = {}) {
   // Use prop stateConfig if provided, otherwise fetch from API
-  const { stateConfig: apiStateConfig } = useStateConfig();
-  const currentStateConfig = stateConfig || apiStateConfig;
+  const { stateConfig: apiStateConfig, loading, error } = useStateConfig();
+  
+  const currentStateConfig = propStateConfig || apiStateConfig;
+
+  if (loading) {
+    return (
+      <footer className="bg-white border-t border-[rgba(2,2,2,0.15)] overflow-x-hidden">
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-pulse text-gray-500">Loading state configuration...</div>
+        </div>
+      </footer>
+    );
+  }
+
+  if (error) {
+    console.warn('Failed to load state config, using fallback:', error);
+  }
   return (
     <footer className="bg-white border-t border-[rgba(2,2,2,0.15)] overflow-x-hidden">
       {/* Desktop layout - matches Figma exactly */}
@@ -25,7 +40,7 @@ export function Footer({ stateConfig }: FooterProps = {}) {
         <div className="flex flex-col items-center gap-2 flex-1 min-w-0 px-4">
           <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] text-center">
             Content Owned & Managed by : National Health Mission (NHM), Dept. of Medical, Health & Family Welfare, Govt.
-            of {currentStateConfig.stateName}
+            of {currentStateConfig?.stateName || 'Karnataka'}
           </div>
           <div className="font-['Poppins'] font-normal text-base leading-6 text-[#303030] text-center">
             Supported by : Software designed and developed by Khushi Baby
@@ -64,7 +79,7 @@ export function Footer({ stateConfig }: FooterProps = {}) {
           <div className="flex flex-col items-center gap-2">
             <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
               Content Owned & Managed by : National Health Mission (NHM), Dept. of Medical, Health & Family Welfare,
-              Govt. of {currentStateConfig.stateName}
+              Govt. of {currentStateConfig?.stateName || 'Karnataka'}
             </div>
             <div className="font-['Poppins'] font-normal text-sm leading-5 text-[#303030]">
               Supported by : Software designed and developed by Khushi Baby
