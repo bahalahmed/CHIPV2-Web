@@ -36,10 +36,9 @@ export interface RegistrationRequest {
 export interface RegistrationResponse {
   success: boolean;
   userId: string;
-  message: string;
   registrationId: string;
+  message: string;
   status: 'pending' | 'approved' | 'rejected';
-  nextSteps?: string[];
 }
 
 export interface DocumentUploadRequest {
@@ -122,12 +121,7 @@ export const registrationApiSlice = createApi({
           userId: `user_${Date.now()}`,
           registrationId: `reg_${Date.now()}`,
           message: 'Registration submitted successfully! Your application is under review.',
-          status: 'pending',
-          nextSteps: [
-            'Upload required documents',
-            'Wait for admin approval',
-            'Check email for updates'
-          ]
+          status: 'pending'
         };
         
         console.log('✅ Mock Registration Response:', mockResponse);

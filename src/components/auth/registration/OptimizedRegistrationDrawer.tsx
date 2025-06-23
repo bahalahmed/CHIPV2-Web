@@ -142,7 +142,7 @@ function OptimizedRegistrationDrawer({ open, onOpenChange }: RegisterDrawerProps
     const secureReviewInfo = {
       ...reviewInfoMemoized,
       password: reviewInfoMemoized.password ? PasswordSecurity.hashPassword(reviewInfoMemoized.password) : reviewInfoMemoized.password,
-      confirmPassword: reviewInfoMemoized.confirmPassword ? PasswordSecurity.hashPassword(reviewInfoMemoized.confirmPassword) : reviewInfoMemoized.confirmPassword
+      // Don't hash confirmPassword - it's not sent to server
     }
     
     console.log("✅ Submitting registration:", secureReviewInfo)
