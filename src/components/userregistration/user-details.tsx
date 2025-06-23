@@ -199,7 +199,6 @@ export default function UserDetailsPage() {
     fetchUserDetails()
   }, [personalInfo, contactInfo, levelInfo])
 
-  const handleEdit = () => navigate("/user-edit")
   const handleBackToLogin = () => navigate("/")
 
   const renderRow = (label: string, value: string) => (
@@ -237,23 +236,15 @@ export default function UserDetailsPage() {
     <div className="min-h-screen bg-gray-50">
       <HeaderWithApi />
 
-      <main className="container mx-auto py-8 px-4">
+      <main className="py-8 px-4">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6">
             <h1 className="text-2xl font-bold text-gray-800 mb-6">User Registration Details</h1>
 
             {/* Personal Info */}
             <div className="mb-6">
-              <div className="flex justify-between items-center mb-4">
+              <div className="mb-4">
                 <h2 className="text-xl font-semibold text-gray-700">Personal Information</h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200"
-                  onClick={handleEdit}
-                >
-                  <span className="mr-1">✏️</span> Edit
-                </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-200 pt-4">
                 {renderRow("First Name", currentData.personalInfo.firstName)}
