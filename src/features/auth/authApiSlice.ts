@@ -25,7 +25,6 @@ interface OtpRequest {
   email?: string;
   whatsapp?: string;
   type: 'mobile' | 'email' | 'whatsapp';
-  context?: 'login' | 'registration' | 'forgot-password';
 }
 
 interface OtpResponse {
@@ -178,6 +177,7 @@ export const authApiSlice = createApi({
       //     url: '/auth/login',
       //     method: 'POST',
       //     body: hashedCredentials,
+      
       //   };
       // },
       // transformErrorResponse: (response: FetchBaseQueryError) => {
@@ -236,10 +236,10 @@ export const authApiSlice = createApi({
 
     // Send OTP - Enhanced with comprehensive error handling
     sendOtp: builder.mutation<OtpResponse, OtpRequest>({
-      query: ({ type, context, ...data }) => ({
-        url: '/auth/send-otp',  // Single endpoint as per your spec
+      query: ({ type, ...data }) => ({
+        url: `/auth/send-otp/${type}`,
         method: 'POST',
-        body: { type, ...data, ...(context && { context }) },
+        body: data,
       }),
       
       // ENHANCED: Transform server errors with proper handling
@@ -267,16 +267,15 @@ export const authApiSlice = createApi({
         };
       },
       
-      // Enhanced logging with context
+      // Enhanced logging
       onQueryStarted: async (arg, { queryFulfilled }) => {
-        const context = arg.context || 'unknown';
-        console.log(`🚀 Sending ${context.toUpperCase()} OTP to ${arg.type}:`, arg[arg.type]);
+        console.log(`🚀 Sending OTP to ${arg.type}:`, arg[arg.type]);
         
         try {
           const { data } = await queryFulfilled;
-          console.log(`✅ ${context.toUpperCase()} OTP sent successfully:`, data);
+          console.log(`✅ OTP sent successfully:`, data);
         } catch (error: any) {
-          console.error(`❌ ${context.toUpperCase()} SendOTP failed:`, error.data);
+          console.error(`❌ SendOTP failed:`, error.data);
         }
       },
     }),
@@ -498,12 +497,10 @@ export const selectIsLoading = (state: any) => {
 // Utility functions for common operations
 export const createOtpRequest = (
   type: 'mobile' | 'email' | 'whatsapp',
-  value: string,
-  context?: 'login' | 'registration' | 'forgot-password'
+  value: string
 ): OtpRequest => ({
   type,
   [type]: value,
-  ...(context && { context }),
 });
 
 export const createVerifyOtpRequest = (
