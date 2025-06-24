@@ -46,13 +46,50 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
       // Hash password before sending over network for security
       const hashedPassword = PasswordSecurity.hashPassword(data.password)
       
-      await loginWithEmail({
+      const response = await loginWithEmail({
         email: data.email,
         password: hashedPassword,
       }).unwrap()
 
       // RTK Query automatically handles Redux state via authSlice matchers
-      // Navigate to dashboard
+      
+      // Check user approval status after email login success
+      try {
+        const userId = response.user?.id
+        if (userId && response.token) {
+          const userDetailsResponse = await fetch(`/auth/user-details/${userId}`, {
+            headers: {
+              'Authorization': `Bearer ${response.token}`,
+              'Content-Type': 'application/json'
+            }
+          })
+          
+          if (userDetailsResponse.ok) {
+            const userDetails = await userDetailsResponse.json()
+            
+            if (userDetails.success && userDetails.data.approvalStatus.status === 'pending') {
+              // Store user details and redirect to approval page
+              localStorage.setItem('userApprovalStatus', 'pending')
+              localStorage.setItem('userId', userId)
+              navigate('/user-details')
+              return
+            } else if (userDetails.success && userDetails.data.approvalStatus.status === 'approved') {
+              // User is approved, proceed to dashboard
+              localStorage.setItem('userApprovalStatus', 'approved')
+              localStorage.setItem('userId', userId)
+              navigate('/dashboard')
+              return
+            }
+          }
+        }
+      } catch (approvalCheckError) {
+        console.error('Error checking approval status:', approvalCheckError)
+        // Fallback: proceed to dashboard if approval check fails
+        navigate("/dashboard")
+        return
+      }
+      
+      // Fallback: Navigate to dashboard if no approval check
       navigate("/dashboard")
       
     } catch (error) {

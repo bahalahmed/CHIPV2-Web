@@ -121,6 +121,45 @@ export function OtpSection({
           // Handle login authentication
           localStorage.setItem('token', response.token)
           localStorage.setItem('refreshToken', response.refreshToken)
+          
+          // Check user approval status after login success
+          try {
+            const userId = response.user?.id
+            if (userId) {
+              const userDetailsResponse = await fetch(`/auth/user-details/${userId}`, {
+                headers: {
+                  'Authorization': `Bearer ${response.token}`,
+                  'Content-Type': 'application/json'
+                }
+              })
+              
+              if (userDetailsResponse.ok) {
+                const userDetails = await userDetailsResponse.json()
+                
+                if (userDetails.success && userDetails.data.approvalStatus.status === 'pending') {
+                  // Store user details and redirect to approval page
+                  localStorage.setItem('userApprovalStatus', 'pending')
+                  localStorage.setItem('userId', userId)
+                  toast.success('Login successful! Please wait for approval.')
+                  navigate('/user-details')
+                  return
+                } else if (userDetails.success && userDetails.data.approvalStatus.status === 'approved') {
+                  // User is approved, proceed to dashboard
+                  localStorage.setItem('userApprovalStatus', 'approved')
+                  localStorage.setItem('userId', userId)
+                  toast.success('Login successful!')
+                  navigate('/dashboard')
+                  return
+                }
+              }
+            }
+          } catch (approvalCheckError) {
+            console.error('Error checking approval status:', approvalCheckError)
+            // Fallback: proceed to dashboard if approval check fails
+            toast.success('Login successful!')
+            navigate('/dashboard')
+            return
+          }
         }
         
         toast.success(`${label} verified successfully!`)
