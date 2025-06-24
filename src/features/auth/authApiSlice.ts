@@ -183,12 +183,23 @@ export const authApiSlice = createApi({
       
       //   };
       // },
-      // transformErrorResponse: (response: FetchBaseQueryError) => {
-      //   return {
-      //     status: response.status,
-      //     message: (response.data as any)?.message || 'Login failed',
-      //   };
-      // },
+      transformErrorResponse: (response: FetchBaseQueryError) => {
+        const data = response.data as any;
+        
+        // Use backend message first, fallback to hardcoded based on status
+        let fallbackMessage = 'Login failed';
+        
+        if (response.status === 404) {
+          fallbackMessage = 'Email not registered. Please sign up first.';
+        } else if (response.status === 401) {
+          fallbackMessage = 'Password is incorrect. Click on forget password to reset.';
+        }
+        
+        return {
+          status: response.status,
+          message: data?.message || fallbackMessage,
+        };
+      },
       
       // MOCK IMPLEMENTATION - Remove when API is ready
       queryFn: async (credentials) => {
