@@ -1,6 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
+import PasswordSecurity from '@/components/auth/utils/passwordSecurity';
+
 // Types for API responses
 interface LoginRequest {
   email?: string;
@@ -25,17 +27,16 @@ interface OtpRequest {
   email?: string;
   whatsapp?: string;
   type: 'mobile' | 'email' | 'whatsapp';
-  context?: 'registration' | 'login' | 'forgot-password';
+  context: 'registration' | 'login' | 'forgot-password';
 }
 
 interface OtpResponse {
   success: boolean;
   message: string;
   otpId: string;
-  // Optional fields that server might send
-  expiryTime?: number;      // OTP expiry time in seconds
-  resendCooldown?: number;  // Time before user can request new OTP
-  timestamp?: string;       // Response timestamp
+  expiryTime: number;      // OTP expiry time in seconds
+  resendCooldown: number;  // Time before user can request new OTP
+  timestamp: string;       // Response timestamp
 }
 
 // Error Response Interface for SendOTP
@@ -54,13 +55,13 @@ interface VerifyOtpRequest {
   otpId: string;
   otp: string;
   type: 'mobile' | 'email' | 'whatsapp';
-  context: 'registration' | 'login' | 'forgot-password';
 }
 
 interface VerifyOtpResponse {
   success: boolean;
   verified: boolean;
   message: string;
+  contactMethod: 'email' | 'mobile' | 'whatsapp';
   // Login context fields (only present when context = 'login')
   user?: {
     id: string;
@@ -98,18 +99,10 @@ const baseQueryWithRetry: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const baseQuery = fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_BASE_URL || (() => {
-      throw new Error('VITE_API_BASE_URL environment variable is required');
-    })(),
+    baseUrl: 'http://localhost:3000/api/v1',
     prepareHeaders: (headers, { getState }) => {
       headers.set('Content-Type', 'application/json');
       headers.set('Accept', 'application/json');
-      
-      // Add API key if available
-      const apiKey = import.meta.env.VITE_API_KEY;
-      if (apiKey) {
-        headers.set(import.meta.env.VITE_API_KEY_HEADER_NAME || 'X-API-KEY', apiKey);
-      }
       
       // Add auth token if available
       const token = (getState() as any).auth?.token;
@@ -119,7 +112,8 @@ const baseQueryWithRetry: BaseQueryFn<
       
       return headers;
     },
-    credentials: import.meta.env.VITE_ENABLE_SESSION_COOKIES === 'true' ? 'include' : 'same-origin',
+    // Remove credentials to fix CORS issue
+    // credentials: 'include',
   });
 
   let result = await baseQuery(args, api, extraOptions);
@@ -134,29 +128,34 @@ const baseQueryWithRetry: BaseQueryFn<
 
   }
 
-  // Handle token refresh on 401
+  // Handle token refresh on 401, but not for login/signup endpoints
   if (result.error && result.error.status === 401) {
-    console.warn('Token expired, attempting refresh...');
+    const url = typeof args === 'string' ? args : args.url;
+    const isAuthEndpoint = url?.includes('/auth/sign_in') || url?.includes('/auth/signup') || url?.includes('/auth/register');
     
-    // Attempt token refresh
-    const refreshResult = await baseQuery(
-      {
-        url: import.meta.env.VITE_AUTH_REFRESH_ENDPOINT || '/auth/refresh',
-        method: 'POST',
-        body: {
-          refreshToken: (api.getState() as any).auth?.refreshToken,
+    if (!isAuthEndpoint) {
+      console.warn('Token expired, attempting refresh...');
+      
+      // Attempt token refresh
+      const refreshResult = await baseQuery(
+        {
+          url: '/auth/refresh',
+          method: 'POST',
+          body: {
+            refreshToken: (api.getState() as any).auth?.refreshToken,
+          },
         },
-      },
-      api,
-      extraOptions
-    );
+        api,
+        extraOptions
+      );
 
-    if (refreshResult.data) {
-      // Retry original request with new token
-      result = await baseQuery(args, api, extraOptions);
-    } else {
-      // Refresh failed, logout user
-      api.dispatch({ type: 'auth/logout' });
+      if (refreshResult.data) {
+        // Retry original request with new token
+        result = await baseQuery(args, api, extraOptions);
+      } else {
+        // Refresh failed, logout user
+        api.dispatch({ type: 'auth/logout' });
+      }
     }
   }
 
@@ -171,27 +170,47 @@ export const authApiSlice = createApi({
   keepUnusedDataFor: 60, // Keep cache for 1 minute
   refetchOnMountOrArgChange: 30, // Refetch if data is older than 30 seconds
   endpoints: (builder) => ({
-    // Email/Password Login (REAL API)
+    // Email/Password Login - Real API Implementation
     loginWithEmail: builder.mutation<LoginResponse, LoginRequest>({
+      // Real API endpoint: POST http://localhost:3000/api/v1/auth/sign_in
       query: (credentials) => {
-        console.log('🔒 Sending login request to real API');
+        // Format credentials with user wrapper as expected by server
+        const requestBody = {
+          user: {
+            email: credentials.email?.trim().toLowerCase(),
+            password: PasswordSecurity.hashPassword(credentials.password)
+          }
+        };
+        
+        console.log('🔒 Password hashed for secure transmission');
+        console.log('📤 Sending login request:', {
+          url: '/auth/sign_in',
+          method: 'POST',
+          body: requestBody,
+          fullUrl: 'http://localhost:3000/api/v1/auth/sign_in'
+        });
         
         return {
-          url: import.meta.env.VITE_AUTH_LOGIN_ENDPOINT || '/auth/login',
+          url: '/auth/sign_in',
           method: 'POST',
-          body: {
-            email: credentials.email,
-            encrypted_password: credentials.password, // Password should already be hashed/encrypted
-          },
+          body: requestBody,
         };
       },
       transformErrorResponse: (response: FetchBaseQueryError) => {
         const data = response.data as any;
         
+        console.error('❌ Login API Error:', {
+          status: response.status,
+          data: data,
+          url: 'http://localhost:3000/api/v1/auth/sign_in'
+        });
+        
         // Use backend message first, fallback to hardcoded based on status
         let fallbackMessage = 'Login failed';
         
-        if (response.status === 404) {
+        if (response.status === 400) {
+          fallbackMessage = 'Invalid request format. Please check your credentials.';
+        } else if (response.status === 404) {
           fallbackMessage = 'Email not registered. Please sign up first.';
         } else if (response.status === 401) {
           fallbackMessage = 'Password is incorrect. Click on forget password to reset.';
@@ -202,6 +221,50 @@ export const authApiSlice = createApi({
           message: data?.message || fallbackMessage,
         };
       },
+      
+      // MOCK IMPLEMENTATION - COMMENTED OUT FOR REAL API TESTING
+      // queryFn: async (credentials) => {
+      //   // Password should already be hashed from frontend
+      //   console.log('🔒 Mock Login - Received Hashed Password:', credentials.password);
+      //   console.log('🔄 Mock Login - Email:', credentials.email);
+      //   
+      //   // Simulate API delay
+      //   await new Promise(resolve => setTimeout(resolve, 1500));
+      //   
+      //   // Mock credentials check - since frontend Zod validation handles format validation
+      //   // Only simulate actual credential validation (email/password mismatch)
+      //   const mockValidCredentials = credentials.email && credentials.password;
+      //   
+      //   if (!mockValidCredentials) {
+      //     return {
+      //       error: {
+      //         status: 401,
+      //         data: {
+      //           success: false,
+      //           message: 'Invalid email or password'
+      //         }
+      //       }
+      //     };
+      //   }
+      //   
+      //   // Mock successful login response
+      //   const mockUser = {
+      //     id: "mock_user_" + Date.now(),
+      //     email: credentials.email || "user@example.com",  
+      //     mobile: "9876543210",
+      //     name: credentials.email?.split('@')[0] || "Mock User",
+      //     role: credentials.email?.includes('admin') ? "Admin" : "User"
+      //   };
+      //   
+      //   const mockResponse: LoginResponse = {
+      //     user: mockUser,
+      //     token: "mock_jwt_token_" + btoa(JSON.stringify(mockUser)),
+      //     refreshToken: "mock_refresh_token_" + Date.now()
+      //   };
+      //   
+      //   console.log('✅ Mock Login Success:', mockResponse);
+      //   return { data: mockResponse };
+      // },
       invalidatesTags: ['User', 'Session'],
     }),
 
@@ -209,7 +272,7 @@ export const authApiSlice = createApi({
     // Send OTP - Enhanced with comprehensive error handling
     sendOtp: builder.mutation<OtpResponse, OtpRequest>({
       query: ({ type, ...data }) => ({
-        url: `${import.meta.env.VITE_OTP_SEND_ENDPOINT || '/auth/send-otp'}/${type}`,
+        url: `/auth/send-otp/${type}`,
         method: 'POST',
         body: data,
       }),
@@ -256,7 +319,7 @@ export const authApiSlice = createApi({
     verifyOtp: builder.mutation<VerifyOtpResponse, VerifyOtpRequest>({
       // TODO: Uncomment this when API is ready
       // query: (data) => ({
-      //   url: import.meta.env.VITE_OTP_VERIFY_ENDPOINT || '/auth/verify-otp',
+      //   url: `/auth/verify-otp`,
       //   method: 'POST',
       //   body: data,
       // }),
@@ -410,7 +473,7 @@ export const authApiSlice = createApi({
     // Forgot Password
     forgotPassword: builder.mutation<ForgotPasswordResponse, ForgotPasswordRequest>({
       query: (data) => ({
-        url: import.meta.env.VITE_AUTH_FORGOT_PASSWORD_ENDPOINT || '/auth/forgot-password',
+        url: '/auth/forgot-password',
         method: 'POST',
         body: data,
       }),
@@ -419,7 +482,7 @@ export const authApiSlice = createApi({
     // Logout
     logout: builder.mutation<{ success: boolean }, void>({
       query: () => ({
-        url: import.meta.env.VITE_AUTH_LOGOUT_ENDPOINT || '/auth/logout',
+        url: '/auth/logout',
         method: 'POST',
       }),
       invalidatesTags: ['User', 'Session'],
@@ -430,16 +493,16 @@ export const authApiSlice = createApi({
 
     // Get Current User (for session validation)
     getCurrentUser: builder.query<LoginResponse['user'], void>({
-      query: () => import.meta.env.VITE_AUTH_ME_ENDPOINT || '/auth/me',
+      query: () => '/auth/me',
       providesTags: ['User'],
       // Stale time for user data
-      keepUnusedDataFor: Number(import.meta.env.VITE_CACHE_DURATION) || 300, // 5 minutes
+      keepUnusedDataFor: 300, // 5 minutes
     }),
 
     // Refresh Token
     refreshToken: builder.mutation<{ token: string; refreshToken: string }, { refreshToken: string }>({
       query: (data) => ({
-        url: import.meta.env.VITE_AUTH_REFRESH_ENDPOINT || '/auth/refresh',
+        url: '/auth/refresh',
         method: 'POST',
         body: data,
       }),

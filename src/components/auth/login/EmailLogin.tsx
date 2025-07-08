@@ -6,10 +6,10 @@ import { useNavigate } from "react-router-dom"
 
 import { useLoginFormValidation } from "@/components/auth/hooks/useFormValidation"
 import { emailLoginSchema, type EmailLoginForm } from "@/components/auth/schemas/validationSchemas"
-import { emailLogin, checkUserApprovalStatus } from "@/lib/authLogin"
 import { handleApiError } from "@/lib/errorHandling"
 import EmailInputField from "@/components/shared/EmailInputField"
 import PasswordInputField from "@/components/shared/PasswordInputField"
+import PasswordSecurity from "../utils/passwordSecurity"
 
 interface EmailLoginProps {
   onForgotPassword: () => void
@@ -39,68 +39,60 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
 
   // Optimized submission handler
   const onSubmit = useCallback(async (data: EmailLoginForm) => {
-    setIsLoading(true)
-    
     try {
-      console.log('🔐 Starting login process...')
+      // Hash password before sending over network for security
+      const hashedPassword = PasswordSecurity.hashPassword(data.password)
       
-      // Use secure login function with automatic CSRF token handling
-      const response = await emailLogin({
+      const response = await loginWithEmail({
         email: data.email,
-        password: data.password, // Will be encrypted automatically
-      })
+        password: hashedPassword,
+      }).unwrap()
 
-      if (!response.success) {
-        throw new Error(response.message)
-      }
-
-      console.log('✅ Login successful, checking user approval status...')
+      // RTK Query automatically handles Redux state via authSlice matchers
       
       // Check user approval status after email login success
       try {
         const userId = response.user?.id
         if (userId && response.token) {
-          const userDetails = await checkUserApprovalStatus(userId, response.token)
+          const userDetailsResponse = await fetch(`/auth/user-details/${userId}`, {
+            headers: {
+              'Authorization': `Bearer ${response.token}`,
+              'Content-Type': 'application/json'
+            }
+          })
           
-          if (userDetails.success && userDetails.data?.approvalStatus?.status === 'pending') {
-            // Store user details and redirect to approval page
-            localStorage.setItem('userApprovalStatus', 'pending')
-            localStorage.setItem('userId', userId)
-            localStorage.setItem('userToken', response.token)
-            navigate('/user-details')
-            return
-          } else if (userDetails.success && userDetails.data?.approvalStatus?.status === 'approved') {
-            // User is approved, proceed to dashboard
-            localStorage.setItem('userApprovalStatus', 'approved')
-            localStorage.setItem('userId', userId)
-            localStorage.setItem('userToken', response.token)
-            navigate('/dashboard')
-            return
+          if (userDetailsResponse.ok) {
+            const userDetails = await userDetailsResponse.json()
+            
+            if (userDetails.success && userDetails.data.approvalStatus.status === 'pending') {
+              // Store user details and redirect to approval page
+              localStorage.setItem('userApprovalStatus', 'pending')
+              localStorage.setItem('userId', userId)
+              navigate('/user-details')
+              return
+            } else if (userDetails.success && userDetails.data.approvalStatus.status === 'approved') {
+              // User is approved, proceed to dashboard
+              localStorage.setItem('userApprovalStatus', 'approved')
+              localStorage.setItem('userId', userId)
+              navigate('/dashboard')
+              return
+            }
           }
         }
       } catch (approvalCheckError) {
         console.error('Error checking approval status:', approvalCheckError)
         // Fallback: proceed to dashboard if approval check fails
-        if (response.token) {
-          localStorage.setItem('userToken', response.token)
-        }
         navigate("/dashboard")
         return
       }
       
       // Fallback: Navigate to dashboard if no approval check
-      if (response.token) {
-        localStorage.setItem('userToken', response.token)
-      }
       navigate("/dashboard")
       
-    } catch (error: any) {
-      console.error('❌ Login failed:', error)
+    } catch (error) {
       handleApiError(error, 'login')
-    } finally {
-      setIsLoading(false)
     }
-  }, [navigate])
+  }, [loginWithEmail, navigate])
 
   // Memoized field change handlers
   const handleEmailChange = useCallback(
@@ -198,3 +190,12 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
 })
 
 export default EmailLogin
+// Import your actual loginWithEmail mutation from your API slice or service
+// Example (adjust the import path as needed):
+// import { useLoginWithEmailMutation } from "@/services/authApi";
+
+// Then, inside your component, initialize the mutation hook:
+// const [loginWithEmail] = useLoginWithEmailMutation();
+
+// Remove the placeholder below:
+
