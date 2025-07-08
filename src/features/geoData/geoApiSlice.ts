@@ -15,7 +15,9 @@ const baseQueryWithRetry: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const baseQuery = fetchBaseQuery({
-    baseUrl: 'http://localhost:3002',
+    baseUrl: import.meta.env.VITE_MOCK_API_BASE_URL || (() => {
+      throw new Error('VITE_MOCK_API_BASE_URL environment variable is required');
+    })(),
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
       headers.set('Accept', 'application/json');

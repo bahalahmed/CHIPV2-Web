@@ -98,10 +98,18 @@ const baseQueryWithRetry: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const baseQuery = fetchBaseQuery({
-    baseUrl: 'https://api.freeapi.app/api/v1',
+    baseUrl: import.meta.env.VITE_API_BASE_URL || (() => {
+      throw new Error('VITE_API_BASE_URL environment variable is required');
+    })(),
     prepareHeaders: (headers, { getState }) => {
       headers.set('Content-Type', 'application/json');
       headers.set('Accept', 'application/json');
+      
+      // Add API key if available
+      const apiKey = import.meta.env.VITE_API_KEY;
+      if (apiKey) {
+        headers.set(import.meta.env.VITE_API_KEY_HEADER_NAME || 'X-API-KEY', apiKey);
+      }
       
       // Add auth token if available
       const token = (getState() as any).auth?.token;
@@ -111,8 +119,7 @@ const baseQueryWithRetry: BaseQueryFn<
       
       return headers;
     },
-    // Remove credentials to fix CORS issue
-    // credentials: 'include',
+    credentials: import.meta.env.VITE_ENABLE_SESSION_COOKIES === 'true' ? 'include' : 'same-origin',
   });
 
   let result = await baseQuery(args, api, extraOptions);
@@ -134,7 +141,7 @@ const baseQueryWithRetry: BaseQueryFn<
     // Attempt token refresh
     const refreshResult = await baseQuery(
       {
-        url: '/auth/refresh',
+        url: import.meta.env.VITE_AUTH_REFRESH_ENDPOINT || '/auth/refresh',
         method: 'POST',
         body: {
           refreshToken: (api.getState() as any).auth?.refreshToken,
@@ -164,25 +171,20 @@ export const authApiSlice = createApi({
   keepUnusedDataFor: 60, // Keep cache for 1 minute
   refetchOnMountOrArgChange: 30, // Refetch if data is older than 30 seconds
   endpoints: (builder) => ({
-    // Email/Password Login (MOCKED for development)
+    // Email/Password Login (REAL API)
     loginWithEmail: builder.mutation<LoginResponse, LoginRequest>({
-      // TODO: Uncomment this when API is ready
-      // query: (credentials) => {
-      //   // Hash password before sending
-      //   const hashedCredentials = {
-      //     ...credentials,
-      //     password: PasswordSecurity.hashPassword(credentials.password)
-      //   };
-      //   
-      //   console.log('🔒 Password hashed for secure transmission');
-      //   
-      //   return {
-      //     url: '/auth/login',
-      //     method: 'POST',
-      //     body: hashedCredentials,
-      
-      //   };
-      // },
+      query: (credentials) => {
+        console.log('🔒 Sending login request to real API');
+        
+        return {
+          url: import.meta.env.VITE_AUTH_LOGIN_ENDPOINT || '/auth/login',
+          method: 'POST',
+          body: {
+            email: credentials.email,
+            encrypted_password: credentials.password, // Password should already be hashed/encrypted
+          },
+        };
+      },
       transformErrorResponse: (response: FetchBaseQueryError) => {
         const data = response.data as any;
         
@@ -200,50 +202,6 @@ export const authApiSlice = createApi({
           message: data?.message || fallbackMessage,
         };
       },
-      
-      // MOCK IMPLEMENTATION - Remove when API is ready
-      queryFn: async (credentials) => {
-        // Password should already be hashed from frontend
-        console.log('🔒 Mock Login - Received Hashed Password:', credentials.password);
-        console.log('🔄 Mock Login - Email:', credentials.email);
-        
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Mock credentials check - since frontend Zod validation handles format validation
-        // Only simulate actual credential validation (email/password mismatch)
-        const mockValidCredentials = credentials.email && credentials.password;
-        
-        if (!mockValidCredentials) {
-          return {
-            error: {
-              status: 401,
-              data: {
-                success: false,
-                message: 'Invalid email or password'
-              }
-            }
-          };
-        }
-        
-        // Mock successful login response
-        const mockUser = {
-          id: "mock_user_" + Date.now(),
-          email: credentials.email || "user@example.com",  
-          mobile: "9876543210",
-          name: credentials.email?.split('@')[0] || "Mock User",
-          role: credentials.email?.includes('admin') ? "Admin" : "User"
-        };
-        
-        const mockResponse: LoginResponse = {
-          user: mockUser,
-          token: "mock_jwt_token_" + btoa(JSON.stringify(mockUser)),
-          refreshToken: "mock_refresh_token_" + Date.now()
-        };
-        
-        console.log('✅ Mock Login Success:', mockResponse);
-        return { data: mockResponse };
-      },
       invalidatesTags: ['User', 'Session'],
     }),
 
@@ -251,7 +209,7 @@ export const authApiSlice = createApi({
     // Send OTP - Enhanced with comprehensive error handling
     sendOtp: builder.mutation<OtpResponse, OtpRequest>({
       query: ({ type, ...data }) => ({
-        url: `/auth/send-otp/${type}`,
+        url: `${import.meta.env.VITE_OTP_SEND_ENDPOINT || '/auth/send-otp'}/${type}`,
         method: 'POST',
         body: data,
       }),
@@ -298,7 +256,7 @@ export const authApiSlice = createApi({
     verifyOtp: builder.mutation<VerifyOtpResponse, VerifyOtpRequest>({
       // TODO: Uncomment this when API is ready
       // query: (data) => ({
-      //   url: `/auth/verify-otp`,
+      //   url: import.meta.env.VITE_OTP_VERIFY_ENDPOINT || '/auth/verify-otp',
       //   method: 'POST',
       //   body: data,
       // }),
@@ -452,7 +410,7 @@ export const authApiSlice = createApi({
     // Forgot Password
     forgotPassword: builder.mutation<ForgotPasswordResponse, ForgotPasswordRequest>({
       query: (data) => ({
-        url: '/auth/forgot-password',
+        url: import.meta.env.VITE_AUTH_FORGOT_PASSWORD_ENDPOINT || '/auth/forgot-password',
         method: 'POST',
         body: data,
       }),
@@ -461,7 +419,7 @@ export const authApiSlice = createApi({
     // Logout
     logout: builder.mutation<{ success: boolean }, void>({
       query: () => ({
-        url: '/auth/logout',
+        url: import.meta.env.VITE_AUTH_LOGOUT_ENDPOINT || '/auth/logout',
         method: 'POST',
       }),
       invalidatesTags: ['User', 'Session'],
@@ -472,16 +430,16 @@ export const authApiSlice = createApi({
 
     // Get Current User (for session validation)
     getCurrentUser: builder.query<LoginResponse['user'], void>({
-      query: () => '/auth/me',
+      query: () => import.meta.env.VITE_AUTH_ME_ENDPOINT || '/auth/me',
       providesTags: ['User'],
       // Stale time for user data
-      keepUnusedDataFor: 300, // 5 minutes
+      keepUnusedDataFor: Number(import.meta.env.VITE_CACHE_DURATION) || 300, // 5 minutes
     }),
 
     // Refresh Token
     refreshToken: builder.mutation<{ token: string; refreshToken: string }, { refreshToken: string }>({
       query: (data) => ({
-        url: '/auth/refresh',
+        url: import.meta.env.VITE_AUTH_REFRESH_ENDPOINT || '/auth/refresh',
         method: 'POST',
         body: data,
       }),
