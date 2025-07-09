@@ -29,8 +29,6 @@ interface LoginResponse {
     active: boolean;
     created_at: string;
   };
-  token?: string;
-  refreshToken?: string;
 }
 
 interface OtpRequest {
@@ -123,11 +121,11 @@ const baseQueryWithRetry: BaseQueryFn<
         headers.set(apiKeyHeader, apiKey);
       }
       
-      // CRITICAL: Add User-Agent and other headers that Rails might expect
       headers.set('User-Agent', 'CHIPV2-Frontend/1.0');
       headers.set('Accept-Language', 'en-US,en;q=0.9');
       
-      // Add auth token if available (for authenticated requests)
+      // Ad
+      // d auth token if available (for authenticated requests)
       const token = (getState() as any).auth?.token;
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
@@ -266,50 +264,7 @@ export const authApiSlice = createApi({
           originalError: response
         };
       },
-      
-      // MOCK IMPLEMENTATION - COMMENTED OUT FOR REAL API TESTING
-      // queryFn: async (credentials) => {
-      //   // Password should already be hashed from frontend
-      //   console.log('🔒 Mock Login - Received Hashed Password:', credentials.password);
-      //   console.log('🔄 Mock Login - Email:', credentials.email);
-      //   
-      //   // Simulate API delay
-      //   await new Promise(resolve => setTimeout(resolve, 1500));
-      //   
-      //   // Mock credentials check - since frontend Zod validation handles format validation
-      //   // Only simulate actual credential validation (email/password mismatch)
-      //   const mockValidCredentials = credentials.email && credentials.password;
-      //   
-      //   if (!mockValidCredentials) {
-      //     return {
-      //       error: {
-      //         status: 401,
-      //         data: {
-      //           success: false,
-      //           message: 'Invalid email or password'
-      //         }
-      //       }
-      //     };
-      //   }
-      //   
-      //   // Mock successful login response
-      //   const mockUser = {
-      //     id: "mock_user_" + Date.now(),
-      //     email: credentials.email || "user@example.com",  
-      //     mobile: "9876543210",
-      //     name: credentials.email?.split('@')[0] || "Mock User",
-      //     role: credentials.email?.includes('admin') ? "Admin" : "User"
-      //   };
-      //   
-      //   const mockResponse: LoginResponse = {
-      //     user: mockUser,
-      //     token: "mock_jwt_token_" + btoa(JSON.stringify(mockUser)),
-      //     refreshToken: "mock_refresh_token_" + Date.now()
-      //   };
-      //   
-      //   console.log('✅ Mock Login Success:', mockResponse);
-      //   return { data: mockResponse };
-      // },
+
       invalidatesTags: ['User', 'Session'],
     }),
 
