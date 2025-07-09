@@ -9,7 +9,7 @@ import { emailLoginSchema, type EmailLoginForm } from "@/components/auth/schemas
 import { handleApiError } from "@/lib/errorHandling"
 import EmailInputField from "@/components/shared/EmailInputField"
 import PasswordInputField from "@/components/shared/PasswordInputField"
-import PasswordSecurity from "../utils/passwordSecurity"
+import { useLoginWithEmailMutation } from "@/features/auth/authApiSlice"
 
 interface EmailLoginProps {
   onForgotPassword: () => void
@@ -18,6 +18,7 @@ interface EmailLoginProps {
 const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProps) {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
+  const [loginWithEmail] = useLoginWithEmailMutation()
   
   // Use optimized form validation hook
   const {
@@ -40,12 +41,11 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
   // Optimized submission handler
   const onSubmit = useCallback(async (data: EmailLoginForm) => {
     try {
-      // Hash password before sending over network for security
-      const hashedPassword = PasswordSecurity.hashPassword(data.password)
+      setIsLoading(true)
       
       const response = await loginWithEmail({
         email: data.email,
-        password: hashedPassword,
+        password: data.password,
       }).unwrap()
 
       // RTK Query automatically handles Redux state via authSlice matchers
@@ -91,6 +91,8 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
       
     } catch (error) {
       handleApiError(error, 'login')
+    } finally {
+      setIsLoading(false)
     }
   }, [loginWithEmail, navigate])
 
@@ -190,12 +192,4 @@ const EmailLogin = memo(function EmailLogin({ onForgotPassword }: EmailLoginProp
 })
 
 export default EmailLogin
-// Import your actual loginWithEmail mutation from your API slice or service
-// Example (adjust the import path as needed):
-// import { useLoginWithEmailMutation } from "@/services/authApi";
-
-// Then, inside your component, initialize the mutation hook:
-// const [loginWithEmail] = useLoginWithEmailMutation();
-
-// Remove the placeholder below:
 

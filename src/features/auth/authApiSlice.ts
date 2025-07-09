@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 import PasswordSecurity from '@/components/auth/utils/passwordSecurity';
+import { getCsrfToken } from '@/lib/csrfToken';
 
 // Types for API responses
 interface LoginRequest {
@@ -11,15 +12,25 @@ interface LoginRequest {
 }
 
 interface LoginResponse {
+  message: string;
   user: {
     id: string;
     email: string;
+    username: string;
+    full_name: string;
     mobile: string;
-    name: string;
-    role: string;
+    created_at: string;
   };
-  token: string;
-  refreshToken: string;
+  session: {
+    session_id: string;
+    login_time: string;
+    logout_time: string | null;
+    status: number;
+    active: boolean;
+    created_at: string;
+  };
+  token?: string;
+  refreshToken?: string;
 }
 
 interface OtpRequest {
@@ -99,12 +110,24 @@ const baseQueryWithRetry: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const baseQuery = fetchBaseQuery({
-    baseUrl: 'http://localhost:3000/api/v1',
+    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://a13797edace6744e9aaac6eb088b75ca-270168266.ap-south-1.elb.amazonaws.com:3000/v1',
+    credentials: 'include',  // Include session cookies
     prepareHeaders: (headers, { getState }) => {
       headers.set('Content-Type', 'application/json');
       headers.set('Accept', 'application/json');
       
-      // Add auth token if available
+      // Add API key if available
+      const apiKey = import.meta.env.VITE_API_KEY;
+      const apiKeyHeader = import.meta.env.VITE_API_KEY_HEADER_NAME || 'X-API-KEY';
+      if (apiKey) {
+        headers.set(apiKeyHeader, apiKey);
+      }
+      
+      // CRITICAL: Add User-Agent and other headers that Rails might expect
+      headers.set('User-Agent', 'CHIPV2-Frontend/1.0');
+      headers.set('Accept-Language', 'en-US,en;q=0.9');
+      
+      // Add auth token if available (for authenticated requests)
       const token = (getState() as any).auth?.token;
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
@@ -112,8 +135,6 @@ const baseQueryWithRetry: BaseQueryFn<
       
       return headers;
     },
-    // Remove credentials to fix CORS issue
-    // credentials: 'include',
   });
 
   let result = await baseQuery(args, api, extraOptions);
@@ -131,7 +152,7 @@ const baseQueryWithRetry: BaseQueryFn<
   // Handle token refresh on 401, but not for login/signup endpoints
   if (result.error && result.error.status === 401) {
     const url = typeof args === 'string' ? args : args.url;
-    const isAuthEndpoint = url?.includes('/auth/sign_in') || url?.includes('/auth/signup') || url?.includes('/auth/register');
+    const isAuthEndpoint = url?.includes('/auth/sign_in') || url?.includes('/auth/login') || url?.includes('/auth/signup') || url?.includes('/auth/register');
     
     if (!isAuthEndpoint) {
       console.warn('Token expired, attempting refresh...');
@@ -170,55 +191,79 @@ export const authApiSlice = createApi({
   keepUnusedDataFor: 60, // Keep cache for 1 minute
   refetchOnMountOrArgChange: 30, // Refetch if data is older than 30 seconds
   endpoints: (builder) => ({
-    // Email/Password Login - Real API Implementation
     loginWithEmail: builder.mutation<LoginResponse, LoginRequest>({
-      // Real API endpoint: POST http://localhost:3000/api/v1/auth/sign_in
-      query: (credentials) => {
-        // Format credentials with user wrapper as expected by server
-        const requestBody = {
-          user: {
+      queryFn: async (credentials) => {
+        try {
+          const csrfToken = await getCsrfToken();
+          
+          const requestBody = {
             email: credentials.email?.trim().toLowerCase(),
-            password: PasswordSecurity.hashPassword(credentials.password)
+            encrypted_password: credentials.password
+          };
+          
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-API-KEY': import.meta.env.VITE_API_KEY,
+              'X-CSRF-Token': csrfToken,
+            },
+            credentials: 'include',
+            body: JSON.stringify(requestBody)
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            return { error: { status: response.status, data } };
           }
-        };
-        
-        console.log('🔒 Password hashed for secure transmission');
-        console.log('📤 Sending login request:', {
-          url: '/auth/sign_in',
-          method: 'POST',
-          body: requestBody,
-          fullUrl: 'http://localhost:3000/api/v1/auth/sign_in'
-        });
-        
-        return {
-          url: '/auth/sign_in',
-          method: 'POST',
-          body: requestBody,
-        };
+          
+          return { data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: String(error) } };
+        }
       },
       transformErrorResponse: (response: FetchBaseQueryError) => {
         const data = response.data as any;
         
-        console.error('❌ Login API Error:', {
+        console.error('❌ Login API Error - Detailed Info:', {
           status: response.status,
+          statusText: response.statusText,
           data: data,
-          url: 'http://localhost:3000/api/v1/auth/sign_in'
+          baseUrl: import.meta.env.VITE_API_BASE_URL,
+          fullResponse: response
         });
         
-        // Use backend message first, fallback to hardcoded based on status
-        let fallbackMessage = 'Login failed';
+        // Log the raw error data for debugging
+        if (data) {
+          console.error('❌ Raw error data:', JSON.stringify(data, null, 2));
+        }
         
-        if (response.status === 400) {
-          fallbackMessage = 'Invalid request format. Please check your credentials.';
-        } else if (response.status === 404) {
-          fallbackMessage = 'Email not registered. Please sign up first.';
-        } else if (response.status === 401) {
-          fallbackMessage = 'Password is incorrect. Click on forget password to reset.';
+        // Use backend error message first, then fallback based on status
+        let message = data?.error || data?.message || data?.errors;
+        
+        if (!message) {
+          if (response.status === 400) {
+            message = 'Invalid request format. Please check your credentials.';
+          } else if (response.status === 404) {
+            message = 'Email not registered. Please sign up first.';
+          } else if (response.status === 401) {
+            message = 'Invalid credentials or missing API key.';
+          } else if (response.status === 403) {
+            message = 'CSRF token invalid. Please try again.';
+          } else if (response.status === 500) {
+            message = 'Server error. This might be a password format issue. Check server logs.';
+          } else if (response.status === 'CSRF_FETCH_FAILED') {
+            message = 'Failed to get security token. Please try again.';
+          } else {
+            message = 'Login failed. Please try again.';
+          }
         }
         
         return {
           status: response.status,
-          message: data?.message || fallbackMessage,
+          message,
+          originalError: response
         };
       },
       
@@ -535,11 +580,11 @@ export const selectIsLoading = (state: any) => {
 export const createOtpRequest = (
   type: 'mobile' | 'email' | 'whatsapp',
   value: string,
-  context?: 'registration' | 'login' | 'forgot-password'
+  context: 'registration' | 'login' | 'forgot-password' = 'registration'
 ): OtpRequest => ({
   type,
   [type]: value,
-  ...(context && { context }),
+  context,
 });
 
 export const createVerifyOtpRequest = (
